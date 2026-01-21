@@ -40,7 +40,7 @@ const updateTestimonialSchema = z.object({
   profession: z.string().min(1).max(100).optional(),
   rating: z.number().int().min(1).max(5).optional(),
   review: z.string().min(10).max(1000).optional(),
-  photo: z.string().url().optional(),
+  photo: z.string().url().optional().nullable().or(z.literal('')),
   isActive: z.boolean().optional(),
   displayOrder: z.number().int().min(0).optional(),
 });
