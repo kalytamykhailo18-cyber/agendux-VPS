@@ -2,7 +2,7 @@ import twilio from 'twilio';
 import prisma from '../config/database';
 import { logger, ServiceLogger } from '../utils/logger';
 import { decrypt, hashForLookup } from '../utils/encryption';
-import { emitToProfessional, emitToAdmins, WebSocketEvent } from '../websocket/socket-manager';
+import { emitToProfessional, emitToAdmins, WebSocketEvent } from '../config/socket.config';
 import { updateCalendarEvent } from './google-calendar.service';
 
 type MessageTemplateType = 'BOOKING_CONFIRMATION' | 'REMINDER' | 'CANCELLATION';

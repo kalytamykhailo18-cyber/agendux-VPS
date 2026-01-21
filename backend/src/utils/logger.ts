@@ -160,6 +160,10 @@ export const ServiceLogger = {
 
   payment: (action: string, data?: Record<string, any>) => {
     logger.info('[Payment]', { service: 'payment', action, ...data });
+  },
+
+  subscription: (action: string, data?: Record<string, any>) => {
+    logger.info('[Subscription]', { service: 'subscription', action, ...data });
   }
 };
 

@@ -9,7 +9,7 @@ import {
   reorderTestimonialsHandler,
 } from '../controllers/testimonial.controller';
 import { authenticateAdmin } from '../middlewares/auth.middleware';
-import { validateBody } from '../middleware/validator.middleware';
+import { validateBody } from '../middleware/validation.middleware';
 import { z } from 'zod';
 
 const router = Router();

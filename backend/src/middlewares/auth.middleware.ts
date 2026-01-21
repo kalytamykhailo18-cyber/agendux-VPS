@@ -115,3 +115,46 @@ export const requireRole = (allowedRoles: string[]) => {
     next();
   };
 };
+
+// Combined authenticate and require admin (for convenience)
+export const authenticateAdmin = (req: Request, res: Response, next: NextFunction): void => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    res.status(401).json({
+      success: false,
+      error: 'Access token required'
+    });
+    return;
+  }
+
+  const payload = verifyToken(token);
+
+  if (!payload) {
+    res.status(403).json({
+      success: false,
+      error: 'Invalid or expired token'
+    });
+    return;
+  }
+
+  if (payload.role !== UserRole.ADMIN) {
+    res.status(403).json({
+      success: false,
+      error: 'Admin access required'
+    });
+    return;
+  }
+
+  req.userId = payload.userId;
+  req.userEmail = payload.email;
+  req.userRole = payload.role;
+  req.user = {
+    id: payload.userId,
+    email: payload.email,
+    role: payload.role
+  };
+
+  next();
+};

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { sendWhatsAppDemo } from '../controllers/demo.controller';
-import { validateBody } from '../middleware/validator.middleware';
+import { validateBody } from '../middleware/validation.middleware';
 import { z } from 'zod';
 
 const router = Router();
