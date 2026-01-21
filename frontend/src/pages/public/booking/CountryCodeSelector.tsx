@@ -7,10 +7,18 @@ interface CountryCodeSelectorProps {
   onChange: (code: string) => void;
 }
 
-// All countries with their codes - Argentina first as default, then alphabetically
+// All countries with their codes - Target LATAM countries first, then alphabetically
 const COUNTRY_CODES = [
-  // Argentina first (default)
+  // Priority: Argentina (default) + Target LATAM markets
   { code: '+54', country: 'Argentina', flag: '🇦🇷' },
+  { code: '+595', country: 'Paraguay', flag: '🇵🇾' },
+  { code: '+591', country: 'Bolivia', flag: '🇧🇴' },
+  { code: '+593', country: 'Ecuador', flag: '🇪🇨' },
+  { code: '+507', country: 'Panamá', flag: '🇵🇦' },
+  { code: '+506', country: 'Costa Rica', flag: '🇨🇷' },
+  { code: '+503', country: 'El Salvador', flag: '🇸🇻' },
+  { code: '+502', country: 'Guatemala', flag: '🇬🇹' },
+  { code: '+1809', country: 'Rep. Dominicana', flag: '🇩🇴' },
   // Rest alphabetically
   { code: '+93', country: 'Afganistán', flag: '🇦🇫' },
   { code: '+355', country: 'Albania', flag: '🇦🇱' },
@@ -32,7 +40,6 @@ const COUNTRY_CODES = [
   { code: '+501', country: 'Belice', flag: '🇧🇿' },
   { code: '+229', country: 'Benín', flag: '🇧🇯' },
   { code: '+375', country: 'Bielorrusia', flag: '🇧🇾' },
-  { code: '+591', country: 'Bolivia', flag: '🇧🇴' },
   { code: '+387', country: 'Bosnia y Herzegovina', flag: '🇧🇦' },
   { code: '+267', country: 'Botsuana', flag: '🇧🇼' },
   { code: '+55', country: 'Brasil', flag: '🇧🇷' },
@@ -57,15 +64,12 @@ const COUNTRY_CODES = [
   { code: '+850', country: 'Corea del Norte', flag: '🇰🇵' },
   { code: '+82', country: 'Corea del Sur', flag: '🇰🇷' },
   { code: '+225', country: 'Costa de Marfil', flag: '🇨🇮' },
-  { code: '+506', country: 'Costa Rica', flag: '🇨🇷' },
   { code: '+385', country: 'Croacia', flag: '🇭🇷' },
   { code: '+53', country: 'Cuba', flag: '🇨🇺' },
   { code: '+45', country: 'Dinamarca', flag: '🇩🇰' },
   { code: '+253', country: 'Yibuti', flag: '🇩🇯' },
   { code: '+1767', country: 'Dominica', flag: '🇩🇲' },
-  { code: '+593', country: 'Ecuador', flag: '🇪🇨' },
   { code: '+20', country: 'Egipto', flag: '🇪🇬' },
-  { code: '+503', country: 'El Salvador', flag: '🇸🇻' },
   { code: '+971', country: 'Emiratos Árabes', flag: '🇦🇪' },
   { code: '+291', country: 'Eritrea', flag: '🇪🇷' },
   { code: '+421', country: 'Eslovaquia', flag: '🇸🇰' },
@@ -85,7 +89,6 @@ const COUNTRY_CODES = [
   { code: '+233', country: 'Ghana', flag: '🇬🇭' },
   { code: '+30', country: 'Grecia', flag: '🇬🇷' },
   { code: '+1473', country: 'Granada', flag: '🇬🇩' },
-  { code: '+502', country: 'Guatemala', flag: '🇬🇹' },
   { code: '+224', country: 'Guinea', flag: '🇬🇳' },
   { code: '+240', country: 'Guinea Ecuatorial', flag: '🇬🇶' },
   { code: '+245', country: 'Guinea-Bisáu', flag: '🇬🇼' },
@@ -151,9 +154,7 @@ const COUNTRY_CODES = [
   { code: '+92', country: 'Pakistán', flag: '🇵🇰' },
   { code: '+680', country: 'Palaos', flag: '🇵🇼' },
   { code: '+970', country: 'Palestina', flag: '🇵🇸' },
-  { code: '+507', country: 'Panamá', flag: '🇵🇦' },
   { code: '+675', country: 'Papúa Nueva Guinea', flag: '🇵🇬' },
-  { code: '+595', country: 'Paraguay', flag: '🇵🇾' },
   { code: '+51', country: 'Perú', flag: '🇵🇪' },
   { code: '+48', country: 'Polonia', flag: '🇵🇱' },
   { code: '+351', country: 'Portugal', flag: '🇵🇹' },
@@ -161,7 +162,6 @@ const COUNTRY_CODES = [
   { code: '+44', country: 'Reino Unido', flag: '🇬🇧' },
   { code: '+236', country: 'Rep. Centroafricana', flag: '🇨🇫' },
   { code: '+420', country: 'Rep. Checa', flag: '🇨🇿' },
-  { code: '+1809', country: 'Rep. Dominicana', flag: '🇩🇴' },
   { code: '+40', country: 'Rumania', flag: '🇷🇴' },
   { code: '+7', country: 'Rusia', flag: '🇷🇺' },
   { code: '+250', country: 'Ruanda', flag: '🇷🇼' },

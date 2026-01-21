@@ -2,22 +2,41 @@ import { Button, Select, MenuItem, FormControl, InputLabel, FormHelperText } fro
 import SaveIcon from '@mui/icons-material/Save';
 
 const TIMEZONES = [
+  // Priority: Target LATAM markets
   { value: 'America/Argentina/Buenos_Aires', label: 'Argentina (Buenos Aires)' },
+  { value: 'America/Asuncion', label: 'Paraguay (Asunción)' },
+  { value: 'America/La_Paz', label: 'Bolivia (La Paz)' },
+  { value: 'America/Guayaquil', label: 'Ecuador (Guayaquil)' },
+  { value: 'America/Panama', label: 'Panamá' },
+  { value: 'America/Costa_Rica', label: 'Costa Rica' },
+  { value: 'America/El_Salvador', label: 'El Salvador' },
+  { value: 'America/Guatemala', label: 'Guatemala' },
+  { value: 'America/Santo_Domingo', label: 'Rep. Dominicana (Santo Domingo)' },
+  // Other LATAM
   { value: 'America/Sao_Paulo', label: 'Brasil (São Paulo)' },
   { value: 'America/Santiago', label: 'Chile (Santiago)' },
   { value: 'America/Bogota', label: 'Colombia (Bogotá)' },
   { value: 'America/Mexico_City', label: 'México (Ciudad de México)' },
   { value: 'America/Lima', label: 'Perú (Lima)' },
+  // Others
   { value: 'Europe/Madrid', label: 'España (Madrid)' },
   { value: 'America/New_York', label: 'Estados Unidos (Nueva York)' },
   { value: 'America/Los_Angeles', label: 'Estados Unidos (Los Ángeles)' }
 ];
 
-// ALL countries with their codes - Argentina first as default, then alphabetically
+// ALL countries with their codes - Target LATAM countries first, then alphabetically
 // REQUIREMENT 6.2: ALL countries must be available in country selection dropdowns
 const COUNTRY_CODES = [
-  // Argentina first (default)
+  // Priority: Argentina (default) + Target LATAM markets
   { value: '+54', label: '+54 (Argentina)' },
+  { value: '+595', label: '+595 (Paraguay)' },
+  { value: '+591', label: '+591 (Bolivia)' },
+  { value: '+593', label: '+593 (Ecuador)' },
+  { value: '+507', label: '+507 (Panamá)' },
+  { value: '+506', label: '+506 (Costa Rica)' },
+  { value: '+503', label: '+503 (El Salvador)' },
+  { value: '+502', label: '+502 (Guatemala)' },
+  { value: '+1809', label: '+1809 (Rep. Dominicana)' },
   // Rest alphabetically
   { value: '+93', label: '+93 (Afganistán)' },
   { value: '+355', label: '+355 (Albania)' },
@@ -39,7 +58,6 @@ const COUNTRY_CODES = [
   { value: '+501', label: '+501 (Belice)' },
   { value: '+229', label: '+229 (Benín)' },
   { value: '+375', label: '+375 (Bielorrusia)' },
-  { value: '+591', label: '+591 (Bolivia)' },
   { value: '+387', label: '+387 (Bosnia y Herzegovina)' },
   { value: '+267', label: '+267 (Botsuana)' },
   { value: '+55', label: '+55 (Brasil)' },
@@ -64,15 +82,12 @@ const COUNTRY_CODES = [
   { value: '+850', label: '+850 (Corea del Norte)' },
   { value: '+82', label: '+82 (Corea del Sur)' },
   { value: '+225', label: '+225 (Costa de Marfil)' },
-  { value: '+506', label: '+506 (Costa Rica)' },
   { value: '+385', label: '+385 (Croacia)' },
   { value: '+53', label: '+53 (Cuba)' },
   { value: '+45', label: '+45 (Dinamarca)' },
   { value: '+253', label: '+253 (Yibuti)' },
   { value: '+1767', label: '+1767 (Dominica)' },
-  { value: '+593', label: '+593 (Ecuador)' },
   { value: '+20', label: '+20 (Egipto)' },
-  { value: '+503', label: '+503 (El Salvador)' },
   { value: '+971', label: '+971 (Emiratos Árabes)' },
   { value: '+291', label: '+291 (Eritrea)' },
   { value: '+421', label: '+421 (Eslovaquia)' },
@@ -91,7 +106,6 @@ const COUNTRY_CODES = [
   { value: '+233', label: '+233 (Ghana)' },
   { value: '+30', label: '+30 (Grecia)' },
   { value: '+1473', label: '+1473 (Granada)' },
-  { value: '+502', label: '+502 (Guatemala)' },
   { value: '+224', label: '+224 (Guinea)' },
   { value: '+240', label: '+240 (Guinea Ecuatorial)' },
   { value: '+245', label: '+245 (Guinea-Bisáu)' },
@@ -157,9 +171,7 @@ const COUNTRY_CODES = [
   { value: '+92', label: '+92 (Pakistán)' },
   { value: '+680', label: '+680 (Palaos)' },
   { value: '+970', label: '+970 (Palestina)' },
-  { value: '+507', label: '+507 (Panamá)' },
   { value: '+675', label: '+675 (Papúa Nueva Guinea)' },
-  { value: '+595', label: '+595 (Paraguay)' },
   { value: '+51', label: '+51 (Perú)' },
   { value: '+48', label: '+48 (Polonia)' },
   { value: '+351', label: '+351 (Portugal)' },
@@ -167,7 +179,6 @@ const COUNTRY_CODES = [
   { value: '+44', label: '+44 (Reino Unido)' },
   { value: '+236', label: '+236 (Rep. Centroafricana)' },
   { value: '+420', label: '+420 (Rep. Checa)' },
-  { value: '+1809', label: '+1809 (Rep. Dominicana)' },
   { value: '+40', label: '+40 (Rumania)' },
   { value: '+250', label: '+250 (Ruanda)' },
   { value: '+1869', label: '+1869 (San Cristóbal y Nieves)' },
