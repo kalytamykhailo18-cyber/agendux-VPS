@@ -50,7 +50,8 @@ interface WebSocketProviderProps {
 }
 
 // WebSocket URL from validated environment configuration (RULE: no hardcoded values)
-const WS_URL = ENV.apiUrl.replace('/api', ''); // Remove /api for WebSocket connection
+// Use regex to only remove trailing /api, not /api in the domain
+const WS_URL = ENV.apiUrl.replace(/\/api$/, ''); // Remove trailing /api for WebSocket connection
 
 export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const [socket, setSocket] = useState<Socket | null>(null);

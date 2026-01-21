@@ -140,18 +140,22 @@ const ProfessionalDetailModal = ({ professionalId, onClose }: ProfessionalDetail
                       {selectedProfessional.subscription.billingPeriod === 'MONTHLY' ? 'Mensual' : 'Anual'}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-xs text-blue-600">Inicio</p>
-                    <p className="text-sm font-medium text-blue-900">
-                      {new Date(selectedProfessional.subscription.startDate).toLocaleDateString('es-AR')}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-blue-600">Próxima Facturación</p>
-                    <p className="text-sm font-medium text-blue-900">
-                      {new Date(selectedProfessional.subscription.nextBillingDate).toLocaleDateString('es-AR')}
-                    </p>
-                  </div>
+                  {selectedProfessional.subscription.startDate && (
+                    <div>
+                      <p className="text-xs text-blue-600">Inicio</p>
+                      <p className="text-sm font-medium text-blue-900">
+                        {new Date(selectedProfessional.subscription.startDate).toLocaleDateString('es-AR')}
+                      </p>
+                    </div>
+                  )}
+                  {selectedProfessional.subscription.nextBillingDate && (
+                    <div>
+                      <p className="text-xs text-blue-600">Próxima Facturación</p>
+                      <p className="text-sm font-medium text-blue-900">
+                        {new Date(selectedProfessional.subscription.nextBillingDate).toLocaleDateString('es-AR')}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </section>
             )}

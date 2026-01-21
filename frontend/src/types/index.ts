@@ -637,6 +637,29 @@ export interface AdminProfessionalDetail extends AdminProfessional {
     cancelled: number;
     noShow: number;
   };
+  // Extended subscription with dates (overrides parent)
+  subscription: {
+    planName: string;
+    status: SubscriptionStatus;
+    billingPeriod: BillingPeriod;
+    startDate?: string;
+    nextBillingDate?: string;
+  } | null;
+  // Deposit settings
+  depositSettings?: {
+    depositEnabled: boolean;
+    depositAmount: number | null;
+  };
+  // Statistics
+  statistics?: {
+    totalAppointments: number;
+    confirmedAppointments: number;
+    pendingAppointments: number;
+    completedAppointments: number;
+    cancelledAppointments: number;
+    noShowAppointments: number;
+    totalPatients: number;
+  };
 }
 
 export interface AdminProfessionalsResponse {

@@ -30,8 +30,8 @@ const features = [
   {
     icon: <AttachMoneyIcon sx={{ fontSize: 24 }} />,
     iconBg: 'bg-yellow-100 text-yellow-600',
-    title: 'Cobro de Señas',
-    description: 'Cobra una seña para confirmar las reservas y reduce las ausencias.',
+    title: 'Cobro de Señas (Opcional)',
+    description: 'Si lo deseas, podés cobrar una seña para confirmar reservas y reducir ausencias.',
     animation: 'fade-left-normal'
   },
   {

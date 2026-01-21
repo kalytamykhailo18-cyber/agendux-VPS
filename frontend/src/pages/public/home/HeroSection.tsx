@@ -17,6 +17,9 @@ const HeroSection = ({ onStartFree, onAdminAccess }: HeroSectionProps) => {
           Plataforma completa para profesionales independientes. Agenda online 24/7,
           recordatorios automáticos por WhatsApp, sincronización con Google Calendar y más.
         </p>
+        <p className="mx-auto mt-3 max-w-xl text-base text-primary font-medium fade-up-fast">
+          Obtené tu página personalizada: agendux.com/tu-nombre
+        </p>
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Button
             variant="contained"
