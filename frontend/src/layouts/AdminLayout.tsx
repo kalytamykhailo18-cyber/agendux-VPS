@@ -60,24 +60,19 @@ const AdminLayout = () => {
         />
       )}
 
-      {/* Sidebar - Mobile: slide from left, Desktop: fixed */}
+      {/* Sidebar - Mobile: drawer, Desktop: always visible */}
       <aside
-        className={`fixed inset-y-0 left-0 z-30 w-72 sm:w-64 transform bg-slate-900 shadow-lg transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 safe-area-left ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed inset-y-0 left-0 z-30 w-72 sm:w-64 bg-slate-900 shadow-lg transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         {/* Sidebar header */}
-        <div className="flex h-14 sm:h-16 items-center justify-between border-b border-slate-700 pl-4 pr-4">
-          <div className="flex items-center gap-3">
-            <img src="/logo2.png" alt="Agendux" className="h-8 w-auto" />
-            <span className="text-base sm:text-lg font-bold text-white">Admin</span>
-          </div>
+        <div className="flex h-14 sm:h-16 items-center justify-between border-b border-slate-700 pl-6 pr-4">
+          <span className="text-base sm:text-lg font-bold text-white">Panel Admin</span>
+          {/* Close button - mobile only */}
           <IconButton
             onClick={() => setIsSidebarOpen(false)}
-            sx={{
-              color: '#94a3b8',
-              display: { xs: 'inline-flex', lg: 'none' }
-            }}
+            sx={{ display: { xs: 'flex', lg: 'none' }, color: '#94a3b8' }}
           >
             <CloseIcon />
           </IconButton>
@@ -145,16 +140,18 @@ const AdminLayout = () => {
       <div className="flex flex-1 flex-col min-w-0">
         {/* Top header */}
         <header className="flex h-14 sm:h-16 items-center justify-between border-b bg-white px-3 sm:px-4 shadow-sm">
-          {/* Mobile menu button */}
-          <IconButton
-            onClick={() => setIsSidebarOpen(true)}
-            sx={{
-              color: '#4b5563',
-              display: { xs: 'inline-flex', lg: 'none' }
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
+          {/* Mobile menu button - only visible on mobile (hidden on lg+) */}
+          <div className="lg:hidden">
+            <IconButton
+              onClick={() => setIsSidebarOpen(true)}
+              sx={{ color: '#4b5563' }}
+            >
+              <MenuIcon />
+            </IconButton>
+          </div>
+
+          {/* Spacer for desktop to maintain layout */}
+          <div className="hidden lg:block w-10" />
 
           {/* Admin info */}
           <div className="flex items-center gap-1 sm:gap-2 truncate">

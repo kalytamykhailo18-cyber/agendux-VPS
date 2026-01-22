@@ -1,14 +1,13 @@
 import { useNavigate } from 'react-router-dom';
-import NavHeader from './NavHeader';
 import HeroSection from './HeroSection';
 import FeaturesSection from './FeaturesSection';
 import TestimonialsSection from './TestimonialsSection';
 import WhatsAppDemoSection from './WhatsAppDemoSection';
 import CTASection from './CTASection';
-import FooterSection from './FooterSection';
 
 // RULE: Page folder structure - index.tsx + flat components (NO subdirectories)
 // RULE: Routing via useNavigation only (no Link/a tags)
+// NOTE: Header and Footer are provided by PublicLayout (root layout)
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -27,10 +26,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      {/* Navigation Header with Logo */}
-      <NavHeader onStartFree={handleStartFree} onAdminAccess={handleAdminAccess} />
-
+    <div className="bg-gradient-to-b from-blue-50 to-white">
       {/* Hero Section */}
       <HeroSection onStartFree={handleStartFree} onAdminAccess={handleAdminAccess} />
 
@@ -45,9 +41,6 @@ const HomePage = () => {
 
       {/* CTA Section */}
       <CTASection onRegister={handleRegister} />
-
-      {/* Footer */}
-      <FooterSection />
     </div>
   );
 };
