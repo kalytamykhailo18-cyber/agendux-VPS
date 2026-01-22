@@ -710,6 +710,26 @@ export interface AdminStatistics {
   };
 }
 
+// Admin Professional Settings Management
+export interface AdminProfessionalAvailability {
+  id: string;
+  dayOfWeek: number;
+  slotNumber: number;
+  startTime: string;
+  endTime: string;
+}
+
+export interface AdminProfessionalAvailabilityResponse {
+  availabilities: AdminProfessionalAvailability[];
+  appointmentDuration: number;
+}
+
+export interface AdminProfessionalBlockedDate {
+  id: string;
+  date: string;
+  reason: string | null;
+}
+
 // ============================================
 // PROFESSIONAL SUBSCRIPTION TYPES
 // ============================================

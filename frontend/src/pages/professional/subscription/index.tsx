@@ -98,10 +98,10 @@ const ProfessionalSubscriptionPage = () => {
 
   // Format price
   const formatPrice = (price: number) => {
-    return price.toLocaleString('es-AR', {
+    return price.toLocaleString('en-US', {
       style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0
+      currency: 'USD',
+      minimumFractionDigits: 2
     });
   };
 

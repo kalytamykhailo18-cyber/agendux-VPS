@@ -37,25 +37,96 @@ export const googleAuth = async (req: Request, res: Response): Promise<void> => 
     let isNewUser = false;
 
     if (user) {
-      // Existing user - check if professional
-      if (user.role !== UserRole.PROFESSIONAL) {
+      // Existing user
+      if (user.role === UserRole.ADMIN) {
+        // Admin user - check if they have a professional profile, if not create one
+        if (!user.professional) {
+          // Generate unique slug from name
+          const baseSlug = generateSlug(googleUser.givenName, googleUser.familyName);
+          const uniqueSlug = await makeSlugUnique(baseSlug, async (slug) => {
+            const existing = await prisma.professional.findUnique({ where: { slug } });
+            return !!existing;
+          });
+
+          // Create professional profile for admin with defaults
+          professional = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+            const newProfessional = await tx.professional.create({
+              data: {
+                userId: user!.id,
+                firstName: googleUser.givenName,
+                lastName: googleUser.familyName,
+                slug: uniqueSlug,
+                timezone: process.env.DEFAULT_TIMEZONE || 'America/Argentina/Buenos_Aires'
+              }
+            });
+
+            // Create default reminder settings
+            await tx.reminderSetting.create({
+              data: {
+                professionalId: newProfessional.id,
+                reminderNumber: 1,
+                hoursBefore: 24,
+                enableNightBefore: false,
+                isActive: true
+              }
+            });
+
+            // Create default message templates
+            await tx.messageTemplate.createMany({
+              data: [
+                {
+                  professionalId: newProfessional.id,
+                  type: 'BOOKING_CONFIRMATION',
+                  messageText: 'Hola {patient_name}, tu turno con {professional_name} ha sido confirmado para el {appointment_date} a las {appointment_time}. Referencia: {booking_reference}',
+                  isActive: true
+                },
+                {
+                  professionalId: newProfessional.id,
+                  type: 'REMINDER',
+                  messageText: 'Hola {patient_name}, te recordamos tu turno con {professional_name} mañana {appointment_date} a las {appointment_time}. ¿Confirmas tu asistencia?',
+                  isActive: true
+                },
+                {
+                  professionalId: newProfessional.id,
+                  type: 'CANCELLATION',
+                  messageText: 'Hola {patient_name}, tu turno con {professional_name} del {appointment_date} a las {appointment_time} ha sido cancelado. Referencia: {booking_reference}',
+                  isActive: true
+                }
+              ]
+            });
+
+            return newProfessional;
+          });
+
+          // Update user to fetch the new professional
+          user = await prisma.user.findUnique({
+            where: { id: user.id },
+            include: { professional: true }
+          }) as typeof user;
+
+          isNewUser = true; // Treat as new for response message
+        } else {
+          professional = user.professional;
+        }
+      } else if (user.role !== UserRole.PROFESSIONAL) {
         res.status(403).json({
           success: false,
-          error: 'This email is registered as admin. Please use admin login.'
+          error: 'This email is registered with an unknown role.'
         } as ApiResponse<null>);
         return;
-      }
+      } else {
+        // Professional user
+        // Check if suspended
+        if (user.professional?.isSuspended) {
+          res.status(403).json({
+            success: false,
+            error: 'Your account has been suspended. Please contact support.'
+          } as ApiResponse<null>);
+          return;
+        }
 
-      // Check if suspended
-      if (user.professional?.isSuspended) {
-        res.status(403).json({
-          success: false,
-          error: 'Your account has been suspended. Please contact support.'
-        } as ApiResponse<null>);
-        return;
+        professional = user.professional;
       }
-
-      professional = user.professional;
     } else {
       // New user - create account
       isNewUser = true;

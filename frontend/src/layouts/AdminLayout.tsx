@@ -67,8 +67,11 @@ const AdminLayout = () => {
         }`}
       >
         {/* Sidebar header */}
-        <div className="flex h-14 sm:h-16 items-center justify-between border-b border-slate-700 pl-6 pr-4">
-          <span className="text-base sm:text-lg font-bold text-white">Panel Admin</span>
+        <div className="flex h-14 sm:h-16 items-center justify-between border-b border-slate-700 pl-4 pr-4">
+          <div className="flex items-center gap-3">
+            <img src="/logo2.png" alt="Agendux" className="h-8 w-auto" />
+            <span className="text-base sm:text-lg font-bold text-white">Admin</span>
+          </div>
           <IconButton
             onClick={() => setIsSidebarOpen(false)}
             sx={{

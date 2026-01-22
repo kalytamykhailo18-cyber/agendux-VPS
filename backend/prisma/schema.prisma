@@ -328,7 +328,7 @@ model Payment {
   type              PaymentType
   status            PaymentStatus @default(PENDING)
   amount            Decimal       @db.Decimal(10, 2)
-  currency          String        @default("ARS")
+  currency          String        @default("USD")
 
   // Mercado Pago reference
   mercadoPagoPaymentId String?

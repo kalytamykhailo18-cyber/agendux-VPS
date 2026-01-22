@@ -6,6 +6,11 @@ import {
   getProfessionalDetail,
   suspendProfessional,
   activateProfessional,
+  getProfessionalAvailability,
+  updateProfessionalAvailability,
+  getProfessionalBlockedDates,
+  addProfessionalBlockedDate,
+  removeProfessionalBlockedDate,
   getPlans,
   createPlan,
   updatePlan,
@@ -30,6 +35,13 @@ router.get('/professionals', getProfessionals);
 router.get('/professionals/:id', getProfessionalDetail);
 router.put('/professionals/:id/suspend', suspendProfessional);
 router.put('/professionals/:id/activate', activateProfessional);
+
+// Professional settings management (admin can edit)
+router.get('/professionals/:id/availability', getProfessionalAvailability);
+router.put('/professionals/:id/availability', updateProfessionalAvailability);
+router.get('/professionals/:id/blocked-dates', getProfessionalBlockedDates);
+router.post('/professionals/:id/blocked-dates', addProfessionalBlockedDate);
+router.delete('/professionals/:id/blocked-dates/:dateId', removeProfessionalBlockedDate);
 
 // Subscription plans management
 router.get('/plans', getPlans);

@@ -40,7 +40,7 @@ export const seedPayments = async (subscriptions: any[]) => {
           type: PaymentType.SUBSCRIPTION,
           status: PaymentStatus.COMPLETED,
           amount,
-          currency: 'ARS',
+          currency: 'USD',
           mercadoPagoPaymentId: `mp_sub_${subscription.id.substring(0, 8)}_${i}`,
           paidAt: getDateOffset(-monthsAgo * 30)
         }
@@ -55,7 +55,7 @@ export const seedPayments = async (subscriptions: any[]) => {
         type: PaymentType.SUBSCRIPTION,
         status: PaymentStatus.PENDING,
         amount,
-        currency: 'ARS'
+        currency: 'USD'
       }
     });
     createdPayments.push(pendingPayment);
@@ -76,7 +76,7 @@ export const seedPayments = async (subscriptions: any[]) => {
         type: PaymentType.DEPOSIT,
         status: PaymentStatus.COMPLETED,
         amount: Number(appointment.depositAmount) || 2000,
-        currency: 'ARS',
+        currency: 'USD',
         mercadoPagoPaymentId: `mp_dep_${appointment.id.substring(0, 8)}`,
         paidAt: appointment.depositPaidAt || new Date()
       }
@@ -93,7 +93,7 @@ export const seedPayments = async (subscriptions: any[]) => {
         type: PaymentType.SUBSCRIPTION,
         status: PaymentStatus.FAILED,
         amount: 2999,
-        currency: 'ARS',
+        currency: 'USD',
         mercadoPagoPaymentId: `mp_failed_${Date.now()}`
       }
     });
@@ -106,7 +106,7 @@ export const seedPayments = async (subscriptions: any[]) => {
         type: PaymentType.SUBSCRIPTION,
         status: PaymentStatus.REFUNDED,
         amount: 2999,
-        currency: 'ARS',
+        currency: 'USD',
         mercadoPagoPaymentId: `mp_refund_${Date.now()}`,
         paidAt: getDateOffset(-45)
       }

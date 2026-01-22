@@ -7,7 +7,7 @@ interface HeroSectionProps {
 
 const HeroSection = ({ onStartFree, onAdminAccess }: HeroSectionProps) => {
   return (
-    <div className="mx-auto max-w-7xl px-4 pt-16 pb-24 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 pt-12 pb-24 sm:px-6 lg:px-8">
       <div className="text-center">
         <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
           <span className="block fade-down-fast">Gestiona tus citas</span>

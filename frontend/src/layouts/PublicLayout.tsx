@@ -13,24 +13,19 @@ const PublicLayout = () => {
       <GlobalLoadingSpinner />
 
       {/* Simple header for public pages - mobile-first */}
-      <header className="bg-blue-500/80 backdrop-blur-sm shadow-sm sticky top-0 z-10">
+      <header className="bg-white/90 backdrop-blur-sm shadow-sm sticky top-0 z-10">
         <div className="container-dashboard py-3 sm:py-4">
           <Button
             onClick={() => navigate('/')}
             sx={{
-              fontSize: { xs: '18px', sm: '20px', md: '24px' },
-              fontWeight: 700,
-              color: '#ffffff',
-              textTransform: 'none',
               padding: 0,
               minWidth: 'auto',
               '&:hover': {
                 backgroundColor: 'transparent',
-                color: '#dbeafe',
               },
             }}
           >
-            Reservas Online
+            <img src="/logo2.png" alt="Agendux" className="h-8 sm:h-10 w-auto" />
           </Button>
         </div>
       </header>
@@ -41,9 +36,9 @@ const PublicLayout = () => {
       </main>
 
       {/* Simple footer - responsive */}
-      <footer className="mt-auto bg-black">
-        <div className="container-dashboard py-3 sm:py-4 text-center text-xs sm:text-sm text-gray-300">
-          &copy; {new Date().getFullYear()} Reservas Online. Todos los derechos reservados.
+      <footer className="mt-auto bg-gray-900">
+        <div className="container-dashboard py-3 sm:py-4 text-center text-xs sm:text-sm text-gray-400">
+          &copy; {new Date().getFullYear()} Agendux. Todos los derechos reservados.
         </div>
       </footer>
     </div>

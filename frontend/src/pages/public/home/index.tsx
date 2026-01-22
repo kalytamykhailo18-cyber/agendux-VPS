@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import NavHeader from './NavHeader';
 import HeroSection from './HeroSection';
 import FeaturesSection from './FeaturesSection';
 import TestimonialsSection from './TestimonialsSection';
@@ -27,6 +28,9 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      {/* Navigation Header with Logo */}
+      <NavHeader onStartFree={handleStartFree} onAdminAccess={handleAdminAccess} />
+
       {/* Hero Section */}
       <HeroSection onStartFree={handleStartFree} onAdminAccess={handleAdminAccess} />
 

@@ -31,6 +31,17 @@ export const seedUsers = async () => {
   // Create professional users (Google OAuth - no password)
   // Comprehensive list covering various specialties and professions
   const professionals = [
+    // Professional demo account for testing (use Google OAuth with this email)
+    {
+      email: 'demo@agendux.com',
+      name: 'Demo Profesional',
+      firstName: 'Demo',
+      lastName: 'Profesional',
+      slug: 'demo',
+      phone: '1100000000',
+      countryCode: '+54',
+      specialty: 'Demo'
+    },
     // Medical Professionals
     {
       email: 'dr.garcia@example.com',

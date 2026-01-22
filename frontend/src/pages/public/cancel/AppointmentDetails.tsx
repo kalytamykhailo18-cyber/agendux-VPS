@@ -125,9 +125,9 @@ const AppointmentDetails = ({
                 {appointment.deposit.amount && (
                   <span className="ml-1">
                     (
-                    {new Intl.NumberFormat('es-AR', {
+                    {new Intl.NumberFormat('en-US', {
                       style: 'currency',
-                      currency: 'ARS'
+                      currency: 'USD'
                     }).format(appointment.deposit.amount)}
                     )
                   </span>

@@ -249,6 +249,20 @@ export const getProfessionalDetail = async (req: Request, res: Response) => {
           patients: professional._count.patients
         },
         appointmentStats: stats,
+        // Frontend expected fields
+        depositSettings: {
+          depositEnabled: professional.depositEnabled,
+          depositAmount: professional.depositAmount ? Number(professional.depositAmount) : null
+        },
+        statistics: {
+          totalAppointments: stats.total,
+          confirmedAppointments: stats.confirmed,
+          pendingAppointments: stats.pending,
+          completedAppointments: stats.completed,
+          cancelledAppointments: stats.cancelled,
+          noShowAppointments: stats.noShow,
+          totalPatients: professional._count.patients
+        },
         createdAt: professional.createdAt.toISOString()
       }
     });
@@ -638,5 +652,222 @@ export const updateSettings = async (req: Request, res: Response) => {
   } catch (error) {
     logger.error('Error updating settings:', error);
     return res.status(500).json({ success: false, error: 'Error al actualizar configuración' });
+  }
+};
+
+// ============================================
+// PROFESSIONAL SETTINGS MANAGEMENT (Admin)
+// ============================================
+
+// GET /api/admin/professionals/:id/availability
+export const getProfessionalAvailability = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const professional = await prisma.professional.findUnique({ where: { id } });
+    if (!professional) {
+      return res.status(404).json({ success: false, error: 'Profesional no encontrado' });
+    }
+
+    const availabilities = await prisma.availability.findMany({
+      where: { professionalId: id, isActive: true },
+      orderBy: [{ dayOfWeek: 'asc' }, { slotNumber: 'asc' }]
+    });
+
+    const settings = await prisma.professionalSettings.findUnique({
+      where: { professionalId: id }
+    });
+
+    return res.json({
+      success: true,
+      data: {
+        availabilities: availabilities.map(a => ({
+          id: a.id,
+          dayOfWeek: a.dayOfWeek,
+          slotNumber: a.slotNumber,
+          startTime: a.startTime,
+          endTime: a.endTime
+        })),
+        appointmentDuration: settings?.appointmentDuration || 30
+      }
+    });
+  } catch (error) {
+    logger.error('Error getting professional availability:', error);
+    return res.status(500).json({ success: false, error: 'Error al obtener disponibilidad' });
+  }
+};
+
+// PUT /api/admin/professionals/:id/availability
+export const updateProfessionalAvailability = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { availabilities, appointmentDuration } = req.body;
+
+    const professional = await prisma.professional.findUnique({ where: { id } });
+    if (!professional) {
+      return res.status(404).json({ success: false, error: 'Profesional no encontrado' });
+    }
+
+    // Validate appointment duration
+    if (appointmentDuration !== undefined) {
+      if (appointmentDuration < 5 || appointmentDuration > 180 || appointmentDuration % 5 !== 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'Duración de cita inválida (debe ser entre 5 y 180 minutos, en incrementos de 5)'
+        });
+      }
+    }
+
+    // Use transaction to update all at once
+    await prisma.$transaction(async (tx) => {
+      // Delete existing availabilities
+      await tx.availability.deleteMany({ where: { professionalId: id } });
+
+      // Create new availabilities
+      if (availabilities && availabilities.length > 0) {
+        await tx.availability.createMany({
+          data: availabilities.map((a: { dayOfWeek: number; slotNumber: number; startTime: string; endTime: string }) => ({
+            professionalId: id,
+            dayOfWeek: a.dayOfWeek,
+            slotNumber: a.slotNumber,
+            startTime: a.startTime,
+            endTime: a.endTime,
+            isActive: true
+          }))
+        });
+      }
+
+      // Update or create professional settings
+      if (appointmentDuration !== undefined) {
+        await tx.professionalSettings.upsert({
+          where: { professionalId: id },
+          update: { appointmentDuration },
+          create: { professionalId: id, appointmentDuration }
+        });
+      }
+    });
+
+    return res.json({
+      success: true,
+      message: 'Disponibilidad actualizada correctamente'
+    });
+  } catch (error) {
+    logger.error('Error updating professional availability:', error);
+    return res.status(500).json({ success: false, error: 'Error al actualizar disponibilidad' });
+  }
+};
+
+// GET /api/admin/professionals/:id/blocked-dates
+export const getProfessionalBlockedDates = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const professional = await prisma.professional.findUnique({ where: { id } });
+    if (!professional) {
+      return res.status(404).json({ success: false, error: 'Profesional no encontrado' });
+    }
+
+    const blockedDates = await prisma.blockedDate.findMany({
+      where: { professionalId: id },
+      orderBy: { date: 'asc' }
+    });
+
+    return res.json({
+      success: true,
+      data: blockedDates.map(bd => ({
+        id: bd.id,
+        date: bd.date.toISOString().split('T')[0],
+        reason: bd.reason
+      }))
+    });
+  } catch (error) {
+    logger.error('Error getting professional blocked dates:', error);
+    return res.status(500).json({ success: false, error: 'Error al obtener fechas bloqueadas' });
+  }
+};
+
+// POST /api/admin/professionals/:id/blocked-dates
+export const addProfessionalBlockedDate = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { date, endDate, reason } = req.body;
+
+    const professional = await prisma.professional.findUnique({ where: { id } });
+    if (!professional) {
+      return res.status(404).json({ success: false, error: 'Profesional no encontrado' });
+    }
+
+    if (!date) {
+      return res.status(400).json({ success: false, error: 'Fecha es requerida' });
+    }
+
+    // Handle single date or date range
+    const startDate = new Date(date);
+    const finalEndDate = endDate ? new Date(endDate) : startDate;
+
+    const datesToBlock: Date[] = [];
+    const currentDate = new Date(startDate);
+
+    while (currentDate <= finalEndDate) {
+      datesToBlock.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    let blockedCount = 0;
+    let skippedCount = 0;
+
+    for (const dateToBlock of datesToBlock) {
+      try {
+        await prisma.blockedDate.create({
+          data: {
+            professionalId: id,
+            date: dateToBlock,
+            reason: reason || null
+          }
+        });
+        blockedCount++;
+      } catch (e: any) {
+        // Unique constraint violation - date already blocked
+        if (e.code === 'P2002') {
+          skippedCount++;
+        } else {
+          throw e;
+        }
+      }
+    }
+
+    return res.json({
+      success: true,
+      message: `${blockedCount} fecha(s) bloqueada(s)${skippedCount > 0 ? `, ${skippedCount} ya estaban bloqueadas` : ''}`,
+      data: { blockedCount, skippedCount }
+    });
+  } catch (error) {
+    logger.error('Error adding professional blocked date:', error);
+    return res.status(500).json({ success: false, error: 'Error al bloquear fecha' });
+  }
+};
+
+// DELETE /api/admin/professionals/:id/blocked-dates/:dateId
+export const removeProfessionalBlockedDate = async (req: Request, res: Response) => {
+  try {
+    const { id, dateId } = req.params;
+
+    const blockedDate = await prisma.blockedDate.findFirst({
+      where: { id: dateId, professionalId: id }
+    });
+
+    if (!blockedDate) {
+      return res.status(404).json({ success: false, error: 'Fecha bloqueada no encontrada' });
+    }
+
+    await prisma.blockedDate.delete({ where: { id: dateId } });
+
+    return res.json({
+      success: true,
+      message: 'Fecha desbloqueada correctamente'
+    });
+  } catch (error) {
+    logger.error('Error removing professional blocked date:', error);
+    return res.status(500).json({ success: false, error: 'Error al desbloquear fecha' });
   }
 };

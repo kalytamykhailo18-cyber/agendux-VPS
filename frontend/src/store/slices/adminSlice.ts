@@ -9,7 +9,10 @@ import type {
   AdminProfessionalsResponse,
   AdminPlan,
   AdminPlatformSettings,
-  AdminStatistics
+  AdminStatistics,
+  AdminProfessionalAvailabilityResponse,
+  AdminProfessionalAvailability,
+  AdminProfessionalBlockedDate
 } from '../../types';
 import { startLoading, stopLoading } from './loadingSlice';
 
@@ -34,6 +37,11 @@ interface AdminState {
   } | null;
   selectedProfessional: AdminProfessionalDetail | null;
 
+  // Professional settings (for editing)
+  professionalAvailability: AdminProfessionalAvailability[] | null;
+  professionalAppointmentDuration: number;
+  professionalBlockedDates: AdminProfessionalBlockedDate[] | null;
+
   // Plans
   plans: AdminPlan[];
 
@@ -57,6 +65,9 @@ const initialState: AdminState = {
   professionals: [],
   professionalsPagination: null,
   selectedProfessional: null,
+  professionalAvailability: null,
+  professionalAppointmentDuration: 30,
+  professionalBlockedDates: null,
   plans: [],
   settings: null,
   statistics: null,
@@ -208,6 +219,173 @@ export const activateProfessional = createAsyncThunk<
     } catch (error: unknown) {
       const err = error as { response?: { data?: { error?: string } } };
       return rejectWithValue(err.response?.data?.error || 'Error al activar profesional');
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
+// ============================================
+// ASYNC THUNKS - PROFESSIONAL SETTINGS (Admin)
+// ============================================
+
+export const getProfessionalAvailability = createAsyncThunk<
+  AdminProfessionalAvailabilityResponse,
+  string,
+  { rejectValue: string }
+>(
+  'admin/getProfessionalAvailability',
+  async (professionalId, { dispatch, rejectWithValue }) => {
+    try {
+      dispatch(startLoading());
+      const response = await api.get<ApiResponse<AdminProfessionalAvailabilityResponse>>(
+        `/admin/professionals/${professionalId}/availability`
+      );
+
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+
+      return rejectWithValue(response.data.error || 'Error al obtener disponibilidad');
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
+      return rejectWithValue(err.response?.data?.error || 'Error al obtener disponibilidad');
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
+interface UpdateProfessionalAvailabilityParams {
+  professionalId: string;
+  availabilities: Array<{
+    dayOfWeek: number;
+    slotNumber: number;
+    startTime: string;
+    endTime: string;
+  }>;
+  appointmentDuration: number;
+}
+
+export const updateProfessionalAvailability = createAsyncThunk<
+  { message: string },
+  UpdateProfessionalAvailabilityParams,
+  { rejectValue: string }
+>(
+  'admin/updateProfessionalAvailability',
+  async ({ professionalId, availabilities, appointmentDuration }, { dispatch, rejectWithValue }) => {
+    try {
+      dispatch(startLoading());
+      const response = await api.put<ApiResponse<{ message: string }>>(
+        `/admin/professionals/${professionalId}/availability`,
+        { availabilities, appointmentDuration }
+      );
+
+      if (response.data.success) {
+        return { message: response.data.message || 'Disponibilidad actualizada' };
+      }
+
+      return rejectWithValue(response.data.error || 'Error al actualizar disponibilidad');
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
+      return rejectWithValue(err.response?.data?.error || 'Error al actualizar disponibilidad');
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
+export const getProfessionalBlockedDates = createAsyncThunk<
+  AdminProfessionalBlockedDate[],
+  string,
+  { rejectValue: string }
+>(
+  'admin/getProfessionalBlockedDates',
+  async (professionalId, { dispatch, rejectWithValue }) => {
+    try {
+      dispatch(startLoading());
+      const response = await api.get<ApiResponse<AdminProfessionalBlockedDate[]>>(
+        `/admin/professionals/${professionalId}/blocked-dates`
+      );
+
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+
+      return rejectWithValue(response.data.error || 'Error al obtener fechas bloqueadas');
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
+      return rejectWithValue(err.response?.data?.error || 'Error al obtener fechas bloqueadas');
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
+interface AddBlockedDateParams {
+  professionalId: string;
+  date: string;
+  endDate?: string;
+  reason?: string;
+}
+
+export const addProfessionalBlockedDate = createAsyncThunk<
+  { message: string; blockedCount: number; skippedCount: number },
+  AddBlockedDateParams,
+  { rejectValue: string }
+>(
+  'admin/addProfessionalBlockedDate',
+  async ({ professionalId, date, endDate, reason }, { dispatch, rejectWithValue }) => {
+    try {
+      dispatch(startLoading());
+      const response = await api.post<ApiResponse<{ blockedCount: number; skippedCount: number }>>(
+        `/admin/professionals/${professionalId}/blocked-dates`,
+        { date, endDate, reason }
+      );
+
+      if (response.data.success && response.data.data) {
+        return {
+          message: response.data.message || 'Fecha(s) bloqueada(s)',
+          ...response.data.data
+        };
+      }
+
+      return rejectWithValue(response.data.error || 'Error al bloquear fecha');
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
+      return rejectWithValue(err.response?.data?.error || 'Error al bloquear fecha');
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
+interface RemoveBlockedDateParams {
+  professionalId: string;
+  dateId: string;
+}
+
+export const removeProfessionalBlockedDate = createAsyncThunk<
+  { dateId: string; message: string },
+  RemoveBlockedDateParams,
+  { rejectValue: string }
+>(
+  'admin/removeProfessionalBlockedDate',
+  async ({ professionalId, dateId }, { dispatch, rejectWithValue }) => {
+    try {
+      dispatch(startLoading());
+      const response = await api.delete<ApiResponse<{ message: string }>>(
+        `/admin/professionals/${professionalId}/blocked-dates/${dateId}`
+      );
+
+      if (response.data.success) {
+        return { dateId, message: response.data.message || 'Fecha desbloqueada' };
+      }
+
+      return rejectWithValue(response.data.error || 'Error al desbloquear fecha');
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
+      return rejectWithValue(err.response?.data?.error || 'Error al desbloquear fecha');
     } finally {
       dispatch(stopLoading());
     }
@@ -476,6 +654,11 @@ const adminSlice = createSlice({
     },
     clearSelectedProfessional: (state) => {
       state.selectedProfessional = null;
+    },
+    clearProfessionalSettings: (state) => {
+      state.professionalAvailability = null;
+      state.professionalAppointmentDuration = 30;
+      state.professionalBlockedDates = null;
     }
   },
   extraReducers: (builder) => {
@@ -634,8 +817,61 @@ const adminSlice = createSlice({
       .addCase(getStatistics.rejected, (state, action) => {
         state.error = action.payload || 'Error al obtener estadísticas';
       });
+
+    // Professional Availability (Admin)
+    builder
+      .addCase(getProfessionalAvailability.fulfilled, (state, action: PayloadAction<AdminProfessionalAvailabilityResponse>) => {
+        state.professionalAvailability = action.payload.availabilities;
+        state.professionalAppointmentDuration = action.payload.appointmentDuration;
+        state.error = null;
+      })
+      .addCase(getProfessionalAvailability.rejected, (state, action) => {
+        state.error = action.payload || 'Error al obtener disponibilidad';
+      });
+
+    builder
+      .addCase(updateProfessionalAvailability.fulfilled, (state, action) => {
+        state.successMessage = action.payload.message;
+        state.error = null;
+      })
+      .addCase(updateProfessionalAvailability.rejected, (state, action) => {
+        state.error = action.payload || 'Error al actualizar disponibilidad';
+      });
+
+    // Professional Blocked Dates (Admin)
+    builder
+      .addCase(getProfessionalBlockedDates.fulfilled, (state, action: PayloadAction<AdminProfessionalBlockedDate[]>) => {
+        state.professionalBlockedDates = action.payload;
+        state.error = null;
+      })
+      .addCase(getProfessionalBlockedDates.rejected, (state, action) => {
+        state.error = action.payload || 'Error al obtener fechas bloqueadas';
+      });
+
+    builder
+      .addCase(addProfessionalBlockedDate.fulfilled, (state, action) => {
+        state.successMessage = action.payload.message;
+        state.error = null;
+      })
+      .addCase(addProfessionalBlockedDate.rejected, (state, action) => {
+        state.error = action.payload || 'Error al bloquear fecha';
+      });
+
+    builder
+      .addCase(removeProfessionalBlockedDate.fulfilled, (state, action) => {
+        if (state.professionalBlockedDates) {
+          state.professionalBlockedDates = state.professionalBlockedDates.filter(
+            bd => bd.id !== action.payload.dateId
+          );
+        }
+        state.successMessage = action.payload.message;
+        state.error = null;
+      })
+      .addCase(removeProfessionalBlockedDate.rejected, (state, action) => {
+        state.error = action.payload || 'Error al desbloquear fecha';
+      });
   }
 });
 
-export const { clearError, clearSuccessMessage, clearSelectedProfessional } = adminSlice.actions;
+export const { clearError, clearSuccessMessage, clearSelectedProfessional, clearProfessionalSettings } = adminSlice.actions;
 export default adminSlice.reducer;

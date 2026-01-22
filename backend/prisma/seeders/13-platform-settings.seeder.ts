@@ -19,7 +19,7 @@ export const seedPlatformSettings = async () => {
     // Localization
     { key: 'defaultTimezone', value: 'America/Argentina/Buenos_Aires' },
     { key: 'defaultCountryCode', value: '+54' },
-    { key: 'defaultCurrency', value: 'ARS' },
+    { key: 'defaultCurrency', value: 'USD' },
     { key: 'defaultLanguage', value: 'es' },
 
     // Appointment Defaults
@@ -39,7 +39,7 @@ export const seedPlatformSettings = async () => {
     // Deposit Configuration
     { key: 'depositTimeLimitMinutes', value: '30' },
     { key: 'defaultDepositAmount', value: '2000' },
-    { key: 'depositCurrency', value: 'ARS' },
+    { key: 'depositCurrency', value: 'USD' },
     { key: 'enableDepositsByDefault', value: 'false' },
 
     // Reminder Configuration

@@ -5,9 +5,9 @@ import SaveIcon from '@mui/icons-material/Save';
 const formatCurrency = (value: string): string => {
   const num = parseFloat(value);
   if (isNaN(num)) return '';
-  return new Intl.NumberFormat('es-AR', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'ARS',
+    currency: 'USD',
     minimumFractionDigits: 0,
     maximumFractionDigits: 2
   }).format(num);
@@ -73,7 +73,7 @@ const DepositForm = ({
               }}
               placeholder="0.00"
             />
-            <span className="text-sm text-gray-500">ARS (Pesos Argentinos)</span>
+            <span className="text-sm text-gray-500">USD (Dólares)</span>
           </div>
           {amount && parseFloat(amount) > 0 && (
             <p className="mt-2 text-sm text-gray-600 fade-up-fast">

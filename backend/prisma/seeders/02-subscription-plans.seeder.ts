@@ -1,7 +1,7 @@
 // ============================================
 // SUBSCRIPTION PLANS SEEDERS
 // Creates comprehensive subscription plans for the platform
-// Admin-editable pricing tiers for Argentine market
+// Admin-editable pricing tiers in USD for international market
 // ============================================
 
 import prisma from '../../src/config/database';
@@ -29,8 +29,8 @@ export const seedSubscriptionPlans = async () => {
     {
       name: 'Plan Inicial',
       description: 'Ideal para comenzar tu práctica profesional',
-      monthlyPrice: 2999,
-      annualPrice: 29990,
+      monthlyPrice: 9.99,
+      annualPrice: 99.90,
       features: [
         'Hasta 30 turnos por mes',
         'Calendario personalizado',
@@ -47,8 +47,8 @@ export const seedSubscriptionPlans = async () => {
     {
       name: 'Plan Básico',
       description: 'Perfecto para profesionales independientes',
-      monthlyPrice: 5999,
-      annualPrice: 59990,
+      monthlyPrice: 19.99,
+      annualPrice: 199.90,
       features: [
         'Hasta 100 turnos por mes',
         'Calendario completo con vista semanal/mensual',
@@ -67,8 +67,8 @@ export const seedSubscriptionPlans = async () => {
     {
       name: 'Plan Profesional',
       description: 'Para profesionales en crecimiento con alta demanda',
-      monthlyPrice: 9999,
-      annualPrice: 99990,
+      monthlyPrice: 39.99,
+      annualPrice: 399.90,
       features: [
         '✨ Turnos ilimitados',
         'Sincronización bidireccional con Google Calendar',
@@ -91,8 +91,8 @@ export const seedSubscriptionPlans = async () => {
     {
       name: 'Plan Premium',
       description: 'Solución completa para alto volumen de pacientes',
-      monthlyPrice: 16999,
-      annualPrice: 169990,
+      monthlyPrice: 79.99,
+      annualPrice: 799.90,
       features: [
         '✨ Todo lo del Plan Profesional',
         'Recordatorios ilimitados con horarios personalizados',
@@ -116,8 +116,8 @@ export const seedSubscriptionPlans = async () => {
     {
       name: 'Plan Empresarial',
       description: 'Para clínicas, centros médicos y equipos grandes',
-      monthlyPrice: 29999,
-      annualPrice: 299990,
+      monthlyPrice: 149.99,
+      annualPrice: 1499.90,
       features: [
         '✨ Todo lo del Plan Premium',
         'Múltiples profesionales (hasta 10)',
@@ -143,8 +143,8 @@ export const seedSubscriptionPlans = async () => {
     {
       name: 'Plan Estudiante',
       description: 'Para estudiantes de últimos años y residentes',
-      monthlyPrice: 1999,
-      annualPrice: 19990,
+      monthlyPrice: 4.99,
+      annualPrice: 49.90,
       features: [
         'Hasta 50 turnos por mes',
         'Calendario personalizado',
@@ -178,7 +178,7 @@ export const seedSubscriptionPlans = async () => {
         });
 
     createdPlans.push(plan);
-    console.log(`  ✓ Created/Updated plan: ${plan.name} - ARS $${plan.monthlyPrice}/mes`);
+    console.log(`  ✓ Created/Updated plan: ${plan.name} - USD $${plan.monthlyPrice}/mes`);
   }
 
   console.log(`✅ Subscription plans seeded: ${createdPlans.length} plans\n`);

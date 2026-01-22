@@ -88,7 +88,7 @@ const AppointmentDetailModal = ({ appointment, onClose }: AppointmentDetailModal
                 <dt className="text-sm text-gray-500">Monto</dt>
                 <dd className="text-sm font-medium text-gray-900">
                   {appointment.deposit.amount
-                    ? new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(appointment.deposit.amount)
+                    ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(appointment.deposit.amount)
                     : '-'}
                 </dd>
               </div>

@@ -186,7 +186,7 @@ const WhatsAppDemoSection = () => {
                     <br />
                     📅 Fecha: Lunes 20 de Enero, 2026
                     <br />
-                    🕐 Hora: 10:00 AM
+                    🕐 Hora: 10:00
                     <br />
                     👤 Profesional: Dr. García
                     <br />

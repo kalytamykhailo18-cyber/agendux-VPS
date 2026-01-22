@@ -79,7 +79,10 @@ const ProfessionalLayout = () => {
       >
         {/* Sidebar header */}
         <div className="flex h-14 sm:h-16 items-center justify-between border-b px-4">
-          <span className="text-base sm:text-lg font-bold text-gray-900">Panel Profesional</span>
+          <div className="flex items-center gap-3">
+            <img src="/logo2.png" alt="Agendux" className="h-8 w-auto" />
+            <span className="text-base sm:text-lg font-bold text-gray-900">Profesional</span>
+          </div>
           <IconButton
             onClick={() => setIsSidebarOpen(false)}
             className="lg:hidden"

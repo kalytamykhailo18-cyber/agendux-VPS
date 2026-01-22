@@ -22,12 +22,14 @@ const formatEventTime = (startTime: string, endTime: string) => {
 
   const startTimeStr = start.toLocaleTimeString('es-AR', {
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
+    hour12: false
   });
 
   const endTimeStr = end.toLocaleTimeString('es-AR', {
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
+    hour12: false
   });
 
   return `${dateStr} ${startTimeStr} - ${endTimeStr}`;
