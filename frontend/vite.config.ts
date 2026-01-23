@@ -22,8 +22,8 @@ export default defineConfig({
     // Enable CSS code splitting
     cssCodeSplit: true,
 
-    // Generate source maps for production debugging (hidden from browser)
-    sourcemap: 'hidden',
+    // Disable source maps for production (reduces bundle size significantly)
+    sourcemap: false,
 
     // Chunk size warning limit (500KB)
     chunkSizeWarningLimit: 500,
@@ -32,18 +32,42 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // Manual chunk splitting for optimal caching
-        manualChunks: {
+        manualChunks: (id) => {
           // Core React libraries - rarely change
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-
-          // Redux and state management - rarely change
-          'vendor-redux': ['@reduxjs/toolkit', 'react-redux'],
-
-          // UI libraries
-          'vendor-ui': ['axios'],
-
+          if (id.includes('node_modules/react') ||
+              id.includes('node_modules/react-dom') ||
+              id.includes('node_modules/react-router')) {
+            return 'vendor-react';
+          }
+          // Redux and state management
+          if (id.includes('node_modules/@reduxjs') ||
+              id.includes('node_modules/react-redux') ||
+              id.includes('node_modules/redux')) {
+            return 'vendor-redux';
+          }
+          // MUI core
+          if (id.includes('node_modules/@mui/material') ||
+              id.includes('node_modules/@mui/system') ||
+              id.includes('node_modules/@mui/styled-engine')) {
+            return 'vendor-mui';
+          }
+          // MUI icons (separate chunk - tree-shakeable)
+          if (id.includes('node_modules/@mui/icons-material')) {
+            return 'vendor-mui-icons';
+          }
+          // Emotion (MUI dependency)
+          if (id.includes('node_modules/@emotion')) {
+            return 'vendor-emotion';
+          }
           // Chart library (only loaded when needed)
-          'vendor-charts': ['chart.js', 'react-chartjs-2']
+          if (id.includes('node_modules/chart.js') ||
+              id.includes('node_modules/react-chartjs-2')) {
+            return 'vendor-charts';
+          }
+          // Axios
+          if (id.includes('node_modules/axios')) {
+            return 'vendor-axios';
+          }
         },
 
         // Optimize chunk file names for caching
