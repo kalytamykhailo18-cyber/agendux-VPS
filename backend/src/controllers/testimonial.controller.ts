@@ -28,6 +28,11 @@ export const getPublicTestimonials = async (req: Request, res: Response) => {
   try {
     const testimonials = await getActiveTestimonials();
 
+    // Prevent caching to ensure testimonials are always fresh
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
     return res.json({
       success: true,
       data: testimonials,

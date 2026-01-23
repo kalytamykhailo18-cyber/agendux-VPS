@@ -26,37 +26,42 @@ const PublicLayout = () => {
 
       {/* Simple header for public pages - mobile-first */}
       <header className="bg-blue-600 shadow-sm sticky top-0 z-10">
-        <div className="container-dashboard py-3 sm:py-4 flex items-center justify-between">
-          <Button
-            onClick={() => navigate('/')}
-            sx={{
-              padding: 0,
-              minWidth: 'auto',
-              '&:hover': {
-                backgroundColor: 'transparent',
-              },
-            }}
-          >
-            <img src="/logo2.png" alt="Agendux" className="h-8 sm:h-10 w-auto" />
-          </Button>
-
-          {/* Dashboard button for logged-in users */}
-          {isAuthenticated && (
+        <div className="container-dashboard py-3 sm:py-4 relative">
+          {/* Centered logo */}
+          <div className="flex justify-center">
             <Button
-              onClick={() => navigate(getDashboardPath())}
-              variant="contained"
-              startIcon={<DashboardIcon />}
+              onClick={() => navigate('/')}
               sx={{
-                textTransform: 'none',
-                bgcolor: 'white',
-                color: '#2563eb',
+                padding: 0,
+                minWidth: 'auto',
                 '&:hover': {
-                  bgcolor: '#f0f9ff',
+                  backgroundColor: 'transparent',
                 },
               }}
             >
-              Dashboard
+              <img src="/logo2.png" alt="Agendux" className="h-8 sm:h-10 w-auto" />
             </Button>
+          </div>
+
+          {/* Dashboard button for logged-in users - positioned absolute right */}
+          {isAuthenticated && (
+            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+              <Button
+                onClick={() => navigate(getDashboardPath())}
+                variant="contained"
+                startIcon={<DashboardIcon />}
+                sx={{
+                  textTransform: 'none',
+                  bgcolor: 'white',
+                  color: '#2563eb',
+                  '&:hover': {
+                    bgcolor: '#f0f9ff',
+                  },
+                }}
+              >
+                Dashboard
+              </Button>
+            </div>
           )}
         </div>
       </header>

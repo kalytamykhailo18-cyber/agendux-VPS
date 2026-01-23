@@ -72,6 +72,3 @@ export const seedTestimonials = async () => {
 
   console.log(`✅ Testimonials seeded: ${testimonials.length} testimonials\n`);
 };
-
-// Run if called directly
-seedTestimonials().catch(console.error);

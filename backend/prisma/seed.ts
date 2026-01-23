@@ -22,6 +22,7 @@ import { seedPayments } from './seeders/14-payments.seeder';
 import { seedScheduledReminders } from './seeders/15-scheduled-reminders.seeder';
 import { seedAppointmentCustomFieldValues } from './seeders/16-appointment-custom-field-values.seeder';
 import { seedExternalCalendarEvents } from './seeders/17-external-calendar-events.seeder';
+import { seedTestimonials } from './seeders/18-testimonials.seeder';
 
 const prisma = new PrismaClient();
 
@@ -81,6 +82,9 @@ async function main() {
 
     // 17. Create external calendar events
     const externalEvents = await seedExternalCalendarEvents(professionals);
+
+    // 18. Create testimonials for homepage
+    await seedTestimonials();
 
     console.log('='.repeat(60));
     console.log('\n');
