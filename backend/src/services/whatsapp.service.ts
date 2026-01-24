@@ -7,6 +7,66 @@ import { updateCalendarEvent } from './google-calendar.service';
 
 type MessageTemplateType = 'BOOKING_CONFIRMATION' | 'REMINDER' | 'CANCELLATION';
 
+// ============================================
+// META WHATSAPP CLOUD API CONFIGURATION
+// Direct integration with Meta's WhatsApp Business API
+// ============================================
+
+const META_WHATSAPP_PHONE_ID = process.env.META_WHATSAPP_PHONE_ID || '';
+const META_WHATSAPP_ACCESS_TOKEN = process.env.META_WHATSAPP_ACCESS_TOKEN || '';
+const META_WHATSAPP_API_VERSION = 'v18.0';
+
+// Check if Meta WhatsApp Cloud API is configured
+const isMetaConfigured = (): boolean => {
+  return META_WHATSAPP_PHONE_ID.length > 0 && META_WHATSAPP_ACCESS_TOKEN.length > 0;
+};
+
+// Send message via Meta WhatsApp Cloud API
+async function sendViaMetaApi(to: string, message: string): Promise<boolean> {
+  try {
+    // Format phone number (remove + and non-digits)
+    const phoneNumber = to.replace(/[^\d]/g, '');
+
+    const response = await fetch(
+      `https://graph.facebook.com/${META_WHATSAPP_API_VERSION}/${META_WHATSAPP_PHONE_ID}/messages`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${META_WHATSAPP_ACCESS_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual',
+          to: phoneNumber,
+          type: 'text',
+          text: {
+            preview_url: false,
+            body: message
+          }
+        })
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      logger.error('Meta WhatsApp API error:', errorData);
+      return false;
+    }
+
+    const data = await response.json();
+    ServiceLogger.whatsapp('meta_message_sent', { to: phoneNumber, messageId: data.messages?.[0]?.id });
+    return true;
+  } catch (error) {
+    logger.error('Error sending via Meta WhatsApp API:', error);
+    return false;
+  }
+}
+
+// ============================================
+// TWILIO CONFIGURATION (Fallback)
+// ============================================
+
 // Twilio client - initialized lazily to handle missing credentials gracefully
 let twilioClient: twilio.Twilio | null = null;
 
@@ -137,9 +197,19 @@ interface SendMessageParams {
 
 export async function sendWhatsAppMessage({ to, message }: SendMessageParams): Promise<boolean> {
   try {
+    // Try Meta WhatsApp Cloud API first (preferred - no trial limits)
+    if (isMetaConfigured()) {
+      const success = await sendViaMetaApi(to, message);
+      if (success) {
+        return true;
+      }
+      logger.warn('Meta API failed, attempting Twilio fallback');
+    }
+
+    // Fallback to Twilio
     const client = getTwilioClient();
     if (!client) {
-      logger.warn('Twilio not configured - skipping WhatsApp message');
+      logger.warn('No WhatsApp provider configured - skipping message');
       return false;
     }
 
@@ -156,7 +226,7 @@ export async function sendWhatsAppMessage({ to, message }: SendMessageParams): P
       to: formattedTo
     });
 
-    ServiceLogger.whatsapp('message_sent', { to: formattedTo });
+    ServiceLogger.whatsapp('twilio_message_sent', { to: formattedTo });
     return true;
   } catch (error) {
     logger.error('Error sending WhatsApp message', { error, to });

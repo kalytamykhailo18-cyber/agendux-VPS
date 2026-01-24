@@ -196,7 +196,9 @@ export const getBookingPageData = async (req: Request, res: Response) => {
 export const getAvailableSlots = async (req: Request, res: Response) => {
   try {
     const { slug } = req.params;
-    const { date } = req.query;
+    // Use validated query from middleware (Express 5 compatible)
+    const query = res.locals.validatedQuery || req.query;
+    const { date } = query;
 
     if (!slug) {
       return res.status(400).json({

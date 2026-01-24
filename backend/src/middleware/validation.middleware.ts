@@ -56,7 +56,8 @@ export const validateQuery = <T extends z.ZodTypeAny>(schema: T) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const validated = await schema.parseAsync(req.query);
-      req.query = validated as typeof req.query;
+      // Store validated query in res.locals (req.query is read-only in Express 5)
+      res.locals.validatedQuery = validated;
       next();
     } catch (error) {
       if (error instanceof ZodError) {

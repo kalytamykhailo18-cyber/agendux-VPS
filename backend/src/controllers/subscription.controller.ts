@@ -94,6 +94,23 @@ export async function createSubscriptionPayment(req: Request, res: Response) {
       return res.status(404).json({ success: false, error: 'Profesional no encontrado' });
     }
 
+    // Check if plan exists and has a valid price
+    const plan = await prisma.subscriptionPlan.findUnique({
+      where: { id: planId }
+    });
+
+    if (!plan) {
+      return res.status(404).json({ success: false, error: 'Plan no encontrado' });
+    }
+
+    const price = billingPeriod === 'MONTHLY' ? Number(plan.monthlyPrice) : Number(plan.annualPrice);
+    if (price <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Este plan es gratuito y no requiere pago. Contacta al soporte para activarlo.'
+      });
+    }
+
     // Use recurring subscription by default (automatic renewal)
     // Fall back to one-time payment if useRecurring=false (manual renewal)
     if (useRecurring) {

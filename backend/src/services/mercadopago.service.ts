@@ -62,7 +62,10 @@ export async function createRecurringSubscription({
   const periodLabel = billingPeriod === 'MONTHLY' ? 'Mensual' : 'Anual';
 
   // Calculate billing dates
+  // Set start date to tomorrow to avoid timezone issues with MercadoPago
   const startDate = new Date();
+  startDate.setDate(startDate.getDate() + 1);
+  startDate.setHours(12, 0, 0, 0); // Set to noon Argentina time
   const endDate = new Date(startDate);
   if (billingPeriod === 'MONTHLY') {
     endDate.setMonth(endDate.getMonth() + 1);
@@ -83,7 +86,7 @@ export async function createRecurringSubscription({
           transaction_amount: amount,
           currency_id: 'ARS',
           start_date: startDate.toISOString(),
-          end_date: null // Subscription continues until cancelled
+          end_date: undefined // Subscription continues until cancelled
         },
         external_reference: JSON.stringify({
           type: 'subscription',
@@ -106,7 +109,7 @@ export async function createRecurringSubscription({
     return {
       subscriptionId: preapproval.id,
       initPoint: preapproval.init_point,
-      sandboxInitPoint: preapproval.sandbox_init_point,
+      sandboxInitPoint: (preapproval as any).sandbox_init_point,
       status: preapproval.status
     };
   } catch (error: any) {
