@@ -26,7 +26,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="bg-gradient-to-b from-blue-50 to-white">
+    <div className="bg-white">
       {/* Hero Section */}
       <HeroSection onStartFree={handleStartFree} onAdminAccess={handleAdminAccess} />
 

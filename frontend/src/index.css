@@ -541,3 +541,15 @@ body {
 .animate-spin-slow {
   animation: spinSlow 8s linear infinite;
 }
+
+@keyframes spinReverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+.animate-spin-reverse {
+  animation: spinReverse 6s linear infinite;
+}

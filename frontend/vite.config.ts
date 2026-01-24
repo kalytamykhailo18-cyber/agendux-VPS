@@ -13,6 +13,10 @@ export default defineConfig({
 
   // Build optimizations for production
   build: {
+    // Output directly to nginx web root
+    outDir: '/var/www/agendux/frontend/dist',
+    emptyOutDir: true,
+
     // Target modern browsers for smaller bundle sizes
     target: 'es2020',
 

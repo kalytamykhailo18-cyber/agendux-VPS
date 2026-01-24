@@ -1,5 +1,4 @@
 import { Button } from '@mui/material';
-import SettingsIcon from '@mui/icons-material/Settings';
 
 interface HeroSectionProps {
   onStartFree: () => void;
@@ -13,27 +12,56 @@ const HeroSection = ({ onStartFree, onAdminAccess }: HeroSectionProps) => {
         {/* Integration Visual - Google Calendar + Gear + WhatsApp */}
         <div className="flex items-center justify-center gap-3 sm:gap-4 mb-8 fade-down-fast">
           {/* Google Calendar Logo */}
-          <div className="flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-white rounded-xl shadow-lg zoom-in-fast">
-            <svg viewBox="0 0 24 24" className="w-8 h-8 sm:w-10 sm:h-10">
-              <path fill="#4285F4" d="M22 6c0-1.1-.9-2-2-2h-4V2h-2v2h-4V2H8v2H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6z"/>
-              <path fill="#FFFFFF" d="M4 8h16v12H4z"/>
-              <path fill="#EA4335" d="M8 14h2v2H8z"/>
-              <path fill="#FBBC05" d="M8 10h2v2H8z"/>
-              <path fill="#34A853" d="M12 14h2v2h-2z"/>
-              <path fill="#4285F4" d="M12 10h2v2h-2z"/>
-              <path fill="#EA4335" d="M16 10h2v2h-2z"/>
+          <div className="flex items-center justify-center zoom-in-fast">
+            <svg viewBox="0 0 200 200" className="w-12 h-12 sm:w-14 sm:h-14">
+              <defs>
+                <clipPath id="calClipHero">
+                  <path d="M32 0 H168 Q200 0 200 32 V150 L150 200 H32 Q0 200 0 168 V32 Q0 0 32 0 Z"/>
+                </clipPath>
+              </defs>
+              <g clipPath="url(#calClipHero)">
+                {/* Blue background */}
+                <rect x="0" y="0" width="200" height="200" fill="#4285F4"/>
+                {/* Dark blue top-right */}
+                <rect x="150" y="0" width="50" height="50" fill="#1967D2"/>
+                {/* Yellow right side */}
+                <rect x="150" y="50" width="50" height="100" fill="#FBBC04"/>
+                {/* Light green bottom */}
+                <rect x="50" y="150" width="100" height="50" fill="#34A853"/>
+                {/* Dark green bottom-left */}
+                <rect x="0" y="150" width="50" height="50" fill="#188038"/>
+                {/* Red bottom-right folded corner */}
+                <polygon points="150,150 200,150 150,200" fill="#EA4335"/>
+                {/* White center */}
+                <rect x="50" y="50" width="100" height="100" fill="#FFFFFF"/>
+                {/* 31 text */}
+                <text x="100" y="128" textAnchor="middle" fontSize="72" fontWeight="400" fill="#1a73e8" fontFamily="Google Sans, Arial, sans-serif">31</text>
+              </g>
             </svg>
           </div>
 
           {/* Gear Icon - Connecting element */}
-          <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 rounded-full shadow-md zoom-in-normal">
-            <SettingsIcon sx={{ color: 'white', fontSize: { xs: 24, sm: 28 } }} className="animate-spin-slow" />
+          <div className="flex items-center justify-center w-22 h-22 sm:w-28 sm:h-28 zoom-in-normal">
+            <img src="/gear.gif" alt="Sync" className="w-22 h-22 sm:w-28 sm:h-28" />
           </div>
 
           {/* WhatsApp Logo */}
-          <div className="flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-white rounded-xl shadow-lg zoom-in-fast">
-            <svg viewBox="0 0 24 24" className="w-8 h-8 sm:w-10 sm:h-10">
-              <path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          <div className="flex items-center justify-center zoom-in-fast">
+            <svg viewBox="0 0 140 140" className="w-12 h-12 sm:w-14 sm:h-14" style={{ filter: 'drop-shadow(2px 3px 3px rgba(0,0,0,0.3))' }}>
+              <defs>
+                <linearGradient id="whatsappGradientHero" x1="50%" y1="100%" x2="50%" y2="0%">
+                  <stop offset="0%" stopColor="#20B038"/>
+                  <stop offset="100%" stopColor="#60D66A"/>
+                </linearGradient>
+              </defs>
+              {/* Gray outer border */}
+              <path fill="#B3B3B3" d="M70 2C35.2 2 7 30.2 7 65c0 12.5 3.6 24.1 9.9 33.9L2 130l31.8-10.2C43.5 126.3 56.2 130 70 130c34.8 0 63-28.2 63-65S104.8 2 70 2z"/>
+              {/* White bold border */}
+              <path fill="#FFFFFF" d="M70 12C40.7 12 17 35.7 17 65c0 11 3.3 21.2 9 29.7L14 122l28-9C50.2 118.5 59.7 122 70 122c29.3 0 53-23.7 53-57S99.3 12 70 12z"/>
+              {/* Green background */}
+              <path fill="url(#whatsappGradientHero)" d="M70 26C48.5 26 31 43.5 31 65c0 9.5 3.4 18.2 9 25L31 112l22.5-7.2C60 109.2 64.8 111 70 111c21.5 0 39-17.5 39-46S91.5 26 70 26z"/>
+              {/* White phone icon - centered */}
+              <path fill="#FFFFFF" d="M53 42c-1.8 0-3.6.7-5 2.2-1.7 1.7-4.2 5-4.2 12.3s4.3 14.4 5 15.4c.6 1 8.4 13.4 20.6 18.8 10.2 4.4 12.2 3.6 14.5 3.4 2.3-.2 7.3-3 8.4-5.9 1.1-2.9 1.1-5.4.7-5.9-.4-.5-1.2-.8-2.5-1.4-1.3-.6-7.8-3.8-9-4.3-1.2-.5-2-.7-3 .7-1 1.4-3.6 4.3-4.4 5.2-.8 1-1.6 1.1-2.9.4-1.3-.6-5.5-2-10.4-6.5-3.8-3.5-6.5-7.7-7.2-9-.7-1.3-.1-2 .6-2.6.6-.6 1.3-1.4 2-2.2.6-.7.8-1.2 1.3-2 .5-.8.2-1.6-.1-2.2-.4-.6-3-7.2-4.1-9.8-1.1-2.6-2.2-2.3-3-2.3-.7 0-1.7-.1-2.6-.1z"/>
             </svg>
           </div>
         </div>
