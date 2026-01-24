@@ -31,42 +31,10 @@ export default defineConfig({
     // Rollup options for code splitting
     rollupOptions: {
       output: {
-        // Manual chunk splitting for optimal caching
+        // Simple vendor chunk - all node_modules together to avoid load order issues
         manualChunks: (id) => {
-          // Core React libraries - rarely change
-          if (id.includes('node_modules/react') ||
-              id.includes('node_modules/react-dom') ||
-              id.includes('node_modules/react-router')) {
-            return 'vendor-react';
-          }
-          // Redux and state management
-          if (id.includes('node_modules/@reduxjs') ||
-              id.includes('node_modules/react-redux') ||
-              id.includes('node_modules/redux')) {
-            return 'vendor-redux';
-          }
-          // MUI core
-          if (id.includes('node_modules/@mui/material') ||
-              id.includes('node_modules/@mui/system') ||
-              id.includes('node_modules/@mui/styled-engine')) {
-            return 'vendor-mui';
-          }
-          // MUI icons (separate chunk - tree-shakeable)
-          if (id.includes('node_modules/@mui/icons-material')) {
-            return 'vendor-mui-icons';
-          }
-          // Emotion (MUI dependency)
-          if (id.includes('node_modules/@emotion')) {
-            return 'vendor-emotion';
-          }
-          // Chart library (only loaded when needed)
-          if (id.includes('node_modules/chart.js') ||
-              id.includes('node_modules/react-chartjs-2')) {
-            return 'vendor-charts';
-          }
-          // Axios
-          if (id.includes('node_modules/axios')) {
-            return 'vendor-axios';
+          if (id.includes('node_modules')) {
+            return 'vendor';
           }
         },
 

@@ -7,6 +7,7 @@ import {
   Button,
   TextField,
   Rating,
+  CircularProgress,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import type { Testimonial, CreateTestimonialData } from '../../../store/slices/testimonialSlice';
@@ -17,7 +18,7 @@ interface TestimonialFormModalProps {
   isOpen: boolean;
   testimonial: Testimonial | null;
   onClose: () => void;
-  onSave: (data: CreateTestimonialData) => void;
+  onSave: (data: CreateTestimonialData) => Promise<void>;
 }
 
 const TestimonialFormModal = ({
@@ -33,6 +34,8 @@ const TestimonialFormModal = ({
     review: '',
     photo: '',
   });
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Handle file upload - convert to base64
@@ -52,9 +55,15 @@ const TestimonialFormModal = ({
       return;
     }
 
+    setIsUploading(true);
     const reader = new FileReader();
     reader.onloadend = () => {
       setFormData({ ...formData, photo: reader.result as string });
+      setIsUploading(false);
+    };
+    reader.onerror = () => {
+      alert('Error al cargar la imagen');
+      setIsUploading(false);
     };
     reader.readAsDataURL(file);
   };
@@ -78,9 +87,10 @@ const TestimonialFormModal = ({
         photo: '',
       });
     }
+    setIsSaving(false);
   }, [testimonial, isOpen]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validation
     if (!formData.name.trim() || !formData.profession.trim() || !formData.review.trim()) {
       alert('Por favor completa todos los campos obligatorios');
@@ -92,7 +102,12 @@ const TestimonialFormModal = ({
       return;
     }
 
-    onSave(formData);
+    setIsSaving(true);
+    try {
+      await onSave(formData);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -153,8 +168,12 @@ const TestimonialFormModal = ({
               Foto (opcional)
             </label>
 
-            {/* Photo preview */}
-            {formData.photo && (
+            {/* Photo preview or upload spinner */}
+            {isUploading ? (
+              <div className="mb-3 w-20 h-20 rounded-full border-2 border-gray-200 flex items-center justify-center bg-gray-50">
+                <CircularProgress size={32} />
+              </div>
+            ) : formData.photo ? (
               <div className="mb-3 relative inline-block">
                 <img
                   src={formData.photo}
@@ -169,7 +188,7 @@ const TestimonialFormModal = ({
                   ×
                 </button>
               </div>
-            )}
+            ) : null}
 
             {/* Upload button */}
             <div className="flex items-center gap-3">
@@ -183,11 +202,12 @@ const TestimonialFormModal = ({
               <Button
                 variant="outlined"
                 size="small"
-                startIcon={<CloudUploadIcon />}
+                startIcon={isUploading ? <CircularProgress size={16} /> : <CloudUploadIcon />}
                 onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
                 sx={{ textTransform: 'none' }}
               >
-                Subir imagen
+                {isUploading ? 'Cargando...' : 'Subir imagen'}
               </Button>
               <span className="text-xs text-gray-500">
                 Máximo 2MB (JPG, PNG)
@@ -210,15 +230,17 @@ const TestimonialFormModal = ({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose} sx={{ textTransform: 'none' }}>
+        <Button onClick={onClose} disabled={isSaving} sx={{ textTransform: 'none' }}>
           Cancelar
         </Button>
         <Button
           onClick={handleSave}
           variant="contained"
+          disabled={isSaving}
+          startIcon={isSaving ? <CircularProgress size={16} color="inherit" /> : undefined}
           sx={{ textTransform: 'none' }}
         >
-          {testimonial ? 'Guardar Cambios' : 'Crear Testimonio'}
+          {isSaving ? 'Guardando...' : (testimonial ? 'Guardar Cambios' : 'Crear Testimonio')}
         </Button>
       </DialogActions>
     </Dialog>
