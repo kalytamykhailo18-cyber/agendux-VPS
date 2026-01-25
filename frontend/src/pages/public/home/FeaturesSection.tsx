@@ -2,21 +2,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import SmartphoneIcon from '@mui/icons-material/Smartphone';
-
-const WhatsAppIcon = () => (
-  <svg viewBox="0 0 100 100" className="w-6 h-6" style={{ filter: 'drop-shadow(1px 2px 2px rgba(0,0,0,0.3))' }}>
-    <defs>
-      <linearGradient id="waGradientFeature" x1="50%" y1="100%" x2="50%" y2="0%">
-        <stop offset="0%" stopColor="#20B038"/>
-        <stop offset="100%" stopColor="#60D66A"/>
-      </linearGradient>
-    </defs>
-    <circle cx="50" cy="50" r="48" fill="#B3B3B3"/>
-    <circle cx="50" cy="50" r="42" fill="#FFFFFF"/>
-    <circle cx="50" cy="50" r="35" fill="url(#waGradientFeature)"/>
-    <path fill="#FFFFFF" transform="translate(50, 50) scale(0.4) translate(-50, -50)" d="M50 20c-2.5 0-5 1-7 3-2.4 2.4-5.8 7-5.8 17s6 20 7 21.5c.8 1.4 11.7 18.7 28.7 26.2 14.2 6.1 17 5 20.2 4.7 3.2-.3 10.2-4.2 11.7-8.2 1.5-4 1.5-7.5 1-8.2-.5-.7-1.7-1.1-3.5-2-1.8-.8-10.9-5.3-12.5-6-1.7-.7-2.8-1-4 1-1.4 2-5 6-6.1 7.2-1.1 1.4-2.2 1.5-4 .5-1.8-.8-7.7-2.8-14.5-9-5.3-4.9-9-10.7-10-12.5-1-1.8-.1-2.8.8-3.6.8-.8 1.8-2 2.8-3 .8-1 1.1-1.7 1.8-2.8.7-1.1.3-2.2-.2-3-.5-.8-4.2-10-5.7-13.7-1.5-3.6-3.1-3.2-4.2-3.2-1 0-2.4-.1-3.6-.1z"/>
-  </svg>
-);
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 
 const GoogleCalendarIcon = () => (
   <svg viewBox="0 0 200 200" className="w-6 h-6">
@@ -47,8 +33,8 @@ const features = [
     animation: 'fade-up-fast'
   },
   {
-    icon: <WhatsAppIcon />,
-    iconBg: 'bg-green-50',
+    icon: <WhatsAppIcon sx={{ fontSize: 24, color: '#FFFFFF' }} />,
+    iconBg: 'bg-[#25D366]',
     title: 'Recordatorios WhatsApp',
     description: 'Recordatorios automáticos vía WhatsApp para reducir ausencias y cancelaciones.',
     animation: 'fade-down-fast'

@@ -1,20 +1,6 @@
 import { useState } from 'react';
 import { Button, TextField, Select, MenuItem, FormControl, InputLabel, Alert } from '@mui/material';
-
-const WhatsAppSvgIcon = ({ className = "w-8 h-8" }: { className?: string }) => (
-  <svg viewBox="0 0 100 100" className={className} style={{ filter: 'drop-shadow(1px 2px 2px rgba(0,0,0,0.3))' }}>
-    <defs>
-      <linearGradient id="waGradientDemo" x1="50%" y1="100%" x2="50%" y2="0%">
-        <stop offset="0%" stopColor="#20B038"/>
-        <stop offset="100%" stopColor="#60D66A"/>
-      </linearGradient>
-    </defs>
-    <circle cx="50" cy="50" r="48" fill="#B3B3B3"/>
-    <circle cx="50" cy="50" r="42" fill="#FFFFFF"/>
-    <circle cx="50" cy="50" r="35" fill="url(#waGradientDemo)"/>
-    <path fill="#FFFFFF" transform="translate(50, 50) scale(0.4) translate(-50, -50)" d="M50 20c-2.5 0-5 1-7 3-2.4 2.4-5.8 7-5.8 17s6 20 7 21.5c.8 1.4 11.7 18.7 28.7 26.2 14.2 6.1 17 5 20.2 4.7 3.2-.3 10.2-4.2 11.7-8.2 1.5-4 1.5-7.5 1-8.2-.5-.7-1.7-1.1-3.5-2-1.8-.8-10.9-5.3-12.5-6-1.7-.7-2.8-1-4 1-1.4 2-5 6-6.1 7.2-1.1 1.4-2.2 1.5-4 .5-1.8-.8-7.7-2.8-14.5-9-5.3-4.9-9-10.7-10-12.5-1-1.8-.1-2.8.8-3.6.8-.8 1.8-2 2.8-3 .8-1 1.1-1.7 1.8-2.8.7-1.1.3-2.2-.2-3-.5-.8-4.2-10-5.7-13.7-1.5-3.6-3.1-3.2-4.2-3.2-1 0-2.4-.1-3.6-.1z"/>
-  </svg>
-);
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 
 // Country codes with flags
 const COUNTRY_CODES = [
@@ -87,8 +73,8 @@ const WhatsAppDemoSection = () => {
     <section className="py-12 sm:py-16 bg-gradient-to-br from-green-50 via-white to-green-50">
       <div className="container-wide">
         <div className="mx-auto max-w-3xl text-center mb-8 fade-down-normal">
-          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-green-100 mb-4 zoom-in-fast">
-            <WhatsAppSvgIcon className="w-8 h-8 sm:w-10 sm:h-10" />
+          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#25D366] mb-4 zoom-in-fast">
+            <WhatsAppIcon sx={{ fontSize: { xs: 32, sm: 40 }, color: '#FFFFFF' }} />
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 fade-up-fast">
             ¿Quieres recibir un mensaje de ejemplo en tu WhatsApp?
@@ -158,7 +144,7 @@ const WhatsAppDemoSection = () => {
                 variant="contained"
                 fullWidth
                 disabled={loading}
-                startIcon={<WhatsAppSvgIcon className="w-5 h-5" />}
+                startIcon={<WhatsAppIcon />}
                 sx={{
                   textTransform: 'none',
                   minHeight: { xs: 56, sm: 48 },
@@ -188,8 +174,8 @@ const WhatsAppDemoSection = () => {
             </h3>
             <div className="rounded-lg bg-white p-4 border border-gray-200 shadow-sm">
               <div className="flex gap-3 items-start">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                  <WhatsAppSvgIcon className="w-5 h-5" />
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center">
+                  <WhatsAppIcon sx={{ fontSize: 20, color: '#FFFFFF' }} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm sm:text-base text-gray-800 leading-relaxed">
