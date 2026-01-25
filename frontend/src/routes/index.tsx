@@ -27,6 +27,7 @@ import { UserRole } from '../types';
 const HomePage = lazy(() => import('../pages/public/home'));
 const BookingPage = lazy(() => import('../pages/public/booking'));
 const CancelBookingPage = lazy(() => import('../pages/public/cancel'));
+const DudasPage = lazy(() => import('../pages/public/dudas'));
 
 // Login pages
 const AdminLoginPage = lazy(() => import('../pages/admin/login'));
@@ -109,6 +110,18 @@ const AppRoutes = () => {
           element={
             <Suspense fallback={<PageLoadingFallback />}>
               <ProfessionalLoginPage />
+            </Suspense>
+          }
+        />
+        {/* Redirect /login to /login/professional */}
+        <Route path="/login" element={<Navigate to="/login/professional" replace />} />
+        {/* Redirect /register to /login/professional (registration is handled there) */}
+        <Route path="/register" element={<Navigate to="/login/professional" replace />} />
+        <Route
+          path="/dudas"
+          element={
+            <Suspense fallback={<PageLoadingFallback />}>
+              <DudasPage />
             </Suspense>
           }
         />

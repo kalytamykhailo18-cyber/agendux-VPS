@@ -2,10 +2,9 @@ import { Button } from '@mui/material';
 
 interface HeroSectionProps {
   onStartFree: () => void;
-  onAdminAccess: () => void;
 }
 
-const HeroSection = ({ onStartFree, onAdminAccess }: HeroSectionProps) => {
+const HeroSection = ({ onStartFree }: HeroSectionProps) => {
   return (
     <div className="mx-auto max-w-7xl px-4 pt-12 pb-24 sm:px-6 lg:px-8">
       <div className="text-center">
@@ -56,46 +55,52 @@ const HeroSection = ({ onStartFree, onAdminAccess }: HeroSectionProps) => {
           </div>
         </div>
 
-        <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
-          <span className="block fade-down-fast">Gestiona tus citas</span>
-          <span className="block text-blue-600 fade-up-normal">de forma automática</span>
+        {/* Hero Headline */}
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl md:text-5xl fade-down-fast">
+          Dejá de perder tiempo dando turnos por mensajes y llamadas
         </h1>
+
+        {/* Subheadline 1 */}
         <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600 zoom-in-normal">
-          Plataforma completa para profesionales independientes. Agenda online 24/7,
-          recordatorios automáticos por WhatsApp, sincronización con Google Calendar y más.
+          Tus pacientes reservan solos, las 24 horas, con tu link personalizado
         </p>
-        <p className="mx-auto mt-3 max-w-xl text-base text-primary font-medium fade-up-fast">
-          Obtené tu página personalizada: agendux.com/tu-nombre
+        <p className="mx-auto mt-2 text-xl text-blue-600 font-semibold fade-up-fast">
+          agendux.com/tunombre
         </p>
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <p className="mx-auto mt-2 max-w-xl text-base text-gray-600 fade-up-normal">
+          o con el código QR listo para usar que te damos gratis.
+        </p>
+
+        {/* Subheadline 2 */}
+        <p className="mx-auto mt-6 max-w-2xl text-base text-gray-700 zoom-in-fast">
+          Recordatorios automáticos por WhatsApp + agenda sincronizada con Google Calendar.
+        </p>
+        <p className="mx-auto mt-2 max-w-2xl text-base text-gray-600 fade-up-fast">
+          Ahorrá tiempo todos los días y ganá más dinero: <span className="text-green-600 font-semibold">reducí hasta un 75% los olvidos y cancelaciones de última hora.</span>
+        </p>
+
+        {/* CTA Button */}
+        <div className="mt-10 flex flex-col items-center justify-center gap-3">
           <Button
             variant="contained"
             onClick={onStartFree}
             sx={{
               width: { xs: '100%', sm: 'auto' },
               textTransform: 'none',
-              px: 4,
-              py: 1.5,
-              fontSize: '1rem',
+              px: 5,
+              py: 1.75,
+              fontSize: '1.125rem',
+              fontWeight: 600,
             }}
-            className="fade-left-fast"
+            className="fade-up-fast"
           >
-            Comenzar Gratis
+            Comenzar Gratis - Sin Tarjeta
           </Button>
-          <Button
-            variant="outlined"
-            onClick={onAdminAccess}
-            sx={{
-              width: { xs: '100%', sm: 'auto' },
-              textTransform: 'none',
-              px: 4,
-              py: 1.5,
-              fontSize: '1rem',
-            }}
-            className="fade-right-fast"
-          >
-            Acceso Admin
-          </Button>
+
+          {/* Text below CTA */}
+          <p className="text-sm text-gray-500 fade-up-normal">
+            Obtené tu link y tu QR en minutos. Empezá hoy mismo sin complicaciones.
+          </p>
         </div>
       </div>
     </div>

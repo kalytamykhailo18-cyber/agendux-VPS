@@ -26,9 +26,9 @@ const PublicLayout = () => {
 
       {/* Simple header for public pages - mobile-first */}
       <header className="bg-blue-600 shadow-sm sticky top-0 z-10">
-        <div className="container-dashboard py-3 sm:py-4 relative">
-          {/* Centered logo */}
-          <div className="flex justify-center">
+        <div className="container-dashboard py-3 sm:py-4">
+          <div className="flex items-center justify-between">
+            {/* Logo on the left */}
             <Button
               onClick={() => navigate('/')}
               sx={{
@@ -41,28 +41,86 @@ const PublicLayout = () => {
             >
               <img src="/logo2.png" alt="Agendux" className="h-8 sm:h-10 w-auto" />
             </Button>
-          </div>
 
-          {/* Dashboard button for logged-in users - positioned absolute right */}
-          {isAuthenticated && (
-            <div className="absolute right-4 top-1/2 -translate-y-1/2">
-              <Button
-                onClick={() => navigate(getDashboardPath())}
-                variant="contained"
-                startIcon={<DashboardIcon />}
-                sx={{
-                  textTransform: 'none',
-                  bgcolor: 'white',
-                  color: '#2563eb',
-                  '&:hover': {
-                    bgcolor: '#f0f9ff',
-                  },
-                }}
-              >
-                Dashboard
-              </Button>
+            {/* Right side buttons */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {isAuthenticated ? (
+                /* Dashboard button for logged-in users */
+                <Button
+                  onClick={() => navigate(getDashboardPath())}
+                  variant="contained"
+                  startIcon={<DashboardIcon />}
+                  sx={{
+                    textTransform: 'none',
+                    bgcolor: 'white',
+                    color: '#2563eb',
+                    fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                    px: { xs: 1.5, sm: 2 },
+                    py: { xs: 0.75, sm: 1 },
+                    '&:hover': {
+                      bgcolor: '#f0f9ff',
+                    },
+                  }}
+                >
+                  Dashboard
+                </Button>
+              ) : (
+                /* Dudas, Login and Start buttons for non-authenticated users */
+                <>
+                  <Button
+                    onClick={() => navigate('/dudas')}
+                    variant="text"
+                    sx={{
+                      textTransform: 'none',
+                      color: 'rgba(255,255,255,0.85)',
+                      fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                      px: { xs: 0.75, sm: 1.5 },
+                      minWidth: 'auto',
+                      '&:hover': {
+                        bgcolor: 'rgba(255,255,255,0.1)',
+                        color: 'white',
+                      },
+                    }}
+                  >
+                    Dudas
+                  </Button>
+                  <Button
+                    onClick={() => navigate('/login')}
+                    variant="text"
+                    sx={{
+                      textTransform: 'none',
+                      color: 'white',
+                      fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                      px: { xs: 1, sm: 2 },
+                      '&:hover': {
+                        bgcolor: 'rgba(255,255,255,0.1)',
+                      },
+                    }}
+                  >
+                    Ingresar
+                  </Button>
+                  <Button
+                    onClick={() => navigate('/register')}
+                    variant="contained"
+                    sx={{
+                      textTransform: 'none',
+                      bgcolor: 'white',
+                      color: '#2563eb',
+                      fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                      px: { xs: 1.5, sm: 2.5 },
+                      py: { xs: 0.5, sm: 0.75 },
+                      fontWeight: 600,
+                      '&:hover': {
+                        bgcolor: '#f0f9ff',
+                      },
+                    }}
+                  >
+                    Comenzar Gratis
+                  </Button>
+                </>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </header>
 

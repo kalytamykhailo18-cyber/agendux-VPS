@@ -22,6 +22,7 @@ import subscriptionRoutes from './subscription.routes';
 import statisticsRoutes from './statistics.routes';
 import demoRoutes from './demo.routes';
 import testimonialRoutes from './testimonial.routes';
+import contactRoutes from './contact.routes';
 
 /**
  * Configure all application routes
@@ -64,4 +65,7 @@ export function configureRoutes(app: Application): void {
 
   // Testimonial routes - public cached, admin no cache
   app.use('/api/testimonials', longCache, testimonialRoutes);
+
+  // Contact routes - public, rate limited
+  app.use('/api/contact', rateLimiter, noCacheControl, contactRoutes);
 }

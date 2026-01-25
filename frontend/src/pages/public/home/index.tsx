@@ -1,8 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import HeroSection from './HeroSection';
 import FeaturesSection from './FeaturesSection';
-import TestimonialsSection from './TestimonialsSection';
 import WhatsAppDemoSection from './WhatsAppDemoSection';
+import HowItWorksSection from './HowItWorksSection';
+import PricingSection from './PricingSection';
+import TestimonialsSection from './TestimonialsSection';
+import FAQSection from './FAQSection';
 import CTASection from './CTASection';
 
 // RULE: Page folder structure - index.tsx + flat components (NO subdirectories)
@@ -14,32 +17,37 @@ const HomePage = () => {
 
   // Handle navigation
   const handleStartFree = () => {
-    navigate('/login/professional');
-  };
-
-  const handleAdminAccess = () => {
-    navigate('/login/admin');
+    navigate('/register');
   };
 
   const handleRegister = () => {
-    navigate('/login/professional');
+    navigate('/register');
   };
 
   return (
     <div className="bg-white">
-      {/* Hero Section */}
-      <HeroSection onStartFree={handleStartFree} onAdminAccess={handleAdminAccess} />
+      {/* 1. Hero Section */}
+      <HeroSection onStartFree={handleStartFree} />
 
-      {/* Features Section */}
+      {/* 2. Features/Benefits Section */}
       <FeaturesSection />
 
-      {/* Testimonials Section */}
-      <TestimonialsSection />
-
-      {/* WhatsApp Demo Section */}
+      {/* 3. WhatsApp Demo Section */}
       <WhatsAppDemoSection />
 
-      {/* CTA Section */}
+      {/* 4. How It Works Section */}
+      <HowItWorksSection />
+
+      {/* 5. Pricing Section */}
+      <PricingSection />
+
+      {/* 6. Testimonials Section */}
+      <TestimonialsSection />
+
+      {/* 7. FAQ Section */}
+      <FAQSection />
+
+      {/* 8. CTA Section */}
       <CTASection onRegister={handleRegister} />
     </div>
   );
