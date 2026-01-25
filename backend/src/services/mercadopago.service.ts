@@ -62,10 +62,11 @@ export async function createRecurringSubscription({
   const periodLabel = billingPeriod === 'MONTHLY' ? 'Mensual' : 'Anual';
 
   // Calculate billing dates
-  // Set start date to tomorrow to avoid timezone issues with MercadoPago
+  // Set start date to 2 days from now to avoid timezone issues with MercadoPago
+  // MercadoPago uses Argentina timezone (UTC-3), so we add buffer days
   const startDate = new Date();
-  startDate.setDate(startDate.getDate() + 1);
-  startDate.setHours(12, 0, 0, 0); // Set to noon Argentina time
+  startDate.setDate(startDate.getDate() + 2);
+  startDate.setUTCHours(15, 0, 0, 0); // 15:00 UTC = 12:00 Argentina time
   const endDate = new Date(startDate);
   if (billingPeriod === 'MONTHLY') {
     endDate.setMonth(endDate.getMonth() + 1);

@@ -194,7 +194,7 @@ const PricingSection = () => {
 
         {/* Bottom Text */}
         <p className="mt-10 text-center text-sm text-gray-500">
-          Todos los planes incluyen soporte por WhatsApp. Podés cambiar o cancelar en cualquier momento.
+          Todos los planes incluyen soporte escribiendo a info@agendux.com. Podés cambiar o cancelar en cualquier momento.
         </p>
       </div>
     </div>
