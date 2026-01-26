@@ -202,7 +202,7 @@ const ProfessionalLoginPage = () => {
         </div>
 
         {/* Footer link */}
-        <p className="mt-4 text-center text-sm text-gray-600 fade-up-slow">
+        {/* <p className="mt-4 text-center text-sm text-gray-600 fade-up-slow">
           ¿Eres administrador?{' '}
           <span
             onClick={() => navigate('/login/admin')}
@@ -210,7 +210,7 @@ const ProfessionalLoginPage = () => {
           >
             Ingresa aquí
           </span>
-        </p>
+        </p> */}
       </div>
     </div>
   );

@@ -35,14 +35,14 @@ const HomePage = () => {
       {/* 3. WhatsApp Demo Section */}
       <WhatsAppDemoSection />
 
-      {/* 4. How It Works Section */}
+      {/* 4. Testimonials Section */}
+      <TestimonialsSection />
+
+      {/* 5. How It Works Section */}
       <HowItWorksSection />
 
-      {/* 5. Pricing Section */}
+      {/* 6. Pricing Section */}
       <PricingSection />
-
-      {/* 6. Testimonials Section */}
-      <TestimonialsSection />
 
       {/* 7. FAQ Section */}
       <FAQSection />
