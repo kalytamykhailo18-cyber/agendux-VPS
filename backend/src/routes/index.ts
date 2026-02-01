@@ -23,6 +23,7 @@ import statisticsRoutes from './statistics.routes';
 import demoRoutes from './demo.routes';
 import testimonialRoutes from './testimonial.routes';
 import contactRoutes from './contact.routes';
+import siteContentRoutes from './site-content.routes';
 
 /**
  * Configure all application routes
@@ -68,4 +69,7 @@ export function configureRoutes(app: Application): void {
 
   // Contact routes - public, rate limited
   app.use('/api/contact', rateLimiter, noCacheControl, contactRoutes);
+
+  // Site content routes - public cached for landing, admin no cache
+  app.use('/api/site-content', longCache, siteContentRoutes);
 }

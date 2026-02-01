@@ -581,3 +581,57 @@ model Testimonial {
   @@index([isActive, displayOrder]) // Fast active testimonials retrieval in order
   @@map("testimonials")
 }
+
+// ============================================
+// SITE CONTENT (CMS for Landing Page)
+// Admin-manageable content for Hero, CTA sections
+// ============================================
+
+model SiteContent {
+  id          String    @id @default(uuid())
+  section     String    @unique // 'hero', 'cta'
+  content     Json      // Flexible JSON for different section structures
+  isActive    Boolean   @default(true)
+  updatedAt   DateTime  @updatedAt
+  updatedBy   String?   // Admin user ID who last updated
+
+  @@index([section])
+  @@map("site_content")
+}
+
+// ============================================
+// FEATURES (Admin-manageable for homepage)
+// Benefits/Features cards on landing page
+// ============================================
+
+model Feature {
+  id           String    @id @default(uuid())
+  icon         String    // MUI icon name (e.g., 'AccessTime', 'AttachMoney')
+  title        String
+  description  String    @db.Text
+  isActive     Boolean   @default(true)
+  displayOrder Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([isActive, displayOrder])
+  @@map("features")
+}
+
+// ============================================
+// FAQ (Admin-manageable for homepage)
+// Frequently Asked Questions section
+// ============================================
+
+model FAQ {
+  id           String    @id @default(uuid())
+  question     String
+  answer       String    @db.Text
+  isActive     Boolean   @default(true)
+  displayOrder Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([isActive, displayOrder])
+  @@map("faqs")
+}

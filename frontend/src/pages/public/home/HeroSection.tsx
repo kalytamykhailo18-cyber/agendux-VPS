@@ -1,10 +1,22 @@
 import { Button } from '@mui/material';
+import { useAppSelector } from '../../../store';
+
+// RULE: All data through Redux - useSelector reads data
+// RULE: NO direct API calls from components
 
 interface HeroSectionProps {
   onStartFree: () => void;
 }
 
 const HeroSection = ({ onStartFree }: HeroSectionProps) => {
+  const { content } = useAppSelector((state) => state.siteContent);
+  const hero = content?.hero;
+
+  // Use CMS content or fallback to defaults
+  const title = hero?.title || 'Dejá de perder tiempo dando turnos por mensajes y llamadas';
+  const linkExample = hero?.linkExample || 'agendux.com/tunombre';
+  const ctaButtonText = hero?.ctaButtonText || 'Comenzar Gratis - Sin Tarjeta';
+  const ctaSubtext = hero?.ctaSubtext || 'Obtené tu link y tu QR en minutos. Empezá hoy mismo sin complicaciones.';
   return (
     <div className="mx-auto max-w-7xl px-4 pt-12 pb-24 sm:px-6 lg:px-8">
       <div className="text-center">
@@ -57,7 +69,7 @@ const HeroSection = ({ onStartFree }: HeroSectionProps) => {
 
         {/* Hero Headline */}
         <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl md:text-5xl fade-down-fast">
-          Dejá de perder tiempo dando turnos por mensajes y llamadas
+          {title}
         </h1>
 
         {/* Subheadline 1 */}
@@ -65,7 +77,7 @@ const HeroSection = ({ onStartFree }: HeroSectionProps) => {
           Tus pacientes reservan solos, las 24 horas, con tu link personalizado
         </p>
         <p className="mx-auto mt-2 text-xl text-blue-600 font-semibold fade-up-fast">
-          agendux.com/tunombre
+          {linkExample}
         </p>
         <p className="mx-auto mt-2 max-w-xl text-base text-gray-600 fade-up-normal">
           o con el código QR listo para usar que te damos gratis.
@@ -94,12 +106,12 @@ const HeroSection = ({ onStartFree }: HeroSectionProps) => {
             }}
             className="fade-up-fast"
           >
-            Comenzar Gratis - Sin Tarjeta
+            {ctaButtonText}
           </Button>
 
           {/* Text below CTA */}
           <p className="text-sm text-gray-500 fade-up-normal">
-            Obtené tu link y tu QR en minutos. Empezá hoy mismo sin complicaciones.
+            {ctaSubtext}
           </p>
         </div>
       </div>

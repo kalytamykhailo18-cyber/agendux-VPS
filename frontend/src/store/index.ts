@@ -18,6 +18,7 @@ import adminReducer from './slices/adminSlice';
 import subscriptionReducer from './slices/subscriptionSlice';
 import statisticsReducer from './slices/statisticsSlice';
 import testimonialReducer from './slices/testimonialSlice';
+import siteContentReducer from './slices/siteContentSlice';
 
 // Configure store
 export const store = configureStore({
@@ -36,7 +37,8 @@ export const store = configureStore({
     admin: adminReducer,
     subscription: subscriptionReducer,
     statistics: statisticsReducer,
-    testimonial: testimonialReducer
+    testimonial: testimonialReducer,
+    siteContent: siteContentReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

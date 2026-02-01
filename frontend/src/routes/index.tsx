@@ -50,6 +50,7 @@ const AdminDashboardPage = lazy(() => import('../pages/admin/dashboard'));
 const AdminProfessionalsPage = lazy(() => import('../pages/admin/professionals'));
 const AdminPlansPage = lazy(() => import('../pages/admin/plans'));
 const AdminTestimonialsPage = lazy(() => import('../pages/admin/testimonials'));
+const AdminSiteContentPage = lazy(() => import('../pages/admin/site-content'));
 const AdminSettingsPage = lazy(() => import('../pages/admin/settings'));
 
 // ============================================
@@ -256,6 +257,14 @@ const AppRoutes = () => {
           element={
             <Suspense fallback={<PageLoadingFallback />}>
               <AdminTestimonialsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/admin/site-content"
+          element={
+            <Suspense fallback={<PageLoadingFallback />}>
+              <AdminSiteContentPage />
             </Suspense>
           }
         />

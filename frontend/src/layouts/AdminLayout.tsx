@@ -8,6 +8,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import GroupIcon from '@mui/icons-material/Group';
 import DescriptionIcon from '@mui/icons-material/Description';
 import RateReviewIcon from '@mui/icons-material/RateReview';
+import WebIcon from '@mui/icons-material/Web';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useAppDispatch, useAppSelector } from '../store';
 import { logout } from '../store/slices/authSlice';
@@ -26,6 +27,7 @@ const navItems: NavItem[] = [
   { label: 'Profesionales', path: '/admin/professionals', icon: <GroupIcon sx={{ fontSize: 20 }} /> },
   { label: 'Planes', path: '/admin/plans', icon: <DescriptionIcon sx={{ fontSize: 20 }} /> },
   { label: 'Testimonios', path: '/admin/testimonials', icon: <RateReviewIcon sx={{ fontSize: 20 }} /> },
+  { label: 'Contenido Web', path: '/admin/site-content', icon: <WebIcon sx={{ fontSize: 20 }} /> },
   { label: 'Configuración', path: '/admin/settings', icon: <SettingsIcon sx={{ fontSize: 20 }} /> }
 ];
 

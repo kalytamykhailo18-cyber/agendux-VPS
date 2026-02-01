@@ -1,98 +1,17 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { useAppSelector } from '../../../store';
 
-interface FAQ {
-  question: string;
-  answer: React.ReactNode;
-}
-
-const faqs: FAQ[] = [
-  {
-    question: '¿Cómo obtengo mi link personalizado y mi código QR?',
-    answer: (
-      <>
-        Al registrarte y configurar tu agenda (en menos de 10 minutos), Agendux genera tu link único
-        (<span className="text-blue-600 font-medium">agendux.com/tunombre</span>) y tu código QR listo
-        para usar. Podés descargarlo, copiarlo o compartirlo directamente.
-      </>
-    ),
-  },
-  {
-    question: '¿Dónde puedo poner el link o el QR para que mis pacientes lo usen?',
-    answer: (
-      <>
-        En cualquier lugar:
-        <ul className="mt-2 space-y-1 list-disc list-inside text-gray-600">
-          <li>Estado y chats de WhatsApp</li>
-          <li>Bio, stories o publicaciones de Instagram/Facebook</li>
-          <li>Página web actual (solo pegás el link o embedás el QR)</li>
-          <li>Tarjeta personal, firma de email o impreso en tu sala de espera</li>
-        </ul>
-        <p className="mt-2">Tus pacientes reservan 24/7 sin necesidad de llamarte.</p>
-      </>
-    ),
-  },
-  {
-    question: '¿Qué pasa si supero la cantidad de citas del plan que elegí?',
-    answer: (
-      <>
-        No te preocupes: seguís recibiendo citas normalmente. Solo pagás un pequeño costo extra por
-        cada recordatorio que exceda el límite mensual (desde USD 0.25 en Básico hasta USD 0.15 en Premium).
-        Podés subir de plan en cualquier momento con un clic, sin perder nada.
-      </>
-    ),
-  },
-  {
-    question: '¿Es seguro usar Agendux con mis datos y los de mis pacientes?',
-    answer: (
-      <>
-        Sí, totalmente. Usamos la <strong>API oficial de WhatsApp Business</strong> (de Meta), cumplimos con
-        las leyes de protección de datos de Argentina y RGPD. No almacenamos mensajes ni datos sensibles
-        más allá de lo necesario para la agenda. Tu número y el de tus pacientes están protegidos y nunca se comparten.
-      </>
-    ),
-  },
-  {
-    question: '¿Puedo cancelar la suscripción cuando quiera?',
-    answer: (
-      <>
-        Sí, en cualquier momento desde tu panel. No hay penalidades ni compromisos de permanencia.
-        Además, ofrecemos <strong>14 días de prueba completamente gratis</strong> (sin tarjeta).
-      </>
-    ),
-  },
-  {
-    question: '¿Funciona con mi Google Calendar actual?',
-    answer: (
-      <>
-        Sí, y muy bien. La sincronización es <strong>bidireccional y en tiempo real</strong>: si alguien
-        agenda por Agendux, se refleja en tu Google Calendar al instante, y viceversa. Evitás doble
-        turnos o conflictos sin esfuerzo.
-      </>
-    ),
-  },
-  {
-    question: '¿Necesito instalar alguna app o programa?',
-    answer: (
-      <>
-        No. Todo se maneja desde el navegador (celular, tablet o computadora). No hay descargas ni
-        instalaciones. Solo entrás a tu cuenta en agendux.com y listo.
-      </>
-    ),
-  },
-  {
-    question: '¿Puedo personalizar los mensajes de confirmación y recordatorio?',
-    answer: (
-      <>
-        Sí. Podés editar el texto, agregar tu nombre, logo, dirección o cualquier detalle de tu
-        consulta/negocio. Los mensajes son <strong>100% personalizables</strong> para que suenen como vos.
-      </>
-    ),
-  },
-];
+// RULE: All data through Redux - useSelector reads data
+// RULE: NO direct API calls from components
+// RULE: Routing via useNavigation only (no Link/a tags)
 
 const FAQSection = () => {
+  const navigate = useNavigate();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const { content } = useAppSelector((state) => state.siteContent);
+  const faqs = content?.faqs || [];
 
   const toggleFAQ = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -115,7 +34,7 @@ const FAQSection = () => {
         <div className="space-y-3">
           {faqs.map((faq, index) => (
             <div
-              key={index}
+              key={faq.id}
               className="bg-white rounded-md shadow-sm overflow-hidden"
             >
               {/* Question Header */}
@@ -152,9 +71,12 @@ const FAQSection = () => {
         {/* Bottom Text */}
         <p className="mt-10 text-center text-sm text-gray-500">
           ¿Tenés otra pregunta?{' '}
-          <a href="/dudas" className="text-blue-600 hover:underline">
+          <span
+            onClick={() => navigate('/dudas')}
+            className="text-blue-600 hover:underline cursor-pointer"
+          >
             Escribinos
-          </a>{' '}
+          </span>{' '}
           y te respondemos a la brevedad.
         </p>
       </div>
