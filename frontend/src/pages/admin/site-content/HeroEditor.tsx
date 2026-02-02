@@ -47,7 +47,7 @@ const HeroEditor = () => {
         El Hero es la primera sección que ven los visitantes en la landing page.
       </p>
 
-      <div className="space-y-4">
+      <div className="flex flex-col gap-6">
         <TextField
           fullWidth
           label="Título Principal"

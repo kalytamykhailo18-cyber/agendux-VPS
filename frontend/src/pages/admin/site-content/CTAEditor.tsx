@@ -47,7 +47,7 @@ const CTAEditor = () => {
         diseñada para convertir visitantes en usuarios.
       </p>
 
-      <div className="space-y-4">
+      <div className="flex flex-col gap-6">
         <TextField
           fullWidth
           label="Título"

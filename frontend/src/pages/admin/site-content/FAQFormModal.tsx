@@ -68,7 +68,7 @@ const FAQFormModal = ({ open, onClose, faq }: FAQFormModalProps) => {
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>{isEditing ? 'Editar Pregunta' : 'Nueva Pregunta'}</DialogTitle>
       <DialogContent>
-        <div className="space-y-4 pt-2">
+        <div className="flex flex-col gap-6 pt-4">
           <TextField
             fullWidth
             label="Pregunta"

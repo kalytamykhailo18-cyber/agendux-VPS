@@ -91,7 +91,7 @@ const FeatureFormModal = ({ open, onClose, feature }: FeatureFormModalProps) => 
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>{isEditing ? 'Editar Feature' : 'Nuevo Feature'}</DialogTitle>
       <DialogContent>
-        <div className="space-y-4 pt-2">
+        <div className="flex flex-col gap-6 pt-4">
           <FormControl fullWidth>
             <InputLabel>Ícono</InputLabel>
             <Select
