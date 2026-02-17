@@ -8,60 +8,15 @@ import { updateCalendarEvent } from './google-calendar.service';
 type MessageTemplateType = 'BOOKING_CONFIRMATION' | 'REMINDER' | 'CANCELLATION';
 
 // ============================================
-// META WHATSAPP CLOUD API CONFIGURATION
-// Direct integration with Meta's WhatsApp Business API
+// TWILIO CONTENT TEMPLATE SIDs (Approved by Meta)
 // ============================================
 
-const META_WHATSAPP_PHONE_ID = process.env.META_WHATSAPP_PHONE_ID || '';
-const META_WHATSAPP_ACCESS_TOKEN = process.env.META_WHATSAPP_ACCESS_TOKEN || '';
-const META_WHATSAPP_API_VERSION = 'v18.0';
-
-// Check if Meta WhatsApp Cloud API is configured
-const isMetaConfigured = (): boolean => {
-  return META_WHATSAPP_PHONE_ID.length > 0 && META_WHATSAPP_ACCESS_TOKEN.length > 0;
+const CONTENT_SIDS = {
+  BOOKING_CONFIRMATION: 'HXbf96cafbb9f104f66c047f5fcfa1a741',
+  REMINDER: 'HXdef65ad838708d0915a13c846690a32b',
+  CANCELLATION: 'HXb9109c8d3f94b52638c1af7c17520530',
+  RECONFIRMATION: 'HX5fd4c9cb0b219ed6c00d8d11f05387b4'
 };
-
-// Send message via Meta WhatsApp Cloud API
-async function sendViaMetaApi(to: string, message: string): Promise<boolean> {
-  try {
-    // Format phone number (remove + and non-digits)
-    const phoneNumber = to.replace(/[^\d]/g, '');
-
-    const response = await fetch(
-      `https://graph.facebook.com/${META_WHATSAPP_API_VERSION}/${META_WHATSAPP_PHONE_ID}/messages`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${META_WHATSAPP_ACCESS_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          messaging_product: 'whatsapp',
-          recipient_type: 'individual',
-          to: phoneNumber,
-          type: 'text',
-          text: {
-            preview_url: false,
-            body: message
-          }
-        })
-      }
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      logger.error('Meta WhatsApp API error:', errorData);
-      return false;
-    }
-
-    const data = await response.json();
-    ServiceLogger.whatsapp('meta_message_sent', { to: phoneNumber, messageId: data.messages?.[0]?.id });
-    return true;
-  } catch (error) {
-    logger.error('Error sending via Meta WhatsApp API:', error);
-    return false;
-  }
-}
 
 // ============================================
 // TWILIO CONFIGURATION (Fallback)
@@ -187,7 +142,7 @@ function formatWhatsAppNumber(number: string): string {
 }
 
 // ============================================
-// SEND WHATSAPP MESSAGE
+// SEND WHATSAPP MESSAGE (plain text - for responses)
 // ============================================
 
 interface SendMessageParams {
@@ -197,19 +152,9 @@ interface SendMessageParams {
 
 export async function sendWhatsAppMessage({ to, message }: SendMessageParams): Promise<boolean> {
   try {
-    // Try Meta WhatsApp Cloud API first (preferred - no trial limits)
-    if (isMetaConfigured()) {
-      const success = await sendViaMetaApi(to, message);
-      if (success) {
-        return true;
-      }
-      logger.warn('Meta API failed, attempting Twilio fallback');
-    }
-
-    // Fallback to Twilio
     const client = getTwilioClient();
     if (!client) {
-      logger.warn('No WhatsApp provider configured - skipping message');
+      logger.warn('Twilio not configured - skipping message');
       return false;
     }
 
@@ -235,25 +180,20 @@ export async function sendWhatsAppMessage({ to, message }: SendMessageParams): P
 }
 
 // ============================================
-// SEND WHATSAPP MESSAGE WITH INTERACTIVE BUTTONS
-// Uses Twilio Content API for interactive templates
+// SEND WHATSAPP TEMPLATE MESSAGE (Content API)
 // ============================================
 
-interface SendInteractiveMessageParams {
+interface SendTemplateParams {
   to: string;
-  message: string;
-  buttons: { id: string; title: string }[];
+  contentSid: string;
+  contentVariables: Record<string, string>;
 }
 
-export async function sendWhatsAppInteractiveMessage({
-  to,
-  message,
-  buttons
-}: SendInteractiveMessageParams): Promise<boolean> {
+export async function sendWhatsAppTemplate({ to, contentSid, contentVariables }: SendTemplateParams): Promise<boolean> {
   try {
     const client = getTwilioClient();
     if (!client) {
-      logger.warn('Twilio not configured - skipping WhatsApp interactive message');
+      logger.warn('Twilio not configured - skipping template message');
       return false;
     }
 
@@ -264,22 +204,17 @@ export async function sendWhatsAppInteractiveMessage({
 
     const formattedTo = formatWhatsAppNumber(to);
 
-    // Create message with quick reply buttons using Twilio's persistent menu
-    // Note: For full interactive buttons, you need Twilio Content API templates
-    // This uses the simplified approach with action text
-    const buttonText = buttons.map(b => `- Responde "${b.title}" para ${b.id === 'confirm' ? 'CONFIRMAR' : 'CANCELAR'}`).join('\n');
-    const fullMessage = `${message}\n\n${buttonText}`;
-
     await client.messages.create({
-      body: fullMessage,
       from: `whatsapp:${TWILIO_WHATSAPP_NUMBER}`,
-      to: formattedTo
+      to: formattedTo,
+      contentSid,
+      contentVariables: JSON.stringify(contentVariables)
     });
 
-    ServiceLogger.whatsapp('interactive_message_sent', { to: formattedTo });
+    ServiceLogger.whatsapp('template_message_sent', { to: formattedTo, contentSid });
     return true;
   } catch (error) {
-    logger.error('Error sending WhatsApp interactive message', { error, to });
+    logger.error('Error sending WhatsApp template', { error, to, contentSid });
     return false;
   }
 }
@@ -318,26 +253,17 @@ export async function sendBookingConfirmation({ appointmentId }: BookingConfirma
     // SECURITY FIX: Decrypt patient whatsappNumber before sending
     const decryptedWhatsappNumber = decrypt(appointment.patient.whatsappNumber);
 
-    // Get template (custom or default)
-    const customTemplate = appointment.professional.messageTemplates[0];
-    const template = customTemplate?.messageText || DEFAULT_TEMPLATES.BOOKING_CONFIRMATION;
-
-    // Prepare variables
-    const variables: MessageVariables = {
-      patient_name: `${appointment.patient.firstName} ${appointment.patient.lastName}`,
-      professional_name: `${appointment.professional.firstName} ${appointment.professional.lastName}`,
-      date: formatDateForMessage(appointment.date, appointment.professional.timezone),
-      time: formatTimeForMessage(appointment.startTime, appointment.professional.timezone),
-      booking_reference: appointment.bookingReference
-    };
-
-    // Replace variables in template
-    const message = replaceVariables(template, variables);
-
-    // Send message
-    return await sendWhatsAppMessage({
+    // Send via approved Content Template
+    return await sendWhatsAppTemplate({
       to: decryptedWhatsappNumber,
-      message
+      contentSid: CONTENT_SIDS.BOOKING_CONFIRMATION,
+      contentVariables: {
+        '1': `${appointment.patient.firstName} ${appointment.patient.lastName}`,
+        '2': formatDateForMessage(appointment.date, appointment.professional.timezone),
+        '3': formatTimeForMessage(appointment.startTime, appointment.professional.timezone),
+        '4': `${appointment.professional.firstName} ${appointment.professional.lastName}`,
+        '5': appointment.bookingReference
+      }
     });
   } catch (error) {
     logger.error('Error sending booking confirmation', { error, appointmentId });
@@ -385,26 +311,16 @@ export async function sendReminder({ appointmentId }: SendReminderParams): Promi
     // SECURITY FIX: Decrypt patient whatsappNumber before sending
     const decryptedWhatsappNumber = decrypt(appointment.patient.whatsappNumber);
 
-    // Get template (custom or default)
-    const customTemplate = appointment.professional.messageTemplates[0];
-    const template = customTemplate?.messageText || DEFAULT_TEMPLATES.REMINDER;
-
-    // Prepare variables
-    const variables: MessageVariables = {
-      patient_name: `${appointment.patient.firstName} ${appointment.patient.lastName}`,
-      professional_name: `${appointment.professional.firstName} ${appointment.professional.lastName}`,
-      date: formatDateForMessage(appointment.date, appointment.professional.timezone),
-      time: formatTimeForMessage(appointment.startTime, appointment.professional.timezone),
-      booking_reference: appointment.bookingReference
-    };
-
-    // Replace variables in template
-    const message = replaceVariables(template, variables);
-
-    // Send message
-    const sent = await sendWhatsAppMessage({
+    // Send via approved Content Template
+    const sent = await sendWhatsAppTemplate({
       to: decryptedWhatsappNumber,
-      message
+      contentSid: CONTENT_SIDS.REMINDER,
+      contentVariables: {
+        '1': `${appointment.patient.firstName} ${appointment.patient.lastName}`,
+        '2': formatDateForMessage(appointment.date, appointment.professional.timezone),
+        '3': formatTimeForMessage(appointment.startTime, appointment.professional.timezone),
+        '4': `${appointment.professional.firstName} ${appointment.professional.lastName}`
+      }
     });
 
     // Update appointment status to REMINDER_SENT if still pending
@@ -456,26 +372,17 @@ export async function sendCancellationNotification({ appointmentId }: SendCancel
     // SECURITY FIX: Decrypt patient whatsappNumber before sending
     const decryptedWhatsappNumber = decrypt(appointment.patient.whatsappNumber);
 
-    // Get template (custom or default)
-    const customTemplate = appointment.professional.messageTemplates[0];
-    const template = customTemplate?.messageText || DEFAULT_TEMPLATES.CANCELLATION;
-
-    // Prepare variables
-    const variables: MessageVariables = {
-      patient_name: `${appointment.patient.firstName} ${appointment.patient.lastName}`,
-      professional_name: `${appointment.professional.firstName} ${appointment.professional.lastName}`,
-      date: formatDateForMessage(appointment.date, appointment.professional.timezone),
-      time: formatTimeForMessage(appointment.startTime, appointment.professional.timezone),
-      booking_reference: appointment.bookingReference
-    };
-
-    // Replace variables in template
-    const message = replaceVariables(template, variables);
-
-    // Send message
-    return await sendWhatsAppMessage({
+    // Send via approved Content Template
+    return await sendWhatsAppTemplate({
       to: decryptedWhatsappNumber,
-      message
+      contentSid: CONTENT_SIDS.CANCELLATION,
+      contentVariables: {
+        '1': `${appointment.patient.firstName} ${appointment.patient.lastName}`,
+        '2': formatDateForMessage(appointment.date, appointment.professional.timezone),
+        '3': formatTimeForMessage(appointment.startTime, appointment.professional.timezone),
+        '4': `${appointment.professional.firstName} ${appointment.professional.lastName}`,
+        '5': appointment.bookingReference
+      }
     });
   } catch (error) {
     logger.error('Error sending cancellation notification', { error, appointmentId });
@@ -664,10 +571,16 @@ export async function processIncomingMessage({ from, body }: IncomingMessagePara
         data: { status: 'CONFIRMED' }
       });
 
-      // Send confirmation response
-      await sendWhatsAppMessage({
+      // Send reconfirmation via approved Content Template
+      await sendWhatsAppTemplate({
         to: decryptedWhatsappNumber,
-        message: `¡Perfecto! Tu cita ha sido confirmada para el ${formatDateForMessage(appointment.date, appointment.professional.timezone)} a las ${formatTimeForMessage(appointment.startTime, appointment.professional.timezone)}. ¡Te esperamos!`
+        contentSid: CONTENT_SIDS.RECONFIRMATION,
+        contentVariables: {
+          '1': `${patient.firstName} ${patient.lastName}`,
+          '2': formatDateForMessage(appointment.date, appointment.professional.timezone),
+          '3': formatTimeForMessage(appointment.startTime, appointment.professional.timezone),
+          '4': `${appointment.professional.firstName} ${appointment.professional.lastName}`
+        }
       });
 
       return {
