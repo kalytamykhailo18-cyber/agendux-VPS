@@ -1,11 +1,16 @@
 import type { Request, Response } from 'express';
 import { logger } from '../utils/logger';
-import { sendWhatsAppMessage } from '../services/whatsapp.service';
+import { sendWhatsAppTemplate } from '../services/whatsapp.service';
 
 // ============================================
 // WHATSAPP DEMO
 // Public endpoint - sends demo message to phone number
+// Uses approved Content Template (WhatsApp Business API
+// requires templates for business-initiated messages)
 // ============================================
+
+// Demo template ContentSid (approved by Meta)
+const DEMO_CONTENT_SID = 'HX00f305cf702bfcc6fe2cc29f1cf693bf';
 
 export const sendWhatsAppDemo = async (req: Request, res: Response) => {
   try {
@@ -30,13 +35,11 @@ export const sendWhatsAppDemo = async (req: Request, res: Response) => {
     // Format full WhatsApp number
     const fullNumber = `${countryCode}${phoneNumber}`;
 
-    // Demo message content (exact as per requirements)
-    const message = `¡Hola! Este es un mensaje de ejemplo de Agendux. Así es como tus pacientes recibirán recordatorios automáticos de sus citas. 📅`;
-
-    // Send WhatsApp message
-    const sent = await sendWhatsAppMessage({
+    // Send WhatsApp demo via approved template (no variables - static content)
+    const sent = await sendWhatsAppTemplate({
       to: fullNumber,
-      message
+      contentSid: DEMO_CONTENT_SID,
+      contentVariables: {}
     });
 
     if (!sent) {
