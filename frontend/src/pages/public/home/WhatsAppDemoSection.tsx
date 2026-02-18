@@ -191,7 +191,7 @@ const WhatsAppDemoSection = () => {
                     👤 Profesional: Dr. García
                     <br />
                     <br />
-                    ¿Quieres automatizar tus citas? Regístrate en <strong>agendux.com</strong>
+                    ¿Querés automatizar tus citas? Registrate en agendux.com
                   </p>
                 </div>
               </div>
