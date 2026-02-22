@@ -52,15 +52,13 @@ const initialState: SiteContentState = {
 // Get all site content for landing page
 export const getSiteContent = createAsyncThunk(
   'siteContent/getSiteContent',
-  async (_, { dispatch, rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      dispatch(startLoading());
+      // No global spinner - landing page renders instantly with fallback defaults
       const response = await api.get('/site-content');
       return response.data.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Error al cargar contenido');
-    } finally {
-      dispatch(stopLoading());
     }
   }
 );

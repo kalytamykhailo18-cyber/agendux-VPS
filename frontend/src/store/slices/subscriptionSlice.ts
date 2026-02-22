@@ -38,15 +38,13 @@ const initialState: SubscriptionState = {
 // Get available plans
 export const getPlans = createAsyncThunk(
   'subscription/getPlans',
-  async (_, { dispatch, rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      dispatch(startLoading());
+      // No global spinner - used on landing page pricing section
       const response = await api.get('/subscription/plans');
       return response.data.plans;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Error al obtener planes');
-    } finally {
-      dispatch(stopLoading());
     }
   }
 );

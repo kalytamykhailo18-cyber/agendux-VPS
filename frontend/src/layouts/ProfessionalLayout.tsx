@@ -15,6 +15,7 @@ import ListAltIcon from '@mui/icons-material/ListAlt';
 import PaymentIcon from '@mui/icons-material/Payment';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import StarIcon from '@mui/icons-material/Star';
+import PersonIcon from '@mui/icons-material/Person';
 import { useAppDispatch, useAppSelector } from '../store';
 import { logout } from '../store/slices/authSlice';
 import GlobalLoadingSpinner from '../components/GlobalLoadingSpinner';
@@ -37,7 +38,8 @@ const navItems: NavItem[] = [
   { label: 'Formulario', path: '/professional/form-fields', icon: <ListAltIcon sx={{ fontSize: 20 }} /> },
   { label: 'Depósito', path: '/professional/deposit', icon: <PaymentIcon sx={{ fontSize: 20 }} /> },
   { label: 'Estadísticas', path: '/professional/statistics', icon: <BarChartIcon sx={{ fontSize: 20 }} /> },
-  { label: 'Suscripción', path: '/professional/subscription', icon: <StarIcon sx={{ fontSize: 20 }} /> }
+  { label: 'Suscripción', path: '/professional/subscription', icon: <StarIcon sx={{ fontSize: 20 }} /> },
+  { label: 'Mi Perfil', path: '/professional/profile', icon: <PersonIcon sx={{ fontSize: 20 }} /> }
 ];
 
 const ProfessionalLayout = () => {

@@ -60,6 +60,10 @@ model Professional {
   subscriptionId        String?
   subscription          Subscription?
 
+  // Address (for booking confirmation messages)
+  addressStreet         String?
+  addressCity           String?
+
   // Deposit settings
   depositEnabled        Boolean   @default(false)
   depositAmount         Decimal?  @db.Decimal(10, 2)

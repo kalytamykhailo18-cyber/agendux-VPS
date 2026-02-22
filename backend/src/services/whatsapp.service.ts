@@ -12,7 +12,7 @@ type MessageTemplateType = 'BOOKING_CONFIRMATION' | 'REMINDER' | 'CANCELLATION';
 // ============================================
 
 const CONTENT_SIDS = {
-  BOOKING_CONFIRMATION: 'HX98f2abd32e4379093f374c7e3425febf',
+  BOOKING_CONFIRMATION: 'HXe7be3e4acd05384a0fd6e3fb54813dab',
   REMINDER: 'HX260b563104019b45b8bca1318c689141',
   CANCELLATION: 'HXc37685eddfb69ca517755813446f4317',
   RECONFIRMATION: 'HX5dd7099f2136446cc3e05eb0d7c0ef09',
@@ -254,6 +254,17 @@ export async function sendBookingConfirmation({ appointmentId }: BookingConfirma
     // SECURITY FIX: Decrypt patient whatsappNumber before sending
     const decryptedWhatsappNumber = decrypt(appointment.patient.whatsappNumber);
 
+    // Build address string from professional's address fields
+    const addressParts = [
+      appointment.professional.addressStreet,
+      appointment.professional.addressCity
+    ].filter(Boolean);
+    const address = addressParts.length > 0 ? addressParts.join(', ') : 'A confirmar';
+
+    // Build cancel URL
+    const frontendUrl = process.env.FRONTEND_URL || 'https://agendux.com';
+    const cancelUrl = `${frontendUrl}/cancel?ref=${appointment.bookingReference}`;
+
     // Send via approved Content Template
     return await sendWhatsAppTemplate({
       to: decryptedWhatsappNumber,
@@ -263,7 +274,9 @@ export async function sendBookingConfirmation({ appointmentId }: BookingConfirma
         '2': formatDateForMessage(appointment.date, appointment.professional.timezone),
         '3': formatTimeForMessage(appointment.startTime, appointment.professional.timezone),
         '4': `${appointment.professional.firstName} ${appointment.professional.lastName}`,
-        '5': appointment.bookingReference
+        '5': appointment.bookingReference,
+        '6': address,
+        '7': cancelUrl
       }
     });
   } catch (error) {

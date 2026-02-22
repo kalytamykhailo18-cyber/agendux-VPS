@@ -68,15 +68,13 @@ const initialState: TestimonialState = {
 // Get public testimonials (for homepage)
 export const getPublicTestimonials = createAsyncThunk(
   'testimonial/getPublicTestimonials',
-  async (_, { dispatch, rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      dispatch(startLoading());
+      // No global spinner - landing page renders instantly, testimonials load silently
       const response = await api.get('/testimonials');
       return response.data.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Error al obtener testimonios');
-    } finally {
-      dispatch(stopLoading());
     }
   }
 );

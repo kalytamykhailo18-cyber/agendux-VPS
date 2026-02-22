@@ -1,54 +1,27 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Switch, CircularProgress } from '@mui/material';
+import { Button, Switch } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import StarIcon from '@mui/icons-material/Star';
-import api from '../../../config/api';
+import { useAppDispatch, useAppSelector } from '../../../store';
+import { getPlans } from '../../../store/slices/subscriptionSlice';
 
-interface Plan {
-  id: string;
-  name: string;
-  description: string;
-  monthlyPrice: number;
-  annualPrice: number;
-  features: string[];
-  displayOrder: number;
-}
+// RULE: All data through Redux - NO direct API calls from components
 
 const PricingSection = () => {
   const navigate = useNavigate();
-  const [plans, setPlans] = useState<Plan[]>([]);
+  const dispatch = useAppDispatch();
+  const { plans } = useAppSelector((state) => state.subscription);
   const [isAnnual, setIsAnnual] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPlans = async () => {
-      try {
-        const response = await api.get('/subscription/plans');
-        if (response.data.success) {
-          setPlans(response.data.plans);
-        }
-      } catch (error) {
-        console.error('Error fetching plans:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPlans();
-  }, []);
+    dispatch(getPlans());
+  }, [dispatch]);
 
   // Find the "recommended" plan (Plan Profesional or middle plan)
   const recommendedPlanIndex = plans.findIndex(p =>
     p.name.toLowerCase().includes('profesional')
   ) || Math.floor(plans.length / 2);
-
-  if (loading) {
-    return (
-      <div className="bg-white py-20 flex justify-center">
-        <CircularProgress />
-      </div>
-    );
-  }
 
   return (
     <div className="bg-white py-20">

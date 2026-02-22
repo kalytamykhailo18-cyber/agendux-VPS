@@ -19,6 +19,7 @@ import subscriptionReducer from './slices/subscriptionSlice';
 import statisticsReducer from './slices/statisticsSlice';
 import testimonialReducer from './slices/testimonialSlice';
 import siteContentReducer from './slices/siteContentSlice';
+import professionalProfileReducer from './slices/professionalProfileSlice';
 
 // Configure store
 export const store = configureStore({
@@ -38,7 +39,8 @@ export const store = configureStore({
     subscription: subscriptionReducer,
     statistics: statisticsReducer,
     testimonial: testimonialReducer,
-    siteContent: siteContentReducer
+    siteContent: siteContentReducer,
+    professionalProfile: professionalProfileReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

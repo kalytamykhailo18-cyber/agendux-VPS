@@ -44,6 +44,7 @@ const ProfessionalRemindersPage = lazy(() => import('../pages/professional/remin
 const ProfessionalTemplatesPage = lazy(() => import('../pages/professional/templates'));
 const ProfessionalSubscriptionPage = lazy(() => import('../pages/professional/subscription'));
 const ProfessionalStatisticsPage = lazy(() => import('../pages/professional/statistics'));
+const ProfessionalProfilePage = lazy(() => import('../pages/professional/profile'));
 
 // Admin pages (loaded when admin logs in)
 const AdminDashboardPage = lazy(() => import('../pages/admin/dashboard'));
@@ -214,6 +215,14 @@ const AppRoutes = () => {
           element={
             <Suspense fallback={<PageLoadingFallback />}>
               <ProfessionalSubscriptionPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/professional/profile"
+          element={
+            <Suspense fallback={<PageLoadingFallback />}>
+              <ProfessionalProfilePage />
             </Suspense>
           }
         />

@@ -11,6 +11,7 @@ import availabilityRoutes from './availability.routes';
 import blockedDatesRoutes from './blocked-dates.routes';
 import customFormFieldsRoutes from './custom-form-fields.routes';
 import depositSettingsRoutes from './deposit-settings.routes';
+import profileRoutes from './profile.routes';
 import publicBookingRoutes from './public-booking.routes';
 import appointmentRoutes from './appointment.routes';
 import professionalAppointmentsRoutes from './professional-appointments.routes';
@@ -43,6 +44,7 @@ export function configureRoutes(app: Application): void {
   app.use('/api/professional/blocked-dates', noCacheControl, blockedDatesRoutes);
   app.use('/api/professional/form-fields', noCacheControl, customFormFieldsRoutes);
   app.use('/api/professional/deposit-settings', noCacheControl, depositSettingsRoutes);
+  app.use('/api/professional/profile', noCacheControl, profileRoutes);
   app.use('/api/professional/appointments', noCacheControl, professionalAppointmentsRoutes);
   app.use('/api/professional/google-calendar', noCacheControl, googleCalendarRoutes);
   app.use('/api/professional/whatsapp', noCacheControl, whatsappRoutes);
