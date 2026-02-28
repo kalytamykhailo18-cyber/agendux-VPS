@@ -20,6 +20,21 @@ const DepositInfoSection = () => {
           <span>Una vez confirmado el pago, la cita queda reservada</span>
         </li>
       </ul>
+
+      <div className="mt-4 rounded-md bg-amber-50 border border-amber-200 p-3 fade-up-normal">
+        <h4 className="text-sm font-medium text-amber-800">Importante sobre el cobro de señas</h4>
+        <p className="mt-1 text-xs text-amber-700">
+          Los pagos de señas son procesados a través de la cuenta de Mercado Pago de Agendux.
+          Una vez acreditado el pago, Agendux se encargará de transferir el monto correspondiente
+          a su cuenta. Para consultas sobre transferencias, contacte a{' '}
+          <span
+            className="underline cursor-pointer hover:text-amber-900"
+            onClick={() => window.location.href = 'mailto:info@agendux.com'}
+          >
+            info@agendux.com
+          </span>.
+        </p>
+      </div>
     </div>
   );
 };

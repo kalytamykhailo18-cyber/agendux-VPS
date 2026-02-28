@@ -50,7 +50,7 @@ const WhatsAppDemoSection = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/demo/whatsapp`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/demo/whatsapp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -202,7 +202,7 @@ const WhatsAppDemoSection = () => {
                     <br />
                     Así es como tus pacientes recibirán recordatorios automáticos de sus citas:
                     <br />
-                    📅 Fecha: Lunes 20 de Enero, 2026
+                    📌 Fecha: Lunes 19 de Enero, 2026
                     <br />
                     🕐 Hora: 10:00
                     <br />
