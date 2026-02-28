@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { sendEmail } from '../services/email.service';
+import { sendWhatsAppMessage } from '../services/whatsapp.service';
 import { logger } from '../utils/logger';
 
 const router = Router();
@@ -71,11 +72,12 @@ router.post('/inquiry', async (req: Request, res: Response) => {
 
     const data = validationResult.data;
 
-    // Send email to info@agendux.com
+    // Send email to info@agendux.com with reply-to pointing to the sender
     const emailSent = await sendEmail({
       to: 'info@agendux.com',
       subject: `Nueva consulta de ${data.nombre} ${data.apellido}`,
       html: getContactInquiryHTML(data),
+      replyTo: data.email,
     });
 
     if (!emailSent) {
@@ -83,6 +85,21 @@ router.post('/inquiry', async (req: Request, res: Response) => {
       return res.status(500).json({
         success: false,
         message: 'Error al enviar el mensaje. Por favor intentá de nuevo.',
+      });
+    }
+
+    // Send WhatsApp notification to admin if configured
+    const adminWhatsApp = process.env.ADMIN_WHATSAPP_NUMBER;
+    if (adminWhatsApp) {
+      const whatsappMessage =
+        `📋 *Nueva consulta desde agendux.com*\n\n` +
+        `👤 *Nombre:* ${data.nombre} ${data.apellido}\n` +
+        `📱 *WhatsApp:* ${data.whatsapp}\n` +
+        `📧 *Email:* ${data.email}\n\n` +
+        `💬 *Pregunta:*\n${data.pregunta}`;
+
+      sendWhatsAppMessage({ to: adminWhatsApp, message: whatsappMessage }).catch(err => {
+        logger.warn('WhatsApp admin notification failed (non-blocking):', err?.message);
       });
     }
 

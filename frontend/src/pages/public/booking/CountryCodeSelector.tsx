@@ -2,6 +2,13 @@ import { useState, useRef, useEffect } from 'react';
 import { TextField, Button } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
+// Convert flag emoji to flagcdn.com image URL (works on all platforms including Windows)
+function getFlagUrl(flagEmoji: string): string {
+  const codePoints = [...flagEmoji].map(c => (c.codePointAt(0) ?? 0) - 0x1F1E6 + 65);
+  const iso = String.fromCharCode(...codePoints).toLowerCase();
+  return `https://flagcdn.com/w20/${iso}.png`;
+}
+
 interface CountryCodeSelectorProps {
   value: string;
   onChange: (code: string) => void;
@@ -265,7 +272,7 @@ const CountryCodeSelector = ({ value, onChange }: CountryCodeSelectorProps) => {
           },
         }}
       >
-        <span className="text-lg">{selectedCountry.flag}</span>
+        <img src={getFlagUrl(selectedCountry.flag)} alt={selectedCountry.country} width={20} height={15} style={{ objectFit: 'cover' }} />
         <span className="font-medium ml-1">{selectedCountry.code}</span>
         <KeyboardArrowDownIcon
           sx={{
@@ -317,7 +324,7 @@ const CountryCodeSelector = ({ value, onChange }: CountryCodeSelectorProps) => {
                     },
                   }}
                 >
-                  <span className="text-lg">{country.flag}</span>
+                  <img src={getFlagUrl(country.flag)} alt={country.country} width={20} height={15} style={{ objectFit: 'cover' }} />
                   <span className="flex-1 truncate text-left ml-2">{country.country}</span>
                   <span className="text-gray-500 text-sm">{country.code}</span>
                 </Button>

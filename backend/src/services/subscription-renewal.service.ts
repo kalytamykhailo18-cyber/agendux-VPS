@@ -1,6 +1,7 @@
 import prisma from '../config/database';
 import { logger, ServiceLogger } from '../utils/logger';
 import { createSubscriptionPreference, getRecurringSubscriptionStatus } from './mercadopago.service';
+import { sendPaymentFailedEmail, sendRenewalLinkEmail, sendSubscriptionCancelledEmail } from './email.service';
 
 // Worker state
 let isRunning = false;
@@ -171,6 +172,14 @@ async function handleSubscriptionRenewal(subscription: any) {
               where: { id: subscription.professionalId },
               data: { isActive: false }
             });
+
+            // Notify professional that their payment failed
+            await sendPaymentFailedEmail(
+              subscription.professional.user.email,
+              `${subscription.professional.firstName} ${subscription.professional.lastName}`,
+              subscription.plan.name,
+              `${process.env.FRONTEND_URL || 'https://agendux.com'}/professional/subscription`
+            );
             break;
 
           case 'cancelled':
@@ -219,8 +228,13 @@ async function handleSubscriptionRenewal(subscription: any) {
 
       ServiceLogger.subscription(`Professional ${subscription.professionalId} deactivated due to past-due subscription`);
 
-      // TODO: Send email notification to professional about payment failure
-      // This would integrate with the email service
+      // Notify professional that their payment failed and page is deactivated
+      await sendPaymentFailedEmail(
+        subscription.professional.user.email,
+        `${subscription.professional.firstName} ${subscription.professional.lastName}`,
+        subscription.plan.name,
+        `${process.env.FRONTEND_URL || 'https://agendux.com'}/professional/subscription`
+      );
 
       return;
     }
@@ -230,7 +244,7 @@ async function handleSubscriptionRenewal(subscription: any) {
 
     try {
       // Create Mercado Pago preference for manual renewal
-      await createSubscriptionPreference({
+      const preference = await createSubscriptionPreference({
         professionalId: subscription.professionalId,
         planId: subscription.planId,
         billingPeriod: subscription.billingPeriod,
@@ -240,8 +254,15 @@ async function handleSubscriptionRenewal(subscription: any) {
 
       ServiceLogger.subscription(`Manual renewal payment preference created for subscription ${subscription.id}`);
 
-      // TODO: Send email with payment link to professional
-      // This would integrate with the email service
+      // Send email with payment link to professional
+      const renewalUrl = preference.initPoint || `${process.env.FRONTEND_URL || 'https://agendux.com'}/professional/subscription`;
+      await sendRenewalLinkEmail(
+        subscription.professional.user.email,
+        `${subscription.professional.firstName} ${subscription.professional.lastName}`,
+        subscription.plan.name,
+        subscription.billingPeriod,
+        renewalUrl
+      );
 
     } catch (error) {
       logger.error(`Failed to create renewal payment for subscription ${subscription.id}:`, error);
@@ -276,7 +297,14 @@ async function handlePastDueSubscriptions() {
         }
       },
       include: {
-        professional: true
+        professional: {
+          include: {
+            user: {
+              select: { email: true, name: true }
+            }
+          }
+        },
+        plan: true
       },
       take: 50
     });
@@ -309,7 +337,12 @@ async function handlePastDueSubscriptions() {
 
         ServiceLogger.subscription(`Cancelled past-due subscription ${subscription.id} and deactivated professional ${subscription.professionalId}`);
 
-        // TODO: Send final cancellation email to professional
+        // Notify professional that their subscription was cancelled
+        await sendSubscriptionCancelledEmail(
+          subscription.professional.user.email,
+          `${subscription.professional.firstName} ${subscription.professional.lastName}`,
+          subscription.plan.name
+        );
 
       } catch (error) {
         logger.error(`Error cancelling past-due subscription ${subscription.id}:`, error);

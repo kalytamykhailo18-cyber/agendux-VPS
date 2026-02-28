@@ -136,6 +136,14 @@ const PublicLayout = () => {
           <p className="text-xs sm:text-sm text-gray-400">
             &copy; {new Date().getFullYear()} Agendux. Todos los derechos reservados.
           </p>
+          <p className="text-xs sm:text-sm text-gray-400 mt-2">
+            <span
+              className="hover:text-white cursor-pointer transition-colors"
+              onClick={() => window.location.href = 'mailto:info@agendux.com'}
+            >
+              info@agendux.com
+            </span>
+          </p>
         </div>
       </footer>
     </div>

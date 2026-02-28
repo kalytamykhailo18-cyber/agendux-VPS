@@ -2,6 +2,13 @@ import { useState } from 'react';
 import { Button, TextField, Select, MenuItem, FormControl, InputLabel, Alert } from '@mui/material';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 
+// Convert flag emoji to flagcdn.com image URL (works on all platforms including Windows)
+function getFlagUrl(flagEmoji: string): string {
+  const codePoints = [...flagEmoji].map(c => (c.codePointAt(0) ?? 0) - 0x1F1E6 + 65);
+  const iso = String.fromCharCode(...codePoints).toLowerCase();
+  return `https://flagcdn.com/w20/${iso}.png`;
+}
+
 // Country codes with flags
 const COUNTRY_CODES = [
   { code: '+54', country: 'Argentina', flag: '🇦🇷' },
@@ -110,11 +117,22 @@ const WhatsAppDemoSection = () => {
                     value={countryCode}
                     onChange={(e) => setCountryCode(e.target.value)}
                     label="País"
+                    renderValue={(selected) => {
+                      const country = COUNTRY_CODES.find(c => c.code === selected);
+                      if (!country) return selected;
+                      return (
+                        <span className="flex items-center gap-2">
+                          <img src={getFlagUrl(country.flag)} alt={country.country} width={20} height={15} style={{ objectFit: 'cover' }} />
+                          <span>{country.country}</span>
+                          <span className="text-gray-500">({country.code})</span>
+                        </span>
+                      );
+                    }}
                   >
                     {COUNTRY_CODES.map((country) => (
                       <MenuItem key={country.code} value={country.code}>
                         <span className="flex items-center gap-2">
-                          <span>{country.flag}</span>
+                          <img src={getFlagUrl(country.flag)} alt={country.country} width={20} height={15} style={{ objectFit: 'cover' }} />
                           <span>{country.country}</span>
                           <span className="text-gray-500">({country.code})</span>
                         </span>

@@ -150,6 +150,130 @@ function getCancellationHTML(variables: EmailVariables): string {
 `;
 }
 
+function getPaymentFailedHTML(professionalName: string, planName: string, renewalUrl: string): string {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Problema con el pago de tu suscripcion</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background-color: #fef2f2; padding: 30px; border-radius: 10px;">
+    <h1 style="color: #dc2626; margin-bottom: 20px;">Problema con tu suscripcion</h1>
+
+    <p>Hola <strong>${professionalName}</strong>,</p>
+
+    <p>No pudimos procesar el pago de tu suscripcion <strong>${planName}</strong>. Como resultado, tu pagina de turnos ha sido desactivada temporalmente.</p>
+
+    <div style="background-color: #fff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626;">
+      <p style="margin: 5px 0;"><strong>Estado:</strong> Pago fallido</p>
+      <p style="margin: 5px 0;"><strong>Plan:</strong> ${planName}</p>
+    </div>
+
+    <p>Para reactivar tu cuenta y volver a recibir turnos, podes renovar tu suscripcion haciendo click en el boton de abajo:</p>
+
+    <p style="text-align: center; margin: 30px 0;">
+      <a href="${renewalUrl}" style="background-color: #dc2626; color: #fff; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Renovar suscripcion</a>
+    </p>
+
+    <p style="color: #666; font-size: 14px;">
+      Si tenes algun problema o preguntas, no dudes en contactarnos.
+    </p>
+
+    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+
+    <p style="color: #999; font-size: 12px; margin: 0;">
+      Este es un mensaje automatico de Agendux. Por favor no respondas a este email.
+    </p>
+  </div>
+</body>
+</html>
+`;
+}
+
+function getRenewalLinkHTML(professionalName: string, planName: string, billingPeriod: string, renewalUrl: string): string {
+  const periodLabel = billingPeriod === 'ANNUAL' ? 'anual' : 'mensual';
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tu suscripcion esta por vencer</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background-color: #fef3c7; padding: 30px; border-radius: 10px;">
+    <h1 style="color: #d97706; margin-bottom: 20px;">Tu suscripcion esta por vencer</h1>
+
+    <p>Hola <strong>${professionalName}</strong>,</p>
+
+    <p>Tu suscripcion <strong>${planName}</strong> (${periodLabel}) esta proxima a vencer. Para continuar recibiendo turnos sin interrupciones, renova tu suscripcion antes de que expire.</p>
+
+    <div style="background-color: #fff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #d97706;">
+      <p style="margin: 5px 0;"><strong>Plan:</strong> ${planName}</p>
+      <p style="margin: 5px 0;"><strong>Periodo:</strong> ${periodLabel}</p>
+    </div>
+
+    <p style="text-align: center; margin: 30px 0;">
+      <a href="${renewalUrl}" style="background-color: #d97706; color: #fff; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Renovar ahora</a>
+    </p>
+
+    <p style="color: #666; font-size: 14px;">
+      Si no renovas tu suscripcion, tu pagina de turnos sera desactivada automaticamente.
+    </p>
+
+    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+
+    <p style="color: #999; font-size: 12px; margin: 0;">
+      Este es un mensaje automatico de Agendux. Por favor no respondas a este email.
+    </p>
+  </div>
+</body>
+</html>
+`;
+}
+
+function getSubscriptionCancelledHTML(professionalName: string, planName: string): string {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tu suscripcion fue cancelada</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background-color: #f3f4f6; padding: 30px; border-radius: 10px;">
+    <h1 style="color: #374151; margin-bottom: 20px;">Suscripcion cancelada</h1>
+
+    <p>Hola <strong>${professionalName}</strong>,</p>
+
+    <p>Tu suscripcion <strong>${planName}</strong> ha sido cancelada debido a falta de pago. Tu pagina de turnos permanece desactivada.</p>
+
+    <div style="background-color: #fff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #374151;">
+      <p style="margin: 5px 0;"><strong>Estado:</strong> Cancelada</p>
+      <p style="margin: 5px 0;"><strong>Plan:</strong> ${planName}</p>
+    </div>
+
+    <p>Si deseas volver a usar Agendux, podes suscribirte nuevamente desde tu panel de profesional.</p>
+
+    <p style="color: #666; font-size: 14px;">
+      Si crees que esto es un error o necesitas ayuda, contactanos.
+    </p>
+
+    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+
+    <p style="color: #999; font-size: 12px; margin: 0;">
+      Este es un mensaje automatico de Agendux. Por favor no respondas a este email.
+    </p>
+  </div>
+</body>
+</html>
+`;
+}
+
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
@@ -183,9 +307,10 @@ interface SendEmailParams {
   to: string;
   subject: string;
   html: string;
+  replyTo?: string;
 }
 
-export async function sendEmail({ to, subject, html }: SendEmailParams): Promise<boolean> {
+export async function sendEmail({ to, subject, html, replyTo }: SendEmailParams): Promise<boolean> {
   try {
     if (!resend) {
       logger.info('Email service not configured (RESEND_API_KEY missing). Skipping email.');
@@ -196,7 +321,8 @@ export async function sendEmail({ to, subject, html }: SendEmailParams): Promise
       from: EMAIL_FROM,
       to,
       subject,
-      html
+      html,
+      ...(replyTo ? { reply_to: replyTo } : {})
     });
 
     logger.info(`Email sent to ${to}: ${subject}`);
@@ -357,6 +483,64 @@ export async function sendCancellationEmail({ appointmentId }: SendCancellationE
     });
   } catch (error) {
     logger.error('Error sending cancellation email', { error, appointmentId });
+    return false;
+  }
+}
+
+// ============================================
+// SUBSCRIPTION NOTIFICATION EMAILS (to professionals)
+// ============================================
+
+export async function sendPaymentFailedEmail(
+  professionalEmail: string,
+  professionalName: string,
+  planName: string,
+  renewalUrl: string
+): Promise<boolean> {
+  try {
+    return await sendEmail({
+      to: professionalEmail,
+      subject: 'Problema con el pago de tu suscripcion Agendux',
+      html: getPaymentFailedHTML(professionalName, planName, renewalUrl)
+    });
+  } catch (error) {
+    logger.error('Error sending payment failed email', { error, professionalEmail });
+    return false;
+  }
+}
+
+export async function sendRenewalLinkEmail(
+  professionalEmail: string,
+  professionalName: string,
+  planName: string,
+  billingPeriod: string,
+  renewalUrl: string
+): Promise<boolean> {
+  try {
+    return await sendEmail({
+      to: professionalEmail,
+      subject: 'Tu suscripcion Agendux esta por vencer - Renova ahora',
+      html: getRenewalLinkHTML(professionalName, planName, billingPeriod, renewalUrl)
+    });
+  } catch (error) {
+    logger.error('Error sending renewal link email', { error, professionalEmail });
+    return false;
+  }
+}
+
+export async function sendSubscriptionCancelledEmail(
+  professionalEmail: string,
+  professionalName: string,
+  planName: string
+): Promise<boolean> {
+  try {
+    return await sendEmail({
+      to: professionalEmail,
+      subject: 'Tu suscripcion Agendux ha sido cancelada',
+      html: getSubscriptionCancelledHTML(professionalName, planName)
+    });
+  } catch (error) {
+    logger.error('Error sending subscription cancelled email', { error, professionalEmail });
     return false;
   }
 }

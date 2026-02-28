@@ -81,6 +81,7 @@ export async function createRecurringSubscription({
         reason: `Suscripción ${plan.name} - ${periodLabel}`,
         payer_email: email,
         back_url: `${FRONTEND_URL}/professional/subscription?status=success`,
+        notification_url: `${BACKEND_URL}/api/webhooks/mercadopago`,
         auto_recurring: {
           frequency: billingPeriod === 'MONTHLY' ? 1 : 12,
           frequency_type: 'months',

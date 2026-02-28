@@ -561,6 +561,11 @@ export async function processIncomingMessage({ from, body }: IncomingMessagePara
     });
 
     if (!patient || patient.appointments.length === 0) {
+      // Send a helpful reply so the patient gets feedback
+      await sendWhatsAppMessage({
+        to: cleanNumber,
+        message: 'No encontramos una cita pendiente asociada a este número. Si creés que es un error, contactá directamente al profesional.'
+      });
       return {
         success: false,
         action: 'UNKNOWN',
@@ -580,9 +585,17 @@ export async function processIncomingMessage({ from, body }: IncomingMessagePara
 
     if (confirmKeywords.some(keyword => normalizedBody.includes(keyword))) {
       // Confirm the appointment
-      await prisma.appointment.update({
+      const confirmedAppointment = await prisma.appointment.update({
         where: { id: appointment.id },
         data: { status: 'CONFIRMED' }
+      });
+
+      // Notify professional dashboard in real-time
+      emitToProfessional(appointment.professionalId, WebSocketEvent.APPOINTMENT_UPDATED, {
+        appointmentId: confirmedAppointment.id,
+        bookingReference: confirmedAppointment.bookingReference,
+        status: confirmedAppointment.status,
+        confirmedVia: 'whatsapp'
       });
 
       // Send reconfirmation via approved Content Template
