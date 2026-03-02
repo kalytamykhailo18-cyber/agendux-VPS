@@ -202,7 +202,7 @@ const WhatsAppDemoSection = () => {
                     <br />
                     Así es como tus pacientes recibirán recordatorios automáticos de sus citas:
                     <br />
-                    📌 Fecha: Lunes 19 de Enero, 2026
+                    📌 Fecha: Lunes 19 de Enero de 2026 
                     <br />
                     🕐 Hora: 10:00
                     <br />

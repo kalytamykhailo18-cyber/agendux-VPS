@@ -169,6 +169,8 @@ export const getBookingPageData = async (req: Request, res: Response) => {
       },
       availability: {
         appointmentDuration: settings?.appointmentDuration || 30,
+        minBookingAdvanceHours: settings?.minBookingAdvanceHours ?? 0,
+        maxBookingAdvanceDays: settings?.maxBookingAdvanceDays ?? 60,
         slots: availabilities
       },
       blockedDates: blockedDates.map((bd) => bd.date.toISOString().split('T')[0]),
@@ -244,6 +246,35 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
         isSuspended: true
       }
     });
+
+    // Validate booking advance window
+    if (professional) {
+      const advanceSettings = await prisma.professionalSettings.findUnique({
+        where: { professionalId: professional.id },
+        select: { minBookingAdvanceHours: true, maxBookingAdvanceDays: true }
+      });
+
+      if (advanceSettings) {
+        const now = new Date();
+        const minDate = new Date(now.getTime() + advanceSettings.minBookingAdvanceHours * 60 * 60 * 1000);
+        minDate.setHours(0, 0, 0, 0);
+        const maxDate = new Date(today.getTime() + advanceSettings.maxBookingAdvanceDays * 24 * 60 * 60 * 1000);
+
+        if (selectedDate < minDate) {
+          return res.status(400).json({
+            success: false,
+            error: 'La fecha seleccionada no cumple con la anticipación mínima requerida'
+          });
+        }
+
+        if (selectedDate > maxDate) {
+          return res.status(400).json({
+            success: false,
+            error: 'La fecha seleccionada excede el período máximo de anticipación'
+          });
+        }
+      }
+    }
 
     if (!professional || !professional.isActive || professional.isSuspended) {
       return res.status(404).json({
@@ -379,7 +410,7 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
         // Check if slot is already booked by an appointment
         const isBookedByAppointment = existingAppointments.some((apt) => {
           const aptStartTime = apt.startTime instanceof Date
-            ? `${apt.startTime.getHours().toString().padStart(2, '0')}:${apt.startTime.getMinutes().toString().padStart(2, '0')}`
+            ? `${apt.startTime.getUTCHours().toString().padStart(2, '0')}:${apt.startTime.getUTCMinutes().toString().padStart(2, '0')}`
             : String(apt.startTime).substring(0, 5);
           return aptStartTime === slotStart;
         });

@@ -367,13 +367,14 @@ export const createAppointment = async (req: Request, res: Response) => {
       status: result.appointment.status
     });
 
-    // Format response
-    const appointmentDate2 = new Date(date);
+    // Format response — use noon UTC to avoid timezone day shift
+    const appointmentDate2 = new Date(`${date}T12:00:00Z`);
     const formattedDate = appointmentDate2.toLocaleDateString('es-AR', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
+      timeZone: 'UTC'
     });
 
     return res.status(201).json({
@@ -494,17 +495,21 @@ export const getAppointmentByReference = async (req: Request, res: Response) => 
       }
     }
 
-    // Format date for display
-    const formattedDate = appointment.date.toLocaleDateString('es-AR', {
+    // Format date for display — use noon UTC to avoid timezone day shift
+    const dateForDisplay = new Date(Date.UTC(
+      appointment.date.getUTCFullYear(), appointment.date.getUTCMonth(), appointment.date.getUTCDate(), 12, 0, 0
+    ));
+    const formattedDate = dateForDisplay.toLocaleDateString('es-AR', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
+      timeZone: 'UTC'
     });
 
-    // Format time for display
+    // Format time for display — use UTC to get stored local time
     const startTime = appointment.startTime instanceof Date
-      ? `${appointment.startTime.getHours().toString().padStart(2, '0')}:${appointment.startTime.getMinutes().toString().padStart(2, '0')}`
+      ? `${appointment.startTime.getUTCHours().toString().padStart(2, '0')}:${appointment.startTime.getUTCMinutes().toString().padStart(2, '0')}`
       : String(appointment.startTime).substring(0, 5);
 
     return res.json({
@@ -521,7 +526,7 @@ export const getAppointmentByReference = async (req: Request, res: Response) => 
         patient: {
           firstName: appointment.patient.firstName,
           lastName: appointment.patient.lastName,
-          email: appointment.patient.email
+          email: decrypt(appointment.patient.email)
         },
         canCancel: ['PENDING', 'PENDING_PAYMENT', 'REMINDER_SENT', 'CONFIRMED'].includes(
           appointment.status

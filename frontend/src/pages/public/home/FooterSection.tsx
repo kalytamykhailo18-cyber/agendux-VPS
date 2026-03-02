@@ -1,4 +1,8 @@
+import { useNavigate } from 'react-router-dom';
+
 const FooterSection = () => {
+  const navigate = useNavigate();
+
   return (
     <footer className="bg-gray-900 py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -12,6 +16,14 @@ const FooterSection = () => {
             />
           </div>
           <p className="fade-down-fast">&copy; 2026 Agendux. Todos los derechos reservados.</p>
+          <p className="mt-2 text-sm fade-up-fast">
+            <span
+              className="hover:text-white cursor-pointer transition-colors"
+              onClick={() => navigate('/privacidad')}
+            >
+              Política de Privacidad
+            </span>
+          </p>
         </div>
       </div>
     </footer>

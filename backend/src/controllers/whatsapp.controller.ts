@@ -147,7 +147,8 @@ export const getTemplates = async (req: Request, res: Response) => {
           { key: '{professional_name}', description: 'Nombre del profesional' },
           { key: '{date}', description: 'Fecha de la cita' },
           { key: '{time}', description: 'Hora de la cita' },
-          { key: '{booking_reference}', description: 'Código de referencia de la reserva' }
+          { key: '{booking_reference}', description: 'Código de referencia de la reserva' },
+          { key: '{address}', description: 'Dirección del consultorio' }
         ]
       }
     });

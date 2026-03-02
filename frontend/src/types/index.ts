@@ -428,6 +428,8 @@ export interface BookingPageData {
   availability: {
     appointmentDuration: number;
     slots: BookingAvailabilitySlot[];
+    minBookingAdvanceHours: number;
+    maxBookingAdvanceDays: number;
   };
   blockedDates: string[];
   deposit: {

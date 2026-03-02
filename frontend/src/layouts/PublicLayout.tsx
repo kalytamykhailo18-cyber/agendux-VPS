@@ -143,6 +143,13 @@ const PublicLayout = () => {
             >
               info@agendux.com
             </span>
+            <span className="mx-2">·</span>
+            <span
+              className="hover:text-white cursor-pointer transition-colors"
+              onClick={() => navigate('/privacidad')}
+            >
+              Política de Privacidad
+            </span>
           </p>
         </div>
       </footer>

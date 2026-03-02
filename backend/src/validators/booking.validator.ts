@@ -74,7 +74,12 @@ export const createBookingSchema = z.object({
  * Cancel booking validation
  */
 export const cancelBookingSchema = z.object({
-  cancellationReason: z
+  email: z
+    .string()
+    .email('Invalid email format')
+    .max(255, 'Email too long')
+    .transform(val => val.toLowerCase().trim()),
+  reason: z
     .string()
     .max(500, 'Reason too long')
     .optional()

@@ -122,11 +122,11 @@ export const getAppointments = async (req: AuthRequest, res: Response) => {
         date: apt.date.toISOString().split('T')[0],
         startTime:
           apt.startTime instanceof Date
-            ? `${apt.startTime.getHours().toString().padStart(2, '0')}:${apt.startTime.getMinutes().toString().padStart(2, '0')}`
+            ? `${apt.startTime.getUTCHours().toString().padStart(2, '0')}:${apt.startTime.getUTCMinutes().toString().padStart(2, '0')}`
             : String(apt.startTime).substring(0, 5),
         endTime:
           apt.endTime instanceof Date
-            ? `${apt.endTime.getHours().toString().padStart(2, '0')}:${apt.endTime.getMinutes().toString().padStart(2, '0')}`
+            ? `${apt.endTime.getUTCHours().toString().padStart(2, '0')}:${apt.endTime.getUTCMinutes().toString().padStart(2, '0')}`
             : String(apt.endTime).substring(0, 5),
         status: apt.status,
         patient: {
@@ -247,11 +247,11 @@ export const getAppointmentById = async (req: AuthRequest, res: Response) => {
       date: appointment.date.toISOString().split('T')[0],
       startTime:
         appointment.startTime instanceof Date
-          ? `${appointment.startTime.getHours().toString().padStart(2, '0')}:${appointment.startTime.getMinutes().toString().padStart(2, '0')}`
+          ? `${appointment.startTime.getUTCHours().toString().padStart(2, '0')}:${appointment.startTime.getUTCMinutes().toString().padStart(2, '0')}`
           : String(appointment.startTime).substring(0, 5),
       endTime:
         appointment.endTime instanceof Date
-          ? `${appointment.endTime.getHours().toString().padStart(2, '0')}:${appointment.endTime.getMinutes().toString().padStart(2, '0')}`
+          ? `${appointment.endTime.getUTCHours().toString().padStart(2, '0')}:${appointment.endTime.getUTCMinutes().toString().padStart(2, '0')}`
           : String(appointment.endTime).substring(0, 5),
       status: appointment.status,
       patient: {
@@ -630,7 +630,7 @@ export const getAppointmentsSummary = async (req: AuthRequest, res: Response) =>
       bookingReference: apt.bookingReference,
       time:
         apt.startTime instanceof Date
-          ? `${apt.startTime.getHours().toString().padStart(2, '0')}:${apt.startTime.getMinutes().toString().padStart(2, '0')}`
+          ? `${apt.startTime.getUTCHours().toString().padStart(2, '0')}:${apt.startTime.getUTCMinutes().toString().padStart(2, '0')}`
           : String(apt.startTime).substring(0, 5),
       patientName: `${apt.patient.firstName} ${apt.patient.lastName}`,
       status: apt.status

@@ -210,7 +210,9 @@ model ProfessionalSettings {
   id                    String    @id @default(uuid())
   professionalId        String    @unique
 
-  appointmentDuration   Int       @default(30) // in minutes (5-180 in 5-minute increments)
+  appointmentDuration       Int       @default(30) // in minutes (5-180 in 5-minute increments)
+  minBookingAdvanceHours    Int       @default(0)  // 0 = same day allowed
+  maxBookingAdvanceDays     Int       @default(60) // max days ahead patients can book
 
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt

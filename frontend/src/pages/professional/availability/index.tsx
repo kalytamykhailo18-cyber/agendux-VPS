@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from '../../../store';
 import { getAvailability, saveAvailability, clearError } from '../../../store/slices/availabilitySlice';
 import AvailabilityHeader from './AvailabilityHeader';
 import DurationSelector from './DurationSelector';
+import BookingAdvanceSelector from './BookingAdvanceSelector';
 import DayCard, { type DayConfig } from './DayCard';
 import HelpSection from './HelpSection';
 
@@ -27,14 +28,21 @@ const DAYS_OF_WEEK = [
 
 const AvailabilityPage = () => {
   const dispatch = useAppDispatch();
-  const { availabilities, appointmentDuration: savedDuration, error } = useAppSelector(
-    (state) => state.availability
-  );
+  const {
+    availabilities,
+    appointmentDuration: savedDuration,
+    minBookingAdvanceHours: savedMinAdvance,
+    maxBookingAdvanceDays: savedMaxAdvance,
+    error
+  } = useAppSelector((state) => state.availability);
 
   // Local state for form
   const [days, setDays] = useState<DayConfig[]>([]);
   const [duration, setDuration] = useState(30);
+  const [minAdvanceHours, setMinAdvanceHours] = useState(0);
+  const [maxAdvanceDays, setMaxAdvanceDays] = useState(60);
   const [saveMessage, setSaveMessage] = useState('');
+  const [hasChanges, setHasChanges] = useState(false);
 
   // Initialize days configuration
   const initializeDays = useCallback(() => {
@@ -58,7 +66,10 @@ const AvailabilityPage = () => {
 
     setDays(initialDays);
     setDuration(savedDuration || 30);
-  }, [availabilities, savedDuration]);
+    setMinAdvanceHours(savedMinAdvance ?? 0);
+    setMaxAdvanceDays(savedMaxAdvance ?? 60);
+    setHasChanges(false);
+  }, [availabilities, savedDuration, savedMinAdvance, savedMaxAdvance]);
 
   // Load availability on mount
   useEffect(() => {
@@ -87,6 +98,7 @@ const AvailabilityPage = () => {
       )
     );
     setSaveMessage('');
+    setHasChanges(true);
   };
 
   // Update slot time
@@ -108,6 +120,7 @@ const AvailabilityPage = () => {
       })
     );
     setSaveMessage('');
+    setHasChanges(true);
   };
 
   // Add new slot to a day
@@ -123,6 +136,7 @@ const AvailabilityPage = () => {
       })
     );
     setSaveMessage('');
+    setHasChanges(true);
   };
 
   // Remove slot from a day
@@ -138,12 +152,14 @@ const AvailabilityPage = () => {
       })
     );
     setSaveMessage('');
+    setHasChanges(true);
   };
 
   // Handle duration change
   const handleDurationChange = (newDuration: number) => {
     setDuration(newDuration);
     setSaveMessage('');
+    setHasChanges(true);
   };
 
   // Handle save
@@ -176,12 +192,15 @@ const AvailabilityPage = () => {
     const result = await dispatch(
       saveAvailability({
         availabilities: availabilityData,
-        appointmentDuration: duration
+        appointmentDuration: duration,
+        minBookingAdvanceHours: minAdvanceHours,
+        maxBookingAdvanceDays: maxAdvanceDays
       })
     );
 
     if (saveAvailability.fulfilled.match(result)) {
       setSaveMessage('Disponibilidad guardada correctamente');
+      setHasChanges(false);
     }
   };
 
@@ -192,6 +211,14 @@ const AvailabilityPage = () => {
 
       {/* Duration Selector Section */}
       <DurationSelector duration={duration} onDurationChange={handleDurationChange} />
+
+      {/* Booking Advance Selector */}
+      <BookingAdvanceSelector
+        minAdvanceHours={minAdvanceHours}
+        maxAdvanceDays={maxAdvanceDays}
+        onMinChange={(v) => { setMinAdvanceHours(v); setSaveMessage(''); setHasChanges(true); }}
+        onMaxChange={(v) => { setMaxAdvanceDays(v); setSaveMessage(''); setHasChanges(true); }}
+      />
 
       {/* Days Configuration Section */}
       <div className="space-y-4">
@@ -221,6 +248,7 @@ const AvailabilityPage = () => {
           variant="contained"
           color="primary"
           onClick={handleSave}
+          disabled={!hasChanges}
           startIcon={<SaveIcon />}
           className="zoom-in-fast"
         >

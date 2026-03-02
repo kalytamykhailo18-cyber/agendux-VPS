@@ -278,25 +278,27 @@ function getSubscriptionCancelledHTML(professionalName: string, planName: string
 // HELPER FUNCTIONS
 // ============================================
 
-function formatDateForEmail(date: Date | string, timezone: string): string {
+function formatDateForEmail(date: Date | string): string {
+  // PostgreSQL DATE comes as midnight UTC (e.g. 2026-03-02T00:00:00.000Z)
+  // Use UTC components to avoid timezone shift (UTC-3 would show previous day)
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return dateObj.toLocaleDateString('es-AR', {
+  const utcDate = new Date(Date.UTC(dateObj.getUTCFullYear(), dateObj.getUTCMonth(), dateObj.getUTCDate(), 12, 0, 0));
+  return utcDate.toLocaleDateString('es-AR', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
-    timeZone: timezone
+    timeZone: 'UTC'
   });
 }
 
-function formatTimeForEmail(time: Date | string, timezone: string): string {
+function formatTimeForEmail(time: Date | string): string {
+  // PostgreSQL TIME comes as UTC (e.g. 1970-01-01T14:30:00.000Z)
+  // The stored time IS already the professional's local time, don't convert
   const timeObj = typeof time === 'string' ? new Date(`2000-01-01T${time}`) : time;
-  return timeObj.toLocaleTimeString('es-AR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-    timeZone: timezone
-  });
+  const hours = timeObj.getUTCHours().toString().padStart(2, '0');
+  const minutes = timeObj.getUTCMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
 }
 
 // ============================================
@@ -365,8 +367,8 @@ export async function sendBookingConfirmationEmail({ appointmentId }: BookingCon
     const variables: EmailVariables = {
       patient_name: `${appointment.patient.firstName} ${appointment.patient.lastName}`,
       professional_name: `${appointment.professional.firstName} ${appointment.professional.lastName}`,
-      date: formatDateForEmail(appointment.date, appointment.professional.timezone),
-      time: formatTimeForEmail(appointment.startTime, appointment.professional.timezone),
+      date: formatDateForEmail(appointment.date),
+      time: formatTimeForEmail(appointment.startTime),
       booking_reference: appointment.bookingReference,
       cancel_url: `${frontendUrl}/cancel?ref=${appointment.bookingReference}`
     };
@@ -421,8 +423,8 @@ export async function sendReminderEmail({ appointmentId }: SendReminderEmailPara
     const variables: EmailVariables = {
       patient_name: `${appointment.patient.firstName} ${appointment.patient.lastName}`,
       professional_name: `${appointment.professional.firstName} ${appointment.professional.lastName}`,
-      date: formatDateForEmail(appointment.date, appointment.professional.timezone),
-      time: formatTimeForEmail(appointment.startTime, appointment.professional.timezone),
+      date: formatDateForEmail(appointment.date),
+      time: formatTimeForEmail(appointment.startTime),
       booking_reference: appointment.bookingReference,
       cancel_url: `${frontendUrl}/cancel?ref=${appointment.bookingReference}`
     };
@@ -470,8 +472,8 @@ export async function sendCancellationEmail({ appointmentId }: SendCancellationE
     const variables: EmailVariables = {
       patient_name: `${appointment.patient.firstName} ${appointment.patient.lastName}`,
       professional_name: `${appointment.professional.firstName} ${appointment.professional.lastName}`,
-      date: formatDateForEmail(appointment.date, appointment.professional.timezone),
-      time: formatTimeForEmail(appointment.startTime, appointment.professional.timezone),
+      date: formatDateForEmail(appointment.date),
+      time: formatTimeForEmail(appointment.startTime),
       booking_reference: appointment.bookingReference
     };
 

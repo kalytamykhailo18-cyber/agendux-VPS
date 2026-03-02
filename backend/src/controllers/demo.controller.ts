@@ -10,7 +10,7 @@ import { sendWhatsAppTemplate } from '../services/whatsapp.service';
 // ============================================
 
 // Demo template ContentSid (approved by Meta)
-const DEMO_CONTENT_SID = 'HX00f305cf702bfcc6fe2cc29f1cf693bf';
+const DEMO_CONTENT_SID = 'HX296e100ba8578ddf18811446db0d52fa';
 
 export const sendWhatsAppDemo = async (req: Request, res: Response) => {
   try {

@@ -16,7 +16,7 @@ const CONTENT_SIDS = {
   REMINDER: 'HX260b563104019b45b8bca1318c689141',
   CANCELLATION: 'HXc37685eddfb69ca517755813446f4317',
   RECONFIRMATION: 'HX5dd7099f2136446cc3e05eb0d7c0ef09',
-  DEMO: 'HX00f305cf702bfcc6fe2cc29f1cf693bf'
+  DEMO: 'HX296e100ba8578ddf18811446db0d52fa'
 };
 
 // ============================================
@@ -59,6 +59,7 @@ const DEFAULT_TEMPLATES = {
 Fecha: {date}
 Hora: {time}
 Profesional: {professional_name}
+Dirección: {address}
 Referencia: {booking_reference}
 
 Recibirás un recordatorio antes de tu cita.`,
@@ -69,6 +70,7 @@ Recibirás un recordatorio antes de tu cita.`,
 Fecha: {date}
 Hora: {time}
 Profesional: {professional_name}
+Dirección: {address}
 
 *Para confirmar tu asistencia responde:* SI o CONFIRMO
 *Para cancelar tu cita responde:* NO o CANCELAR
@@ -81,6 +83,7 @@ Tu respuesta nos ayuda a gestionar mejor los turnos.`,
 Fecha: {date}
 Hora: {time}
 Profesional: {professional_name}
+Dirección: {address}
 Referencia: {booking_reference}
 
 Si deseas reprogramar, puedes hacerlo en línea en cualquier momento.`
@@ -96,6 +99,7 @@ interface MessageVariables {
   date: string;
   time: string;
   booking_reference: string;
+  address: string;
 }
 
 function replaceVariables(template: string, variables: MessageVariables): string {
@@ -105,28 +109,31 @@ function replaceVariables(template: string, variables: MessageVariables): string
   message = message.replace(/{date}/g, variables.date);
   message = message.replace(/{time}/g, variables.time);
   message = message.replace(/{booking_reference}/g, variables.booking_reference);
+  message = message.replace(/{address}/g, variables.address);
   return message;
 }
 
-function formatDateForMessage(date: Date | string, timezone: string): string {
+function formatDateForMessage(date: Date | string): string {
+  // PostgreSQL DATE comes as midnight UTC (e.g. 2026-03-02T00:00:00.000Z)
+  // Use UTC components to avoid timezone shift (UTC-3 would show previous day)
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return dateObj.toLocaleDateString('es-AR', {
+  const utcDate = new Date(Date.UTC(dateObj.getUTCFullYear(), dateObj.getUTCMonth(), dateObj.getUTCDate(), 12, 0, 0));
+  return utcDate.toLocaleDateString('es-AR', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
-    timeZone: timezone
+    timeZone: 'UTC'
   });
 }
 
-function formatTimeForMessage(time: Date | string, timezone: string): string {
+function formatTimeForMessage(time: Date | string): string {
+  // PostgreSQL TIME comes as UTC (e.g. 1970-01-01T14:30:00.000Z)
+  // The stored time IS already the professional's local time, don't convert
   const timeObj = typeof time === 'string' ? new Date(`2000-01-01T${time}`) : time;
-  return timeObj.toLocaleTimeString('es-AR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-    timeZone: timezone
-  });
+  const hours = timeObj.getUTCHours().toString().padStart(2, '0');
+  const minutes = timeObj.getUTCMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
 }
 
 // Format WhatsApp number to E.164 format
@@ -271,8 +278,8 @@ export async function sendBookingConfirmation({ appointmentId }: BookingConfirma
       contentSid: CONTENT_SIDS.BOOKING_CONFIRMATION,
       contentVariables: {
         '1': `${appointment.patient.firstName} ${appointment.patient.lastName}`,
-        '2': formatDateForMessage(appointment.date, appointment.professional.timezone),
-        '3': formatTimeForMessage(appointment.startTime, appointment.professional.timezone),
+        '2': formatDateForMessage(appointment.date),
+        '3': formatTimeForMessage(appointment.startTime),
         '4': `${appointment.professional.firstName} ${appointment.professional.lastName}`,
         '5': appointment.bookingReference,
         '6': address,
@@ -331,8 +338,8 @@ export async function sendReminder({ appointmentId }: SendReminderParams): Promi
       contentSid: CONTENT_SIDS.REMINDER,
       contentVariables: {
         '1': `${appointment.patient.firstName} ${appointment.patient.lastName}`,
-        '2': formatDateForMessage(appointment.date, appointment.professional.timezone),
-        '3': formatTimeForMessage(appointment.startTime, appointment.professional.timezone),
+        '2': formatDateForMessage(appointment.date),
+        '3': formatTimeForMessage(appointment.startTime),
         '4': `${appointment.professional.firstName} ${appointment.professional.lastName}`
       }
     });
@@ -392,8 +399,8 @@ export async function sendCancellationNotification({ appointmentId }: SendCancel
       contentSid: CONTENT_SIDS.CANCELLATION,
       contentVariables: {
         '1': `${appointment.patient.firstName} ${appointment.patient.lastName}`,
-        '2': formatDateForMessage(appointment.date, appointment.professional.timezone),
-        '3': formatTimeForMessage(appointment.startTime, appointment.professional.timezone),
+        '2': formatDateForMessage(appointment.date),
+        '3': formatTimeForMessage(appointment.startTime),
         '4': `${appointment.professional.firstName} ${appointment.professional.lastName}`,
         '5': appointment.bookingReference
       }
@@ -457,14 +464,14 @@ export async function scheduleRemindersForAppointment({
 
       // Handle night-before option for early morning appointments
       if (setting.enableNightBefore) {
-        const appointmentHour = appointmentDateTime.getHours();
+        const appointmentHour = appointmentDateTime.getUTCHours();
 
         // If appointment is before 10 AM and reminder would be very early (before 7 AM)
-        if (appointmentHour < 10 && reminderTime.getHours() < 7) {
+        if (appointmentHour < 10 && reminderTime.getUTCHours() < 7) {
           // Send reminder the night before at 20:00 (8 PM)
           reminderTime = new Date(appointmentDateTime);
-          reminderTime.setDate(reminderTime.getDate() - 1);
-          reminderTime.setHours(20, 0, 0, 0);
+          reminderTime.setUTCDate(reminderTime.getUTCDate() - 1);
+          reminderTime.setUTCHours(20, 0, 0, 0);
         }
       }
 
@@ -487,7 +494,7 @@ export async function scheduleRemindersForAppointment({
 function combineDateTime(date: Date, time: Date): Date {
   const combined = new Date(date);
   const timeDate = new Date(time);
-  combined.setHours(timeDate.getHours(), timeDate.getMinutes(), 0, 0);
+  combined.setUTCHours(timeDate.getUTCHours(), timeDate.getUTCMinutes(), 0, 0);
   return combined;
 }
 
@@ -604,8 +611,8 @@ export async function processIncomingMessage({ from, body }: IncomingMessagePara
         contentSid: CONTENT_SIDS.RECONFIRMATION,
         contentVariables: {
           '1': `${patient.firstName} ${patient.lastName}`,
-          '2': formatDateForMessage(appointment.date, appointment.professional.timezone),
-          '3': formatTimeForMessage(appointment.startTime, appointment.professional.timezone),
+          '2': formatDateForMessage(appointment.date),
+          '3': formatTimeForMessage(appointment.startTime),
           '4': `${appointment.professional.firstName} ${appointment.professional.lastName}`
         }
       });
@@ -662,7 +669,7 @@ export async function processIncomingMessage({ from, body }: IncomingMessagePara
       // Send cancellation response
       await sendWhatsAppMessage({
         to: decryptedWhatsappNumber,
-        message: `Tu cita del ${formatDateForMessage(appointment.date, appointment.professional.timezone)} ha sido cancelada. Si deseas reprogramar, puedes hacerlo en línea.`
+        message: `Tu cita del ${formatDateForMessage(appointment.date)} ha sido cancelada. Si deseas reprogramar, puedes hacerlo en línea.`
       });
 
       return {

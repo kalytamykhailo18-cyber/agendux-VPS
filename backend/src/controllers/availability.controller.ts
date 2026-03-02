@@ -66,7 +66,9 @@ export const getAvailability = async (req: AuthRequest, res: Response) => {
       success: true,
       data: {
         availabilities,
-        appointmentDuration: settings.appointmentDuration
+        appointmentDuration: settings.appointmentDuration,
+        minBookingAdvanceHours: settings.minBookingAdvanceHours,
+        maxBookingAdvanceDays: settings.maxBookingAdvanceDays
       }
     });
   } catch (error) {
@@ -82,7 +84,7 @@ export const getAvailability = async (req: AuthRequest, res: Response) => {
 export const saveAvailability = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
-    const { availabilities, appointmentDuration } = req.body;
+    const { availabilities, appointmentDuration, minBookingAdvanceHours, maxBookingAdvanceDays } = req.body;
 
     if (!userId) {
       return res.status(401).json({
@@ -202,17 +204,20 @@ export const saveAvailability = async (req: AuthRequest, res: Response) => {
         });
       }
 
-      // Update appointment duration if provided
-      if (appointmentDuration) {
+      // Update settings if provided
+      const settingsUpdate: Record<string, number> = {};
+      if (appointmentDuration) settingsUpdate.appointmentDuration = appointmentDuration;
+      if (minBookingAdvanceHours !== undefined) settingsUpdate.minBookingAdvanceHours = minBookingAdvanceHours;
+      if (maxBookingAdvanceDays !== undefined) settingsUpdate.maxBookingAdvanceDays = maxBookingAdvanceDays;
+
+      if (Object.keys(settingsUpdate).length > 0) {
         await tx.professionalSettings.upsert({
           where: { professionalId: professional.id },
           create: {
             professionalId: professional.id,
-            appointmentDuration
+            ...settingsUpdate
           },
-          update: {
-            appointmentDuration
-          }
+          update: settingsUpdate
         });
       }
     });
@@ -245,7 +250,9 @@ export const saveAvailability = async (req: AuthRequest, res: Response) => {
       message: 'Disponibilidad guardada correctamente',
       data: {
         availabilities: updatedAvailabilities,
-        appointmentDuration: settings?.appointmentDuration || 30
+        appointmentDuration: settings?.appointmentDuration || 30,
+        minBookingAdvanceHours: settings?.minBookingAdvanceHours ?? 0,
+        maxBookingAdvanceDays: settings?.maxBookingAdvanceDays ?? 60
       }
     });
   } catch (error) {

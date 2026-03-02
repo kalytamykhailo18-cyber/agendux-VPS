@@ -280,6 +280,8 @@ const BookingPage = () => {
             availabilitySlots={pageData.availability.slots}
             blockedDates={pageData.blockedDates}
             timezone={pageData.professional.timezone}
+            minBookingAdvanceHours={pageData.availability.minBookingAdvanceHours}
+            maxBookingAdvanceDays={pageData.availability.maxBookingAdvanceDays}
           />
         </div>
 

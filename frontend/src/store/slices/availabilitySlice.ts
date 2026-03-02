@@ -9,6 +9,8 @@ import { startLoading, stopLoading } from './loadingSlice';
 interface AvailabilityState {
   availabilities: Availability[];
   appointmentDuration: number;
+  minBookingAdvanceHours: number;
+  maxBookingAdvanceDays: number;
   error: string | null;
   lastFetched: number | null;
 }
@@ -16,6 +18,8 @@ interface AvailabilityState {
 interface AvailabilityResponse {
   availabilities: Availability[];
   appointmentDuration: number;
+  minBookingAdvanceHours: number;
+  maxBookingAdvanceDays: number;
 }
 
 interface SaveAvailabilityRequest {
@@ -26,11 +30,15 @@ interface SaveAvailabilityRequest {
     endTime: string;
   }[];
   appointmentDuration: number;
+  minBookingAdvanceHours: number;
+  maxBookingAdvanceDays: number;
 }
 
 const initialState: AvailabilityState = {
   availabilities: [],
   appointmentDuration: 30,
+  minBookingAdvanceHours: 0,
+  maxBookingAdvanceDays: 60,
   error: null,
   lastFetched: null
 };
@@ -103,6 +111,8 @@ const availabilitySlice = createSlice({
       .addCase(getAvailability.fulfilled, (state, action: PayloadAction<AvailabilityResponse>) => {
         state.availabilities = action.payload.availabilities;
         state.appointmentDuration = action.payload.appointmentDuration;
+        state.minBookingAdvanceHours = action.payload.minBookingAdvanceHours ?? 0;
+        state.maxBookingAdvanceDays = action.payload.maxBookingAdvanceDays ?? 60;
         state.error = null;
         state.lastFetched = Date.now();
       })
@@ -115,6 +125,8 @@ const availabilitySlice = createSlice({
       .addCase(saveAvailability.fulfilled, (state, action: PayloadAction<AvailabilityResponse>) => {
         state.availabilities = action.payload.availabilities;
         state.appointmentDuration = action.payload.appointmentDuration;
+        state.minBookingAdvanceHours = action.payload.minBookingAdvanceHours ?? 0;
+        state.maxBookingAdvanceDays = action.payload.maxBookingAdvanceDays ?? 60;
         state.error = null;
         state.lastFetched = Date.now();
       })

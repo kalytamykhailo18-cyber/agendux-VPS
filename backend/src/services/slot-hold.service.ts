@@ -237,7 +237,7 @@ export async function getHeldSlotsForDate(params: GetHoldsParams): Promise<HeldS
 
     return holds.map((hold) => ({
       startTime: hold.startTime instanceof Date
-        ? `${hold.startTime.getHours().toString().padStart(2, '0')}:${hold.startTime.getMinutes().toString().padStart(2, '0')}`
+        ? `${hold.startTime.getUTCHours().toString().padStart(2, '0')}:${hold.startTime.getUTCMinutes().toString().padStart(2, '0')}`
         : String(hold.startTime).substring(0, 5),
       isHeldByCurrentSession: sessionId ? hold.sessionId === sessionId : false
     }));

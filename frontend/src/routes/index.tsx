@@ -28,6 +28,7 @@ const HomePage = lazy(() => import('../pages/public/home'));
 const BookingPage = lazy(() => import('../pages/public/booking'));
 const CancelBookingPage = lazy(() => import('../pages/public/cancel'));
 const DudasPage = lazy(() => import('../pages/public/dudas'));
+const PrivacyPage = lazy(() => import('../pages/public/privacy'));
 
 // Login pages
 const AdminLoginPage = lazy(() => import('../pages/admin/login'));
@@ -124,6 +125,14 @@ const AppRoutes = () => {
           element={
             <Suspense fallback={<PageLoadingFallback />}>
               <DudasPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/privacidad"
+          element={
+            <Suspense fallback={<PageLoadingFallback />}>
+              <PrivacyPage />
             </Suspense>
           }
         />
