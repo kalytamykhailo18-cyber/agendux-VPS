@@ -415,7 +415,7 @@ const ProfessionalDetailModal = ({ professionalId, onClose }: ProfessionalDetail
                       <div>
                         <p className="text-xs text-gray-500">Monto del Depósito</p>
                         <p className="text-sm font-medium text-gray-900">
-                          ${selectedProfessional.depositSettings.depositAmount} USD
+                          ${selectedProfessional.depositSettings.depositAmount?.toLocaleString('es-AR')} ARS
                         </p>
                       </div>
                     )}

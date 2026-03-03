@@ -57,6 +57,29 @@ interface DepositPaymentPreference {
   currency: string;
 }
 
+// Appointment details fetched by reference (for deposit confirmation page)
+interface AppointmentByRef {
+  bookingReference: string;
+  status: string;
+  date: string;
+  time: string;
+  professional: {
+    fullName: string;
+    slug: string;
+  };
+  patient: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  canCancel: boolean;
+  deposit: {
+    required: boolean;
+    amount: number | null;
+    paid: boolean;
+  };
+}
+
 interface PublicBookingState {
   pageData: BookingPageData | null;
   selectedDate: string | null;
@@ -72,6 +95,9 @@ interface PublicBookingState {
   sessionId: string;
   currentHold: { holdId: string; expiresAt: string } | null;
   holdError: string | null;
+  // Deposit confirmation page state
+  appointmentByRef: AppointmentByRef | null;
+  appointmentByRefError: string | null;
 }
 
 // Generate a unique session ID for this booking session
@@ -93,7 +119,10 @@ const initialState: PublicBookingState = {
   // Slot hold state (Requirement 10.1)
   sessionId: generateSessionId(),
   currentHold: null,
-  holdError: null
+  holdError: null,
+  // Deposit confirmation page state
+  appointmentByRef: null,
+  appointmentByRefError: null
 };
 
 // Get booking page data by professional slug
@@ -214,6 +243,38 @@ export const createDepositPayment = createAsyncThunk<
     } catch (error: unknown) {
       const err = error as { response?: { data?: { error?: string } } };
       const message = err.response?.data?.error || 'Error al crear el pago';
+      return rejectWithValue(message);
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
+// Fetch appointment by booking reference (for deposit confirmation page)
+export const fetchAppointmentByRef = createAsyncThunk<
+  AppointmentByRef,
+  string,
+  { rejectValue: string }
+>(
+  'publicBooking/fetchAppointmentByRef',
+  async (reference, { dispatch, rejectWithValue }) => {
+    try {
+      dispatch(startLoading());
+      const response = await api.get<ApiResponse<AppointmentByRef>>(
+        `/appointments/reference/${reference}`
+      );
+
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+
+      return rejectWithValue(response.data.error || 'Error al obtener la reserva');
+    } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { error?: string } } };
+      if (err.response?.status === 404) {
+        return rejectWithValue('NOT_FOUND');
+      }
+      const message = err.response?.data?.error || 'Error al obtener la reserva';
       return rejectWithValue(message);
     } finally {
       dispatch(stopLoading());
@@ -361,6 +422,10 @@ const publicBookingSlice = createSlice({
     },
     clearDepositPaymentPreference: (state) => {
       state.depositPaymentPreference = null;
+    },
+    clearAppointmentByRef: (state) => {
+      state.appointmentByRef = null;
+      state.appointmentByRefError = null;
     }
   },
   extraReducers: (builder) => {
@@ -434,6 +499,16 @@ const publicBookingSlice = createSlice({
       .addCase(refreshAvailableSlots.fulfilled, (state, action: PayloadAction<AvailableSlotsData>) => {
         state.availableSlots = action.payload;
       });
+
+    // Fetch appointment by reference (deposit confirmation page)
+    builder
+      .addCase(fetchAppointmentByRef.fulfilled, (state, action: PayloadAction<AppointmentByRef>) => {
+        state.appointmentByRef = action.payload;
+        state.appointmentByRefError = null;
+      })
+      .addCase(fetchAppointmentByRef.rejected, (state, action) => {
+        state.appointmentByRefError = action.payload || 'Error al obtener la reserva';
+      });
   }
 });
 
@@ -446,6 +521,7 @@ export const {
   resetBookingForm,
   clearHoldError,
   clearDepositPaymentError,
-  clearDepositPaymentPreference
+  clearDepositPaymentPreference,
+  clearAppointmentByRef
 } = publicBookingSlice.actions;
 export default publicBookingSlice.reducer;

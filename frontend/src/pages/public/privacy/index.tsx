@@ -6,7 +6,7 @@ const PrivacyPage = () => {
           Política de Privacidad
         </h1>
         <p className="text-sm text-gray-500 mb-8 fade-up-fast">
-          Última actualización: febrero 2026
+          Última actualización: marzo 2026
         </p>
 
         <div className="space-y-6 text-sm sm:text-base text-gray-700 leading-relaxed">
@@ -74,7 +74,10 @@ const PrivacyPage = () => {
                 <h3 className="font-semibold text-gray-800">Google Calendar</h3>
                 <p className="text-gray-600">
                   Sincronización bidireccional de citas cuando el profesional conecta su cuenta de
-                  Google. Solo se comparten datos de las citas (fecha, hora, nombre del paciente).
+                  Google. Accedemos a los eventos del calendario para evitar superposición de turnos
+                  y creamos eventos para las citas reservadas a través de Agendux. Solo se comparten
+                  datos de las citas (fecha, hora, nombre del paciente, referencia de reserva).
+                  Para más detalles, consulta la sección &quot;Uso de datos de Google API&quot; a continuación.
                 </p>
               </div>
               <div>
@@ -121,10 +124,74 @@ const PrivacyPage = () => {
             </ul>
           </section>
 
-          {/* 5. Derechos del usuario */}
+          {/* 5. Uso de datos de Google API */}
           <section className="fade-left-normal">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
-              5. Tus derechos
+              5. Uso de datos de Google API
+            </h2>
+            <p className="mb-3">
+              Agendux ofrece integración opcional con Google Calendar para profesionales. Al conectar
+              tu cuenta de Google, aceptás que Agendux acceda a la siguiente información:
+            </p>
+
+            <h3 className="font-semibold text-gray-800 mt-3 mb-1">Datos que accedemos</h3>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Eventos de tu Google Calendar (fecha, hora, título) para verificar disponibilidad y evitar superposición de turnos</li>
+              <li>Creación, actualización y cancelación de eventos en tu calendario correspondientes a citas reservadas a través de Agendux</li>
+            </ul>
+
+            <h3 className="font-semibold text-gray-800 mt-3 mb-1">Cómo usamos estos datos</h3>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Para sincronizar citas entre Agendux y tu Google Calendar</li>
+              <li>Para bloquear automáticamente los horarios que ya tenés ocupados en tu calendario</li>
+              <li>Para reflejar en tu Google Calendar las citas nuevas, confirmadas o canceladas</li>
+            </ul>
+
+            <h3 className="font-semibold text-gray-800 mt-3 mb-1">Almacenamiento y seguridad</h3>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Las credenciales de acceso a Google (tokens) se almacenan encriptadas con algoritmo AES-256-GCM en nuestros servidores</li>
+              <li>No almacenamos el contenido completo de tus eventos personales; solo los horarios de inicio y fin para verificar disponibilidad</li>
+              <li>Los datos de Google no se comparten con terceros ni se utilizan con fines publicitarios</li>
+            </ul>
+
+            <h3 className="font-semibold text-gray-800 mt-3 mb-1">Revocación del acceso</h3>
+            <p className="mb-2">
+              Podés desconectar tu cuenta de Google en cualquier momento desde la sección
+              &quot;Google Calendar&quot; en tu panel de profesional. Al desconectar:
+            </p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Se eliminan las credenciales de acceso almacenadas</li>
+              <li>Agendux deja de acceder a tu Google Calendar</li>
+              <li>Los eventos previamente creados por Agendux en tu calendario permanecen (podés eliminarlos manualmente)</li>
+            </ul>
+            <p className="mt-2">
+              También podés revocar el acceso desde tu cuenta de Google en{' '}
+              <span
+                className="text-blue-600 hover:underline cursor-pointer"
+                onClick={() => window.open('https://myaccount.google.com/permissions', '_blank')}
+              >
+                myaccount.google.com/permissions
+              </span>.
+            </p>
+
+            <h3 className="font-semibold text-gray-800 mt-3 mb-1">Cumplimiento de políticas de Google</h3>
+            <p>
+              El uso y la transferencia de información recibida de las APIs de Google por parte de
+              Agendux se adhiere a la{' '}
+              <span
+                className="text-blue-600 hover:underline cursor-pointer"
+                onClick={() => window.open('https://developers.google.com/terms/api-services-user-data-policy', '_blank')}
+              >
+                Política de Datos de Usuario de los Servicios de API de Google
+              </span>
+              , incluyendo los requisitos de Uso Limitado (Limited Use).
+            </p>
+          </section>
+
+          {/* 6. Derechos del usuario */}
+          <section className="fade-left-normal">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
+              6. Tus derechos
             </h2>
             <p className="mb-2">
               De acuerdo con la Ley de Protección de Datos Personales (Ley 25.326), tenés derecho a:
@@ -146,10 +213,10 @@ const PrivacyPage = () => {
             </p>
           </section>
 
-          {/* 6. Cookies */}
+          {/* 7. Cookies */}
           <section className="fade-right-normal">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
-              6. Cookies y almacenamiento local
+              7. Cookies y almacenamiento local
             </h2>
             <p>
               Agendux utiliza almacenamiento local del navegador (localStorage) para mantener tu
@@ -158,10 +225,10 @@ const PrivacyPage = () => {
             </p>
           </section>
 
-          {/* 7. Retención de datos */}
+          {/* 8. Retención de datos */}
           <section className="fade-left-normal">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
-              7. Retención de datos
+              8. Retención de datos
             </h2>
             <p>
               Conservamos los datos personales mientras la cuenta del profesional esté activa y
@@ -171,10 +238,10 @@ const PrivacyPage = () => {
             </p>
           </section>
 
-          {/* 8. Cambios */}
+          {/* 9. Cambios */}
           <section className="fade-right-normal">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
-              8. Cambios a esta política
+              9. Cambios a esta política
             </h2>
             <p>
               Podemos actualizar esta política de privacidad periódicamente. Cualquier cambio
@@ -183,10 +250,10 @@ const PrivacyPage = () => {
             </p>
           </section>
 
-          {/* 9. Contacto */}
+          {/* 10. Contacto */}
           <section className="fade-left-normal">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
-              9. Contacto
+              10. Contacto
             </h2>
             <p>
               Si tenés preguntas o inquietudes sobre esta política de privacidad o el tratamiento

@@ -78,7 +78,7 @@ const PlanFormModal = ({
                 <TextField
                   fullWidth
                   type="number"
-                  label="Precio Mensual (USD) *"
+                  label="Precio Mensual (ARS) *"
                   value={formData.monthlyPrice}
                   onChange={(e) => onFormChange({ monthlyPrice: Number(e.target.value) })}
                   inputProps={{ min: 0 }}
@@ -89,7 +89,7 @@ const PlanFormModal = ({
                 <TextField
                   fullWidth
                   type="number"
-                  label="Precio Anual (USD) *"
+                  label="Precio Anual (ARS) *"
                   value={formData.annualPrice}
                   onChange={(e) => onFormChange({ annualPrice: Number(e.target.value) })}
                   inputProps={{ min: 0 }}

@@ -107,8 +107,7 @@ const PricingSection = () => {
                     </div>
                   ) : (
                     <div className="flex items-baseline">
-                      <span className="text-sm">USD</span>
-                      <span className="text-3xl font-bold mx-1">${price}</span>
+                      <span className="text-3xl font-bold mx-1">${price.toLocaleString('es-AR')}</span>
                       <span className={`text-sm ${isRecommended ? 'text-blue-100' : 'text-gray-500'}`}>
                         /{isAnnual ? 'año' : 'mes'}
                       </span>

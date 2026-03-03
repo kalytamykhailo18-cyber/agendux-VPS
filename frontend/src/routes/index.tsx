@@ -29,6 +29,7 @@ const BookingPage = lazy(() => import('../pages/public/booking'));
 const CancelBookingPage = lazy(() => import('../pages/public/cancel'));
 const DudasPage = lazy(() => import('../pages/public/dudas'));
 const PrivacyPage = lazy(() => import('../pages/public/privacy'));
+const DepositConfirmationPage = lazy(() => import('../pages/public/deposit-confirmation'));
 
 // Login pages
 const AdminLoginPage = lazy(() => import('../pages/admin/login'));
@@ -95,6 +96,15 @@ const AppRoutes = () => {
           element={
             <Suspense fallback={<PageLoadingFallback />}>
               <BookingPage />
+            </Suspense>
+          }
+        />
+        {/* Deposit confirmation page (MercadoPago return URL) */}
+        <Route
+          path="/booking/confirmation"
+          element={
+            <Suspense fallback={<PageLoadingFallback />}>
+              <DepositConfirmationPage />
             </Suspense>
           }
         />
