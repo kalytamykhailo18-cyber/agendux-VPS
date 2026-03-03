@@ -107,7 +107,7 @@ export async function createSubscriptionPayment(req: Request, res: Response) {
     if (price <= 0) {
       return res.status(400).json({
         success: false,
-        error: 'Este plan es gratuito y no requiere pago. Contacta al soporte para activarlo.'
+        error: 'Este plan es gratuito y no requiere pago. Contacta al soporte en info@agendux.com para activarlo.'
       });
     }
 

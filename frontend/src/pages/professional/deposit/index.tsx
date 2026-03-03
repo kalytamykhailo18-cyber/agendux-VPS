@@ -25,6 +25,8 @@ const DepositSettingsPage = () => {
   const [enabled, setEnabled] = useState(false);
   const [amount, setAmount] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [savedEnabled, setSavedEnabled] = useState(false);
+  const [savedAmount, setSavedAmount] = useState('');
 
   // Load deposit settings on mount
   useEffect(() => {
@@ -35,6 +37,8 @@ const DepositSettingsPage = () => {
   useEffect(() => {
     setEnabled(depositEnabled);
     setAmount(depositAmount ? depositAmount.toString() : '');
+    setSavedEnabled(depositEnabled);
+    setSavedAmount(depositAmount ? depositAmount.toString() : '');
   }, [depositEnabled, depositAmount]);
 
   // Clear error on unmount
@@ -72,6 +76,8 @@ const DepositSettingsPage = () => {
     );
 
     if (updateDepositSettings.fulfilled.match(result)) {
+      setSavedEnabled(enabled);
+      setSavedAmount(enabled ? amount : '');
       setSuccessMessage(
         enabled
           ? 'Depósito habilitado correctamente'
@@ -79,6 +85,9 @@ const DepositSettingsPage = () => {
       );
     }
   };
+
+  // Track if form has unsaved changes
+  const hasChanges = enabled !== savedEnabled || amount !== savedAmount;
 
   return (
     <div className="mx-auto max-w-2xl zoom-in-normal">
@@ -89,6 +98,7 @@ const DepositSettingsPage = () => {
       <DepositForm
         enabled={enabled}
         amount={amount}
+        hasChanges={hasChanges}
         onEnabledChange={setEnabled}
         onAmountChange={setAmount}
         onSave={handleSave}

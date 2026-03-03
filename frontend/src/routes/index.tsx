@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 
 // ============================================
 // ROUTE-BASED CODE SPLITTING (Section 12.1 - Speed)
@@ -68,6 +68,12 @@ const PageLoadingFallback = () => (
   </div>
 );
 
+// Redirect old /booking/:slug to /:slug
+const BookingRedirect = () => {
+  const { slug } = useParams();
+  return <Navigate to={`/${slug}`} replace />;
+};
+
 // ============================================
 // APP ROUTES WITH SUSPENSE
 // ============================================
@@ -85,12 +91,17 @@ const AppRoutes = () => {
           }
         />
         <Route
-          path="/booking/:slug"
+          path="/:slug"
           element={
             <Suspense fallback={<PageLoadingFallback />}>
               <BookingPage />
             </Suspense>
           }
+        />
+        {/* Backwards compatibility: old /booking/:slug URLs redirect to /:slug */}
+        <Route
+          path="/booking/:slug"
+          element={<BookingRedirect />}
         />
         <Route
           path="/cancel"

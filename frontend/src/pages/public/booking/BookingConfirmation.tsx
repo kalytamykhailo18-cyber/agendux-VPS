@@ -126,9 +126,9 @@ const BookingConfirmation = ({
           <p className="mb-3 text-xs sm:text-sm text-yellow-700 fade-up-fast">
             Para confirmar tu reserva, debes pagar un depósito de{' '}
             <strong>
-              {new Intl.NumberFormat('en-US', {
+              {new Intl.NumberFormat('es-AR', {
                 style: 'currency',
-                currency: 'USD'
+                currency: 'ARS'
               }).format(depositAmount)}
             </strong>
           </p>

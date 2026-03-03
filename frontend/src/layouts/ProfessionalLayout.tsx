@@ -124,7 +124,7 @@ const ProfessionalLayout = () => {
           {professional?.slug && (
             <div className="mt-4 sm:mt-6 border-t pt-4">
               <Button
-                onClick={() => handleNavigation(`/booking/${professional.slug}`)}
+                onClick={() => handleNavigation(`/${professional.slug}`)}
                 fullWidth
                 startIcon={<PublicIcon />}
                 sx={{

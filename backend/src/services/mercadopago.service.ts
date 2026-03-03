@@ -1,6 +1,9 @@
 import { MercadoPagoConfig, Preference, Payment, PreApproval } from 'mercadopago';
 import prisma from '../config/database';
 import { logger, ServiceLogger } from '../utils/logger';
+import { sendBookingConfirmation } from './whatsapp.service';
+import { sendBookingConfirmationEmail } from './email.service';
+import { scheduleRemindersForAppointment } from './reminder-worker.service';
 
 type BillingPeriod = 'MONTHLY' | 'ANNUAL';
 
@@ -630,13 +633,29 @@ async function handleDepositPayment(payment: any, externalRef: any) {
   switch (payment.status) {
     case 'approved': {
       // Update appointment deposit status
-      await prisma.appointment.update({
+      const appointment = await prisma.appointment.update({
         where: { id: appointmentId },
         data: {
           depositPaid: true,
           depositPaidAt: new Date(),
           status: 'PENDING' // Move from PENDING_PAYMENT to PENDING
         }
+      });
+
+      // Now send booking confirmations (deferred until deposit paid)
+      sendBookingConfirmation({ appointmentId }).catch(err => {
+        logger.error('WhatsApp confirmation after deposit error:', err);
+      });
+      sendBookingConfirmationEmail({ appointmentId }).catch(err => {
+        logger.error('Email confirmation after deposit error:', err);
+      });
+      scheduleRemindersForAppointment({
+        appointmentId,
+        professionalId: appointment.professionalId,
+        appointmentDate: appointment.date,
+        appointmentTime: appointment.startTime
+      }).catch(err => {
+        logger.error('Reminder scheduling after deposit error:', err);
       });
 
       console.log('[MercadoPago] Deposit payment approved for appointment:', appointmentId);

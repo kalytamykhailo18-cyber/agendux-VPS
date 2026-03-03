@@ -146,6 +146,12 @@ function formatWhatsAppNumber(number: string): string {
     cleaned = '+' + cleaned;
   }
 
+  // Argentina mobile numbers: WhatsApp requires +549 prefix for mobile
+  // If number starts with +54 but NOT +549, add the 9
+  if (cleaned.startsWith('+54') && !cleaned.startsWith('+549')) {
+    cleaned = '+549' + cleaned.slice(3);
+  }
+
   return `whatsapp:${cleaned}`;
 }
 
@@ -543,29 +549,58 @@ export async function processIncomingMessage({ from, body }: IncomingMessagePara
     // Instead, search by hash which is indexed and searchable
     const phoneHash = hashForLookup(cleanNumber);
 
-    // Find the patient by WhatsApp number hash
-    const patient = await prisma.patient.findFirst({
+    // Argentina mobile numbers: Twilio sends +549XXXX but we store +54XXXX
+    // Try alternate format if primary lookup fails
+    let alternateHash: string | null = null;
+    if (cleanNumber.startsWith('+549')) {
+      // Remove the 9: +5492613630080 → +542613630080
+      alternateHash = hashForLookup('+54' + cleanNumber.slice(4));
+    } else if (cleanNumber.startsWith('+54') && !cleanNumber.startsWith('+549')) {
+      // Add the 9: +542613630080 → +5492613630080
+      alternateHash = hashForLookup('+549' + cleanNumber.slice(3));
+    }
+
+    // Use today at midnight UTC for date filter to avoid excluding same-day appointments
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    const appointmentFilter = {
+      where: {
+        status: {
+          in: ['PENDING', 'REMINDER_SENT', 'PENDING_PAYMENT'] as string[]
+        },
+        date: {
+          gte: today
+        }
+      },
+      orderBy: { date: 'asc' as const },
+      take: 1,
+      include: {
+        professional: true
+      }
+    };
+
+    // Find the patient by WhatsApp number hash (try primary, then alternate)
+    let patient = await prisma.patient.findFirst({
       where: {
         whatsappNumberHash: phoneHash
       },
       include: {
-        appointments: {
-          where: {
-            status: {
-              in: ['PENDING', 'REMINDER_SENT', 'PENDING_PAYMENT']
-            },
-            date: {
-              gte: new Date()
-            }
-          },
-          orderBy: { date: 'asc' },
-          take: 1,
-          include: {
-            professional: true
-          }
-        }
+        appointments: appointmentFilter
       }
     });
+
+    // If not found, try alternate Argentine format
+    if ((!patient || patient.appointments.length === 0) && alternateHash) {
+      patient = await prisma.patient.findFirst({
+        where: {
+          whatsappNumberHash: alternateHash
+        },
+        include: {
+          appointments: appointmentFilter
+        }
+      });
+    }
 
     if (!patient || patient.appointments.length === 0) {
       // Send a helpful reply so the patient gets feedback

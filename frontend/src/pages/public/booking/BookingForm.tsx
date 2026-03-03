@@ -227,9 +227,9 @@ const BookingForm = ({
             <p className="mt-1 text-sm text-yellow-700">
               Para confirmar tu cita, deberás realizar un depósito de{' '}
               <strong>
-                {new Intl.NumberFormat('en-US', {
+                {new Intl.NumberFormat('es-AR', {
                   style: 'currency',
-                  currency: 'USD'
+                  currency: 'ARS'
                 }).format(depositAmount)}
               </strong>
             </p>

@@ -19,6 +19,7 @@ interface EmailVariables {
   time: string;
   booking_reference: string;
   cancel_url?: string;
+  confirm_url?: string;
 }
 
 function getBookingConfirmationHTML(variables: EmailVariables): string {
@@ -28,38 +29,50 @@ function getBookingConfirmationHTML(variables: EmailVariables): string {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Confirmacion de Cita</title>
+  <title>Confirmacion de Cita - Agendux</title>
 </head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="background-color: #f8f9fa; padding: 30px; border-radius: 10px;">
-    <h1 style="color: #2563eb; margin-bottom: 20px;">Cita Confirmada</h1>
-
-    <p>Hola <strong>${variables.patient_name}</strong>,</p>
-
-    <p>Tu cita ha sido reservada exitosamente.</p>
-
-    <div style="background-color: #fff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb;">
-      <p style="margin: 5px 0;"><strong>Fecha:</strong> ${variables.date}</p>
-      <p style="margin: 5px 0;"><strong>Hora:</strong> ${variables.time}</p>
-      <p style="margin: 5px 0;"><strong>Profesional:</strong> ${variables.professional_name}</p>
-      <p style="margin: 5px 0;"><strong>Referencia:</strong> <code style="background: #e5e7eb; padding: 2px 6px; border-radius: 4px;">${variables.booking_reference}</code></p>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 0; background-color: #f3f4f6;">
+  <div style="max-width: 600px; margin: 0 auto;">
+    <!-- Header with Agendux branding -->
+    <div style="background-color: #2563eb; padding: 24px; text-align: center;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 1px;">Agendux</h1>
     </div>
 
-    <p style="color: #666; font-size: 14px;">
-      Guarda tu codigo de referencia. Lo necesitaras si deseas modificar o cancelar tu cita.
-    </p>
+    <!-- Main content -->
+    <div style="background-color: #ffffff; padding: 30px;">
+      <h2 style="color: #1e40af; margin-top: 0; margin-bottom: 20px;">Cita Confirmada</h2>
 
-    ${variables.cancel_url ? `
-    <p style="margin-top: 20px;">
-      <a href="${variables.cancel_url}" style="color: #dc2626; text-decoration: underline;">Cancelar esta cita</a>
-    </p>
-    ` : ''}
+      <p>Hola <strong>${variables.patient_name}</strong>,</p>
 
-    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+      <p>Tu cita ha sido reservada exitosamente.</p>
 
-    <p style="color: #999; font-size: 12px; margin: 0;">
-      Este es un mensaje automatico. Por favor no respondas a este email.
-    </p>
+      <div style="background-color: #eff6ff; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2563eb;">
+        <p style="margin: 5px 0;"><strong>Fecha:</strong> ${variables.date}</p>
+        <p style="margin: 5px 0;"><strong>Hora:</strong> ${variables.time}</p>
+        <p style="margin: 5px 0;"><strong>Profesional:</strong> ${variables.professional_name}</p>
+        <p style="margin: 5px 0;"><strong>Referencia:</strong> <code style="background: #dbeafe; padding: 2px 6px; border-radius: 4px;">${variables.booking_reference}</code></p>
+      </div>
+
+      <p style="color: #374151; font-size: 14px;">
+        Guarda tu codigo de referencia. Lo necesitaras si deseas modificar o cancelar tu cita.
+      </p>
+
+      ${variables.cancel_url ? `
+      <p style="margin-top: 20px; text-align: center;">
+        <a href="${variables.cancel_url}" style="color: #dc2626; text-decoration: underline; font-size: 14px;">Cancelar esta cita</a>
+      </p>
+      ` : ''}
+    </div>
+
+    <!-- Footer -->
+    <div style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;">
+        Este es un mensaje automatico de <a href="https://agendux.com" style="color: #2563eb; text-decoration: none;">Agendux</a>. Por favor no respondas a este email.
+      </p>
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+        <a href="https://agendux.com" style="color: #9ca3af; text-decoration: none;">agendux.com</a>
+      </p>
+    </div>
   </div>
 </body>
 </html>
@@ -73,38 +86,61 @@ function getReminderHTML(variables: EmailVariables): string {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recordatorio de Cita</title>
+  <title>Recordatorio de Cita - Agendux</title>
 </head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="background-color: #fef3c7; padding: 30px; border-radius: 10px;">
-    <h1 style="color: #d97706; margin-bottom: 20px;">Recordatorio de Cita</h1>
-
-    <p>Hola <strong>${variables.patient_name}</strong>,</p>
-
-    <p>Te recordamos que tienes una cita proxima:</p>
-
-    <div style="background-color: #fff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #d97706;">
-      <p style="margin: 5px 0;"><strong>Fecha:</strong> ${variables.date}</p>
-      <p style="margin: 5px 0;"><strong>Hora:</strong> ${variables.time}</p>
-      <p style="margin: 5px 0;"><strong>Profesional:</strong> ${variables.professional_name}</p>
-      <p style="margin: 5px 0;"><strong>Referencia:</strong> <code style="background: #e5e7eb; padding: 2px 6px; border-radius: 4px;">${variables.booking_reference}</code></p>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 0; background-color: #f3f4f6;">
+  <div style="max-width: 600px; margin: 0 auto;">
+    <!-- Header with Agendux branding -->
+    <div style="background-color: #2563eb; padding: 24px; text-align: center;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 1px;">Agendux</h1>
     </div>
 
-    <p style="color: #666; font-size: 14px;">
-      Por favor confirma tu asistencia o cancela si no podras asistir.
-    </p>
+    <!-- Main content -->
+    <div style="background-color: #ffffff; padding: 30px;">
+      <h2 style="color: #1e40af; margin-top: 0; margin-bottom: 20px;">Recordatorio de Cita</h2>
 
-    ${variables.cancel_url ? `
-    <p style="margin-top: 20px;">
-      <a href="${variables.cancel_url}" style="color: #dc2626; text-decoration: underline;">Cancelar esta cita</a>
-    </p>
-    ` : ''}
+      <p>Hola <strong>${variables.patient_name}</strong>,</p>
 
-    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+      <p>Te recordamos que tienes una cita proxima:</p>
 
-    <p style="color: #999; font-size: 12px; margin: 0;">
-      Este es un mensaje automatico. Por favor no respondas a este email.
-    </p>
+      <div style="background-color: #eff6ff; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2563eb;">
+        <p style="margin: 5px 0;"><strong>Fecha:</strong> ${variables.date}</p>
+        <p style="margin: 5px 0;"><strong>Hora:</strong> ${variables.time}</p>
+        <p style="margin: 5px 0;"><strong>Profesional:</strong> ${variables.professional_name}</p>
+        <p style="margin: 5px 0;"><strong>Referencia:</strong> <code style="background: #dbeafe; padding: 2px 6px; border-radius: 4px;">${variables.booking_reference}</code></p>
+      </div>
+
+      <p style="color: #374151; font-size: 14px;">
+        Por favor confirma tu asistencia o cancela si no podras asistir.
+      </p>
+
+      <!-- Action buttons -->
+      <div style="text-align: center; margin: 25px 0;">
+        ${variables.confirm_url ? `
+        <a href="${variables.confirm_url}" style="display: inline-block; background-color: #2563eb; color: #ffffff; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; margin-right: 12px;">Confirmar asistencia</a>
+        ` : ''}
+        ${variables.cancel_url ? `
+        <a href="${variables.cancel_url}" style="display: inline-block; background-color: #ffffff; color: #dc2626; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; border: 1px solid #dc2626;">Cancelar cita</a>
+        ` : ''}
+      </div>
+
+      <!-- WhatsApp note -->
+      <div style="background-color: #f0fdf4; padding: 12px 16px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #22c55e;">
+        <p style="color: #166534; font-size: 13px; margin: 0;">
+          Si ya confirmaste o cancelaste tu cita por WhatsApp, no es necesario que lo hagas nuevamente por email.
+        </p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;">
+        Este es un mensaje automatico de <a href="https://agendux.com" style="color: #2563eb; text-decoration: none;">Agendux</a>. Por favor no respondas a este email.
+      </p>
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+        <a href="https://agendux.com" style="color: #9ca3af; text-decoration: none;">agendux.com</a>
+      </p>
+    </div>
   </div>
 </body>
 </html>
@@ -118,32 +154,44 @@ function getCancellationHTML(variables: EmailVariables): string {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cita Cancelada</title>
+  <title>Cita Cancelada - Agendux</title>
 </head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="background-color: #fef2f2; padding: 30px; border-radius: 10px;">
-    <h1 style="color: #dc2626; margin-bottom: 20px;">Cita Cancelada</h1>
-
-    <p>Hola <strong>${variables.patient_name}</strong>,</p>
-
-    <p>Tu cita ha sido cancelada.</p>
-
-    <div style="background-color: #fff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626;">
-      <p style="margin: 5px 0;"><strong>Fecha:</strong> ${variables.date}</p>
-      <p style="margin: 5px 0;"><strong>Hora:</strong> ${variables.time}</p>
-      <p style="margin: 5px 0;"><strong>Profesional:</strong> ${variables.professional_name}</p>
-      <p style="margin: 5px 0;"><strong>Referencia:</strong> <code style="background: #e5e7eb; padding: 2px 6px; border-radius: 4px;">${variables.booking_reference}</code></p>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 0; background-color: #f3f4f6;">
+  <div style="max-width: 600px; margin: 0 auto;">
+    <!-- Header with Agendux branding -->
+    <div style="background-color: #2563eb; padding: 24px; text-align: center;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 1px;">Agendux</h1>
     </div>
 
-    <p style="color: #666; font-size: 14px;">
-      Si deseas reprogramar tu cita, puedes hacerlo en linea en cualquier momento.
-    </p>
+    <!-- Main content -->
+    <div style="background-color: #ffffff; padding: 30px;">
+      <h2 style="color: #dc2626; margin-top: 0; margin-bottom: 20px;">Cita Cancelada</h2>
 
-    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+      <p>Hola <strong>${variables.patient_name}</strong>,</p>
 
-    <p style="color: #999; font-size: 12px; margin: 0;">
-      Este es un mensaje automatico. Por favor no respondas a este email.
-    </p>
+      <p>Tu cita ha sido cancelada.</p>
+
+      <div style="background-color: #fef2f2; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #dc2626;">
+        <p style="margin: 5px 0;"><strong>Fecha:</strong> ${variables.date}</p>
+        <p style="margin: 5px 0;"><strong>Hora:</strong> ${variables.time}</p>
+        <p style="margin: 5px 0;"><strong>Profesional:</strong> ${variables.professional_name}</p>
+        <p style="margin: 5px 0;"><strong>Referencia:</strong> <code style="background: #fee2e2; padding: 2px 6px; border-radius: 4px;">${variables.booking_reference}</code></p>
+      </div>
+
+      <p style="color: #374151; font-size: 14px;">
+        Si deseas reprogramar tu cita, puedes hacerlo en linea en cualquier momento.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;">
+        Este es un mensaje automatico de <a href="https://agendux.com" style="color: #2563eb; text-decoration: none;">Agendux</a>. Por favor no respondas a este email.
+      </p>
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+        <a href="https://agendux.com" style="color: #9ca3af; text-decoration: none;">agendux.com</a>
+      </p>
+    </div>
   </div>
 </body>
 </html>
@@ -426,7 +474,8 @@ export async function sendReminderEmail({ appointmentId }: SendReminderEmailPara
       date: formatDateForEmail(appointment.date),
       time: formatTimeForEmail(appointment.startTime),
       booking_reference: appointment.bookingReference,
-      cancel_url: `${frontendUrl}/cancel?ref=${appointment.bookingReference}`
+      cancel_url: `${frontendUrl}/cancel?ref=${appointment.bookingReference}`,
+      confirm_url: `${frontendUrl}/api/appointments/confirm/${appointment.bookingReference}`
     };
 
     // Send email

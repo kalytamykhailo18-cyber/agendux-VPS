@@ -25,8 +25,9 @@ const DepositInfoSection = () => {
         <h4 className="text-sm font-medium text-amber-800">Importante sobre el cobro de señas</h4>
         <p className="mt-1 text-xs text-amber-700">
           Los pagos de señas son procesados a través de la cuenta de Mercado Pago de Agendux.
-          Una vez acreditado el pago, Agendux se encargará de transferir el monto correspondiente
-          a su cuenta. Para consultas sobre transferencias, contacte a{' '}
+          Mercado Pago cobra un 4,2% por cada operación, por lo que en caso de cancelación,
+          Agendux podrá reintegrar el 95,8% de la seña aproximadamente 30 días después del turno.
+          El cobro de seña es opcional. Para consultas sobre transferencias, contacte a{' '}
           <span
             className="underline cursor-pointer hover:text-amber-900"
             onClick={() => window.location.href = 'mailto:info@agendux.com'}

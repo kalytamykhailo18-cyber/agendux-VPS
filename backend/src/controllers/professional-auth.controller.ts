@@ -120,7 +120,7 @@ export const googleAuth = async (req: Request, res: Response): Promise<void> => 
         if (user.professional?.isSuspended) {
           res.status(403).json({
             success: false,
-            error: 'Your account has been suspended. Please contact support.'
+            error: 'Tu cuenta ha sido suspendida. Contacta al soporte en info@agendux.com.'
           } as ApiResponse<null>);
           return;
         }

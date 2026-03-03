@@ -5,9 +5,9 @@ import SaveIcon from '@mui/icons-material/Save';
 const formatCurrency = (value: string): string => {
   const num = parseFloat(value);
   if (isNaN(num)) return '';
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('es-AR', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'ARS',
     minimumFractionDigits: 0,
     maximumFractionDigits: 2
   }).format(num);
@@ -16,6 +16,7 @@ const formatCurrency = (value: string): string => {
 interface DepositFormProps {
   enabled: boolean;
   amount: string;
+  hasChanges: boolean;
   onEnabledChange: (enabled: boolean) => void;
   onAmountChange: (amount: string) => void;
   onSave: () => void;
@@ -24,6 +25,7 @@ interface DepositFormProps {
 const DepositForm = ({
   enabled,
   amount,
+  hasChanges,
   onEnabledChange,
   onAmountChange,
   onSave
@@ -73,7 +75,7 @@ const DepositForm = ({
               }}
               placeholder="0.00"
             />
-            <span className="text-sm text-gray-500">USD (Dólares)</span>
+            <span className="text-sm text-gray-500">ARS (Pesos Argentinos)</span>
           </div>
           {amount && parseFloat(amount) > 0 && (
             <p className="mt-2 text-sm text-gray-600 fade-up-fast">
@@ -89,7 +91,7 @@ const DepositForm = ({
           variant="contained"
           color="primary"
           onClick={onSave}
-          disabled={!isValid}
+          disabled={!isValid || !hasChanges}
           startIcon={<SaveIcon />}
           className="zoom-in-fast"
         >

@@ -325,29 +325,33 @@ export const createAppointment = async (req: Request, res: Response) => {
       logger.error('Google Calendar sync error (non-blocking):', err);
     });
 
-    // Send WhatsApp booking confirmation (non-blocking)
-    sendBookingConfirmation({
-      appointmentId: result.appointment.id
-    }).catch(err => {
-      logger.error('WhatsApp confirmation error (non-blocking):', err);
-    });
+    // Only send confirmations and schedule reminders if deposit is NOT required
+    // When deposit is required, these are sent after payment confirmation
+    if (!result.appointment.depositRequired) {
+      // Send WhatsApp booking confirmation (non-blocking)
+      sendBookingConfirmation({
+        appointmentId: result.appointment.id
+      }).catch(err => {
+        logger.error('WhatsApp confirmation error (non-blocking):', err);
+      });
 
-    // Send email booking confirmation (non-blocking)
-    sendBookingConfirmationEmail({
-      appointmentId: result.appointment.id
-    }).catch(err => {
-      logger.error('Email confirmation error (non-blocking):', err);
-    });
+      // Send email booking confirmation (non-blocking)
+      sendBookingConfirmationEmail({
+        appointmentId: result.appointment.id
+      }).catch(err => {
+        logger.error('Email confirmation error (non-blocking):', err);
+      });
 
-    // Schedule reminders (non-blocking)
-    scheduleRemindersForAppointment({
-      appointmentId: result.appointment.id,
-      professionalId: professional.id,
-      appointmentDate,
-      appointmentTime: startTime
-    }).catch(err => {
-      logger.error('Reminder scheduling error (non-blocking):', err);
-    });
+      // Schedule reminders (non-blocking)
+      scheduleRemindersForAppointment({
+        appointmentId: result.appointment.id,
+        professionalId: professional.id,
+        appointmentDate,
+        appointmentTime: startTime
+      }).catch(err => {
+        logger.error('Reminder scheduling error (non-blocking):', err);
+      });
+    }
 
     // Emit real-time update to professional's dashboard
     emitToProfessional(professional.id, WebSocketEvent.APPOINTMENT_CREATED, {
@@ -667,6 +671,90 @@ export const cancelAppointment = async (req: Request, res: Response) => {
     });
   }
 };
+
+// ============================================
+// CONFIRM APPOINTMENT VIA EMAIL LINK
+// Public endpoint - GET request from email button
+// ============================================
+
+export const confirmAppointmentByEmail = async (req: Request, res: Response) => {
+  try {
+    const { reference } = req.params;
+
+    if (!reference) {
+      return res.send(getConfirmPageHTML('error', 'Referencia no proporcionada'));
+    }
+
+    // Find appointment
+    const appointment = await prisma.appointment.findUnique({
+      where: { bookingReference: reference.toUpperCase() },
+      include: {
+        patient: { select: { firstName: true, lastName: true } },
+        professional: { select: { firstName: true, lastName: true } }
+      }
+    });
+
+    if (!appointment) {
+      return res.send(getConfirmPageHTML('error', 'Reserva no encontrada'));
+    }
+
+    // Check if already confirmed
+    if (appointment.status === 'CONFIRMED') {
+      return res.send(getConfirmPageHTML('already', `Tu cita con ${appointment.professional.firstName} ${appointment.professional.lastName} ya estaba confirmada.`));
+    }
+
+    // Check if can be confirmed
+    if (!['PENDING', 'REMINDER_SENT'].includes(appointment.status)) {
+      return res.send(getConfirmPageHTML('error', `Esta cita no puede ser confirmada (estado actual: ${appointment.status}).`));
+    }
+
+    // Update appointment status to CONFIRMED
+    await prisma.appointment.update({
+      where: { id: appointment.id },
+      data: { status: 'CONFIRMED' }
+    });
+
+    // Emit WebSocket event to professional dashboard
+    emitToProfessional(appointment.professionalId, WebSocketEvent.APPOINTMENT_UPDATED, {
+      appointmentId: appointment.id,
+      bookingReference: appointment.bookingReference,
+      status: 'CONFIRMED',
+      confirmedVia: 'email'
+    });
+
+    return res.send(getConfirmPageHTML('success', `Tu cita con ${appointment.professional.firstName} ${appointment.professional.lastName} ha sido confirmada exitosamente.`));
+  } catch (error) {
+    logger.error('Error confirming appointment via email:', error);
+    return res.send(getConfirmPageHTML('error', 'Ocurrio un error al confirmar tu cita. Por favor intenta de nuevo.'));
+  }
+};
+
+// Helper: Generate confirm page HTML
+function getConfirmPageHTML(type: 'success' | 'error' | 'already', message: string): string {
+  const colors = {
+    success: { bg: '#eff6ff', border: '#2563eb', icon: '&#10003;', iconBg: '#dbeafe', iconColor: '#2563eb', title: 'Cita Confirmada' },
+    already: { bg: '#eff6ff', border: '#2563eb', icon: '&#10003;', iconBg: '#dbeafe', iconColor: '#2563eb', title: 'Cita Ya Confirmada' },
+    error: { bg: '#fef2f2', border: '#dc2626', icon: '&#10007;', iconBg: '#fee2e2', iconColor: '#dc2626', title: 'Error' }
+  };
+  const c = colors[type];
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${c.title} - Agendux</title></head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f3f4f6; min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+  <div style="max-width: 480px; width: 100%; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <div style="background-color: #2563eb; padding: 20px; text-align: center;">
+      <h1 style="color: white; margin: 0; font-size: 24px;">Agendux</h1>
+    </div>
+    <div style="padding: 30px; text-align: center;">
+      <div style="width: 64px; height: 64px; border-radius: 50%; background: ${c.iconBg}; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: ${c.iconColor}; line-height: 64px;">${c.icon}</div>
+      <h2 style="color: #111827; margin-bottom: 10px;">${c.title}</h2>
+      <p style="color: #6b7280; line-height: 1.6;">${message}</p>
+      <a href="${process.env.FRONTEND_URL || 'https://agendux.com'}" style="display: inline-block; margin-top: 20px; background-color: #2563eb; color: white; padding: 10px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Ir a Agendux</a>
+    </div>
+    <div style="padding: 15px; text-align: center; background: #f9fafb; border-top: 1px solid #e5e7eb;">
+      <p style="color: #9ca3af; font-size: 12px; margin: 0;">agendux.com</p>
+    </div>
+  </div>
+</body></html>`;
+}
 
 // ============================================
 // CREATE DEPOSIT PAYMENT PREFERENCE

@@ -278,7 +278,13 @@ export const handleIncomingMessage = async (req: Request, res: Response) => {
       }
     }
 
-    const { From, Body } = req.body;
+    const { From, Body, MessageStatus, SmsStatus } = req.body;
+
+    // Handle Twilio status callbacks (delivery notifications) - return 200
+    if (MessageStatus || SmsStatus) {
+      res.set('Content-Type', 'text/xml');
+      return res.send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
+    }
 
     if (!From || !Body) {
       return res.status(400).send('Bad Request');

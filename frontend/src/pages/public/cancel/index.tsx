@@ -88,7 +88,7 @@ const CancelBookingPage = () => {
   // Handle reschedule
   const handleReschedule = () => {
     if (appointment) {
-      navigate(`/booking/${appointment.professional.slug}`);
+      navigate(`/${appointment.professional.slug}`);
     }
   };
 

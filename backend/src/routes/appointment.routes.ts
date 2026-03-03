@@ -3,6 +3,7 @@ import {
   createAppointment,
   getAppointmentByReference,
   cancelAppointment,
+  confirmAppointmentByEmail,
   createDepositPayment
 } from '../controllers/appointment.controller';
 import { validateBody, validateParams, slugParamSchema, referenceParamSchema } from '../middleware/validation.middleware';
@@ -24,6 +25,9 @@ router.get('/reference/:reference', validateParams(referenceParamSchema), getApp
 
 // POST /api/appointments/cancel/:reference - Cancel appointment by patient
 router.post('/cancel/:reference', validateParams(referenceParamSchema), validateBody(cancelBookingSchema), cancelAppointment);
+
+// GET /api/appointments/confirm/:reference - Confirm appointment from email link
+router.get('/confirm/:reference', validateParams(referenceParamSchema), confirmAppointmentByEmail);
 
 // POST /api/appointments/deposit/:reference - Create deposit payment preference
 router.post('/deposit/:reference', validateParams(referenceParamSchema), createDepositPayment);
