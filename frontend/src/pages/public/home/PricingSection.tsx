@@ -34,6 +34,9 @@ const PricingSection = () => {
           <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto fade-up-normal">
             Elegí el plan que mejor se adapte a tu consultorio. Sin sorpresas, sin costos ocultos.
           </p>
+          <p className="mt-3 text-sm text-gray-500 fade-up-normal">
+            Todos los valores están expresados en pesos argentinos (ARS).
+          </p>
 
           {/* Annual/Monthly Toggle */}
           <div className="mt-8 flex items-center justify-center gap-3">
@@ -166,7 +169,7 @@ const PricingSection = () => {
 
         {/* Bottom Text */}
         <p className="mt-10 text-center text-sm text-gray-500">
-          Todos los planes incluyen soporte escribiendo a info@agendux.com. Podés cambiar o cancelar en cualquier momento.
+          Todos los planes incluyen soporte escribiendo a info@agendux.com. Podés cambiar o cancelar en cualquier momento. Todos los valores están expresados en pesos argentinos (ARS).
         </p>
       </div>
     </div>
