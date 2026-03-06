@@ -1,4 +1,10 @@
+import { useEffect } from 'react';
+
 const PrivacyPage = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="mx-auto max-w-3xl zoom-in-normal">
       <div className="rounded-md bg-white p-6 sm:p-8 shadow-sm">

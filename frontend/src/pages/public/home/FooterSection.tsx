@@ -18,7 +18,7 @@ const FooterSection = () => {
           <p className="fade-down-fast">&copy; 2026 Agendux. Todos los derechos reservados.</p>
           <p className="mt-2 text-sm fade-up-fast">
             <span
-              className="hover:text-white cursor-pointer transition-colors"
+              className="text-white hover:text-blue-300 cursor-pointer transition-colors underline"
               onClick={() => navigate('/privacidad')}
             >
               Política de Privacidad

@@ -145,7 +145,7 @@ const PublicLayout = () => {
             </span>
             <span className="mx-2">·</span>
             <span
-              className="hover:text-white cursor-pointer transition-colors"
+              className="text-white underline hover:text-blue-300 cursor-pointer transition-colors"
               onClick={() => navigate('/privacidad')}
             >
               Política de Privacidad
