@@ -3,7 +3,7 @@ import prisma from '../config/database';
 import { logger, ServiceLogger } from '../utils/logger';
 import { decrypt, hashForLookup } from '../utils/encryption';
 import { emitToProfessional, emitToAdmins, WebSocketEvent } from '../config/socket.config';
-import { updateCalendarEvent } from './google-calendar.service';
+import { updateCalendarEvent, deleteCalendarEvent } from './google-calendar.service';
 
 type MessageTemplateType = 'BOOKING_CONFIRMATION' | 'REMINDER' | 'CANCELLATION';
 
@@ -640,8 +640,8 @@ export async function processIncomingMessage({ from, body }: IncomingMessagePara
         confirmedVia: 'whatsapp'
       });
 
-      // Send reconfirmation via approved Content Template
-      await sendWhatsAppTemplate({
+      // Send reconfirmation response - try template first, fallback to plain text
+      const reconfirmSent = await sendWhatsAppTemplate({
         to: decryptedWhatsappNumber,
         contentSid: CONTENT_SIDS.RECONFIRMATION,
         contentVariables: {
@@ -651,6 +651,14 @@ export async function processIncomingMessage({ from, body }: IncomingMessagePara
           '4': `${appointment.professional.firstName} ${appointment.professional.lastName}`
         }
       });
+
+      // Fallback to plain text if template fails
+      if (!reconfirmSent) {
+        await sendWhatsAppMessage({
+          to: decryptedWhatsappNumber,
+          message: `✅ Tu cita del ${formatDateForMessage(appointment.date)} a las ${formatTimeForMessage(appointment.startTime)} con ${appointment.professional.firstName} ${appointment.professional.lastName} ha sido confirmada. ¡Te esperamos!`
+        });
+      }
 
       return {
         success: true,
@@ -690,14 +698,13 @@ export async function processIncomingMessage({ from, body }: IncomingMessagePara
         appointmentId: updatedAppointment.id
       });
 
-      // CRITICAL FIX: Update Google Calendar event (non-blocking)
+      // Delete Google Calendar event to free the time slot (non-blocking)
       if (appointment.googleEventId) {
-        updateCalendarEvent({
-          professionalId: appointment.professionalId,
-          googleEventId: appointment.googleEventId,
-          status: 'CANCELLED'
-        }).catch(err => {
-          logger.error('Google Calendar update error (non-blocking):', err);
+        deleteCalendarEvent(
+          appointment.professionalId,
+          appointment.googleEventId
+        ).catch(err => {
+          logger.error('Google Calendar delete error (non-blocking):', err);
         });
       }
 

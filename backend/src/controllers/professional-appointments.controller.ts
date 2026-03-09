@@ -3,7 +3,7 @@ import { logger } from '../utils/logger';
 import type { AuthRequest } from '../middlewares/auth.middleware';
 import prisma from '../config/database';
 import { AppointmentStatus, Prisma } from '@prisma/client';
-import { updateCalendarEvent } from '../services/google-calendar.service';
+import { updateCalendarEvent, deleteCalendarEvent } from '../services/google-calendar.service';
 import { emitToProfessional, emitToAdmins, WebSocketEvent } from '../config/socket.config';
 import { sendCancellationNotification } from '../services/whatsapp.service';
 import { sendCancellationEmail } from '../services/email.service';
@@ -373,14 +373,13 @@ export const cancelAppointmentByProfessional = async (req: AuthRequest, res: Res
       }
     });
 
-    // Update Google Calendar event (non-blocking)
+    // Delete Google Calendar event to free the time slot (non-blocking)
     if (appointment.googleEventId) {
-      updateCalendarEvent({
+      deleteCalendarEvent(
         professionalId,
-        googleEventId: appointment.googleEventId,
-        status: 'CANCELLED'
-      }).catch(err => {
-        logger.error('Google Calendar update error (non-blocking):', err);
+        appointment.googleEventId
+      ).catch(err => {
+        logger.error('Google Calendar delete error (non-blocking):', err);
       });
     }
 

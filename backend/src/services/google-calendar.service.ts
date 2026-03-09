@@ -14,8 +14,8 @@ const GOOGLE_REDIRECT_URI = process.env.GOOGLE_CALENDAR_REDIRECT_URI || 'http://
 
 // Scopes required for calendar access
 const SCOPES = [
-  'https://www.googleapis.com/auth/calendar',
-  'https://www.googleapis.com/auth/calendar.events'
+  'https://www.googleapis.com/auth/calendar.events',
+  'https://www.googleapis.com/auth/calendar.readonly'
 ];
 
 // Create OAuth2 client
@@ -388,15 +388,56 @@ export const syncFromGoogleCalendar = async (professionalId: string): Promise<nu
     const events = response.data.items || [];
     let syncedCount = 0;
 
-    // Get existing platform appointments' Google event IDs
+    // Get existing platform appointments' Google event IDs (active ones only)
     const existingAppointments = await prisma.appointment.findMany({
       where: {
         professionalId,
-        googleEventId: { not: null }
+        googleEventId: { not: null },
+        status: { notIn: ['cancelled', 'completed', 'no_show'] },
+        dateTime: { gte: now }
       },
-      select: { googleEventId: true }
+      select: { id: true, googleEventId: true }
     });
     const platformEventIds = new Set(existingAppointments.map(a => a.googleEventId));
+
+    // Detect Agendux appointments deleted from Google Calendar
+    const googleEventIds = new Set(events.map(e => e.id).filter(Boolean));
+    for (const apt of existingAppointments) {
+      if (apt.googleEventId && !googleEventIds.has(apt.googleEventId)) {
+        // This appointment was deleted from Google Calendar by the professional
+        try {
+          await prisma.appointment.update({
+            where: { id: apt.id },
+            data: {
+              status: 'cancelled',
+              cancelledAt: new Date(),
+              cancelledBy: 'professional',
+              cancellationReason: 'Cancelado desde Google Calendar'
+            }
+          });
+
+          // Cancel scheduled reminders
+          await prisma.scheduledReminder.updateMany({
+            where: { appointmentId: apt.id, status: 'pending' },
+            data: { status: 'cancelled' }
+          });
+
+          // Notify patient via WhatsApp and email (dynamic import to avoid circular dependency)
+          const { sendCancellationNotification } = await import('./whatsapp.service');
+          const { sendCancellationEmail } = await import('./email.service');
+          await Promise.all([
+            sendCancellationNotification({ appointmentId: apt.id }),
+            sendCancellationEmail({ appointmentId: apt.id })
+          ]).catch(err => {
+            logger.error('Error sending cancellation notifications from Google Calendar sync:', err);
+          });
+
+          logger.info(`Appointment ${apt.id} cancelled via Google Calendar deletion`);
+        } catch (err) {
+          logger.error(`Error cancelling appointment ${apt.id} from Google Calendar sync:`, err);
+        }
+      }
+    }
 
     // Process each event
     for (const event of events) {

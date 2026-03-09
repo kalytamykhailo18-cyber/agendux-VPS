@@ -52,6 +52,9 @@ const ProfilePage = () => {
     }
   }, [successMessage]);
 
+  // Check if form has unsaved changes
+  const hasChanges = street !== (addressStreet || '') || city !== (addressCity || '');
+
   // Handle save
   const handleSave = async () => {
     setSuccessMessage('');
@@ -147,6 +150,7 @@ const ProfilePage = () => {
         <Button
           variant="contained"
           onClick={handleSave}
+          disabled={!hasChanges}
           startIcon={<SaveIcon />}
           sx={{
             mt: 3,

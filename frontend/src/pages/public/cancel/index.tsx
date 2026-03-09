@@ -85,9 +85,21 @@ const CancelBookingPage = () => {
     navigate('/');
   };
 
-  // Handle reschedule
-  const handleReschedule = () => {
-    if (appointment) {
+  // Handle reschedule - cancel old appointment first, then redirect to booking
+  const handleReschedule = async () => {
+    if (!appointment) return;
+
+    // Cancel the old appointment before rebooking
+    const result = await dispatch(
+      cancelAppointment({
+        reference: appointment.bookingReference,
+        email: appointment.patient.email,
+        reason: 'Reagendado por el paciente'
+      })
+    );
+
+    if (cancelAppointment.fulfilled.match(result)) {
+      // Navigate to booking page after successful cancellation
       navigate(`/${appointment.professional.slug}`);
     }
   };

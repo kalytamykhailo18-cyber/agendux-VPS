@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { logger } from '../utils/logger';
 import prisma from '../config/database';
 import { v4 as uuidv4 } from 'uuid';
-import { createCalendarEvent, updateCalendarEvent } from '../services/google-calendar.service';
+import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from '../services/google-calendar.service';
 import {
   sendBookingConfirmation,
   sendCancellationNotification,
@@ -630,14 +630,13 @@ export const cancelAppointment = async (req: Request, res: Response) => {
       appointmentId: updatedAppointment.id
     });
 
-    // Update Google Calendar event (non-blocking)
+    // Delete Google Calendar event to free the time slot (non-blocking)
     if (appointment.googleEventId) {
-      updateCalendarEvent({
-        professionalId: appointment.professionalId,
-        googleEventId: appointment.googleEventId,
-        status: 'CANCELLED'
-      }).catch(err => {
-        logger.error('Google Calendar update error (non-blocking):', err);
+      deleteCalendarEvent(
+        appointment.professionalId,
+        appointment.googleEventId
+      ).catch(err => {
+        logger.error('Google Calendar delete error (non-blocking):', err);
       });
     }
 

@@ -78,17 +78,15 @@ export const addBlockedDate = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Parse and validate date
-    const blockedDate = new Date(date);
+    // Parse and validate date - use UTC to avoid timezone shift
+    const [year, month, day] = date.split('-').map(Number);
+    const blockedDate = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
     if (isNaN(blockedDate.getTime())) {
       return res.status(400).json({
         success: false,
         error: 'Formato de fecha inválido'
       });
     }
-
-    // Set to midnight to avoid timezone issues
-    blockedDate.setHours(0, 0, 0, 0);
 
     // Don't allow blocking past dates
     const today = new Date();
@@ -254,9 +252,11 @@ export const addBlockedDateRange = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Parse dates
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    // Parse dates - use UTC noon to avoid timezone shift
+    const [sy, sm, sd] = startDate.split('-').map(Number);
+    const [ey, em, ed] = endDate.split('-').map(Number);
+    const start = new Date(Date.UTC(sy, sm - 1, sd, 12, 0, 0));
+    const end = new Date(Date.UTC(ey, em - 1, ed, 12, 0, 0));
 
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
       return res.status(400).json({
@@ -264,10 +264,6 @@ export const addBlockedDateRange = async (req: AuthRequest, res: Response) => {
         error: 'Formato de fecha inválido'
       });
     }
-
-    // Set to midnight
-    start.setHours(0, 0, 0, 0);
-    end.setHours(0, 0, 0, 0);
 
     if (start > end) {
       return res.status(400).json({
