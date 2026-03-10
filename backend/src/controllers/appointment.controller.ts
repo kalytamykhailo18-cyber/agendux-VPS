@@ -310,6 +310,16 @@ export const createAppointment = async (req: Request, res: Response) => {
       });
     }
 
+    // Fetch custom field values with labels for Google Calendar
+    const customFieldData = await prisma.appointmentCustomFieldValue.findMany({
+      where: { appointmentId: result.appointment.id },
+      include: { customField: { select: { label: true } } }
+    });
+    const customFields = customFieldData.map(cf => ({
+      label: cf.customField.label,
+      value: cf.value
+    }));
+
     // Sync to Google Calendar (non-blocking)
     createCalendarEvent({
       professionalId: professional.id,
@@ -319,8 +329,10 @@ export const createAppointment = async (req: Request, res: Response) => {
       endTime,
       patientName: `${result.patient.firstName} ${result.patient.lastName}`,
       patientEmail: decryptedEmail,
+      patientWhatsapp: decryptedWhatsappNumber,
       status: result.appointment.status,
-      bookingReference: result.appointment.bookingReference
+      bookingReference: result.appointment.bookingReference,
+      customFields
     }).catch(err => {
       logger.error('Google Calendar sync error (non-blocking):', err);
     });
@@ -720,6 +732,17 @@ export const confirmAppointmentByEmail = async (req: Request, res: Response) => 
       status: 'CONFIRMED',
       confirmedVia: 'email'
     });
+
+    // Update Google Calendar event color to green (CONFIRMED)
+    if (appointment.googleEventId) {
+      updateCalendarEvent({
+        professionalId: appointment.professionalId,
+        googleEventId: appointment.googleEventId,
+        status: 'CONFIRMED'
+      }).catch(err => {
+        logger.error('Google Calendar color update error (non-blocking):', err);
+      });
+    }
 
     return res.send(getConfirmPageHTML('success', `Tu cita con ${appointment.professional.firstName} ${appointment.professional.lastName} ha sido confirmada exitosamente.`));
   } catch (error) {

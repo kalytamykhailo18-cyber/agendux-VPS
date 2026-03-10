@@ -655,6 +655,17 @@ export async function processIncomingMessage({ from, body }: IncomingMessagePara
         confirmedVia: 'whatsapp'
       });
 
+      // Update Google Calendar event color to green (CONFIRMED)
+      if (appointment.googleEventId) {
+        updateCalendarEvent({
+          professionalId: appointment.professionalId,
+          googleEventId: appointment.googleEventId,
+          status: 'CONFIRMED'
+        }).catch(err => {
+          logger.error('Google Calendar color update error (non-blocking):', err);
+        });
+      }
+
       // Send reconfirmation response - try template first, fallback to plain text
       const reconfirmSent = await sendWhatsAppTemplate({
         to: decryptedWhatsappNumber,

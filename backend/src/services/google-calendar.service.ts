@@ -167,8 +167,10 @@ interface CreateEventParams {
   endTime: Date;
   patientName: string;
   patientEmail?: string;
+  patientWhatsapp?: string;
   status: string;
   bookingReference: string;
+  customFields?: { label: string; value: string }[];
 }
 
 export const createCalendarEvent = async (params: CreateEventParams): Promise<string | null> => {
@@ -194,10 +196,36 @@ export const createCalendarEvent = async (params: CreateEventParams): Promise<st
       ? params.endTime.toISOString().split('T')[1].substring(0, 5)
       : String(params.endTime).substring(0, 5);
 
+    // Build description with patient details
+    const descriptionParts = [
+      `Paciente: ${params.patientName}`,
+      `Código de reserva: ${params.bookingReference}`
+    ];
+    if (params.patientWhatsapp) {
+      descriptionParts.push(`WhatsApp: ${params.patientWhatsapp}`);
+    }
+    if (params.patientEmail) {
+      descriptionParts.push(`Email: ${params.patientEmail}`);
+    }
+    if (params.customFields && params.customFields.length > 0) {
+      descriptionParts.push('');
+      for (const field of params.customFields) {
+        descriptionParts.push(`${field.label}: ${field.value}`);
+      }
+    }
+
+    // Build summary: LASTNAME - Turno - WhatsApp
+    const nameParts = params.patientName.split(' ');
+    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ').toUpperCase() : nameParts[0].toUpperCase();
+    const summaryParts = [lastName, `Turno con ${professional.firstName} ${professional.lastName}`];
+    if (params.patientWhatsapp) {
+      summaryParts.push(params.patientWhatsapp);
+    }
+
     // Create event
     const event: calendar_v3.Schema$Event = {
-      summary: `Cita: ${params.patientName}`,
-      description: `Código de reserva: ${params.bookingReference}\nPaciente: ${params.patientName}`,
+      summary: summaryParts.join(' - '),
+      description: descriptionParts.join('\n'),
       start: {
         dateTime: `${dateStr}T${startTimeStr}:00`,
         timeZone: professional.timezone || 'America/Argentina/Buenos_Aires'
