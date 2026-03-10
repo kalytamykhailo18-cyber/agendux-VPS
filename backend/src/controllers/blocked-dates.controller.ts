@@ -78,9 +78,8 @@ export const addBlockedDate = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Parse and validate date - use UTC to avoid timezone shift
-    const [year, month, day] = date.split('-').map(Number);
-    const blockedDate = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+    // Parse and validate date
+    const blockedDate = new Date(date + 'T00:00:00.000Z');
     if (isNaN(blockedDate.getTime())) {
       return res.status(400).json({
         success: false,
@@ -252,11 +251,9 @@ export const addBlockedDateRange = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Parse dates - use UTC noon to avoid timezone shift
-    const [sy, sm, sd] = startDate.split('-').map(Number);
-    const [ey, em, ed] = endDate.split('-').map(Number);
-    const start = new Date(Date.UTC(sy, sm - 1, sd, 12, 0, 0));
-    const end = new Date(Date.UTC(ey, em - 1, ed, 12, 0, 0));
+    // Parse dates
+    const start = new Date(startDate + 'T00:00:00.000Z');
+    const end = new Date(endDate + 'T00:00:00.000Z');
 
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
       return res.status(400).json({

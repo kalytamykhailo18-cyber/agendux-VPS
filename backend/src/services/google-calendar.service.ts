@@ -393,8 +393,8 @@ export const syncFromGoogleCalendar = async (professionalId: string): Promise<nu
       where: {
         professionalId,
         googleEventId: { not: null },
-        status: { notIn: ['cancelled', 'completed', 'no_show'] },
-        dateTime: { gte: now }
+        status: { notIn: ['CANCELLED', 'COMPLETED', 'NO_SHOW'] },
+        date: { gte: now }
       },
       select: { id: true, googleEventId: true }
     });
@@ -409,7 +409,7 @@ export const syncFromGoogleCalendar = async (professionalId: string): Promise<nu
           await prisma.appointment.update({
             where: { id: apt.id },
             data: {
-              status: 'cancelled',
+              status: 'CANCELLED',
               cancelledAt: new Date(),
               cancelledBy: 'professional',
               cancellationReason: 'Cancelado desde Google Calendar'

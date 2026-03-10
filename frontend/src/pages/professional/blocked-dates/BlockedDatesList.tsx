@@ -3,10 +3,11 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import type { BlockedDate } from '../../../types';
 
 // Format date for display (e.g., "Lunes, 15 de Enero 2024")
-// Append T12:00:00 to date-only strings to prevent UTC midnight from shifting to previous day in negative UTC offsets (e.g. Argentina UTC-3)
+// Extract YYYY-MM-DD and use T12:00:00 to prevent UTC midnight from shifting to previous day in negative UTC offsets (e.g. Argentina UTC-3)
 const formatDate = (date: Date | string): string => {
   const dateStr = typeof date === 'string' ? date : date.toISOString();
-  const d = new Date(dateStr.length === 10 ? `${dateStr}T12:00:00` : dateStr);
+  const dateOnly = dateStr.substring(0, 10); // Extract YYYY-MM-DD
+  const d = new Date(`${dateOnly}T12:00:00`);
   return d.toLocaleDateString('es-AR', {
     weekday: 'long',
     year: 'numeric',

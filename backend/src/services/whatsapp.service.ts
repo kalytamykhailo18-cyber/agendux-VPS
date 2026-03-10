@@ -399,18 +399,33 @@ export async function sendCancellationNotification({ appointmentId }: SendCancel
     // SECURITY FIX: Decrypt patient whatsappNumber before sending
     const decryptedWhatsappNumber = decrypt(appointment.patient.whatsappNumber);
 
-    // Send via approved Content Template
-    return await sendWhatsAppTemplate({
+    const patientName = `${appointment.patient.firstName} ${appointment.patient.lastName}`;
+    const professionalName = `${appointment.professional.firstName} ${appointment.professional.lastName}`;
+    const date = formatDateForMessage(appointment.date);
+    const time = formatTimeForMessage(appointment.startTime);
+
+    // Send via approved Content Template, fallback to plain text
+    const templateSent = await sendWhatsAppTemplate({
       to: decryptedWhatsappNumber,
       contentSid: CONTENT_SIDS.CANCELLATION,
       contentVariables: {
-        '1': `${appointment.patient.firstName} ${appointment.patient.lastName}`,
-        '2': formatDateForMessage(appointment.date),
-        '3': formatTimeForMessage(appointment.startTime),
-        '4': `${appointment.professional.firstName} ${appointment.professional.lastName}`,
+        '1': patientName,
+        '2': date,
+        '3': time,
+        '4': professionalName,
         '5': appointment.bookingReference
       }
     });
+
+    if (!templateSent) {
+      logger.warn('Cancellation template failed, trying plain text', { appointmentId });
+      await sendWhatsAppMessage({
+        to: decryptedWhatsappNumber,
+        message: `Hola ${patientName}, tu cita del ${date} a las ${time} con ${professionalName} ha sido cancelada. Código de reserva: ${appointment.bookingReference}. Si tenés consultas, contactá al profesional.`
+      });
+    }
+
+    return true;
   } catch (error) {
     logger.error('Error sending cancellation notification', { error, appointmentId });
     return false;
@@ -633,7 +648,7 @@ export async function processIncomingMessage({ from, body }: IncomingMessagePara
       });
 
       // Notify professional dashboard in real-time
-      emitToProfessional(appointment.professionalId, WebSocketEvent.APPOINTMENT_UPDATED, {
+      emitToProfessional(appointment.professionalId, WebSocketEvent.APPOINTMENT_CONFIRMED, {
         appointmentId: confirmedAppointment.id,
         bookingReference: confirmedAppointment.bookingReference,
         status: confirmedAppointment.status,

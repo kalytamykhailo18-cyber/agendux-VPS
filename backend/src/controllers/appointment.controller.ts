@@ -714,7 +714,7 @@ export const confirmAppointmentByEmail = async (req: Request, res: Response) => 
     });
 
     // Emit WebSocket event to professional dashboard
-    emitToProfessional(appointment.professionalId, WebSocketEvent.APPOINTMENT_UPDATED, {
+    emitToProfessional(appointment.professionalId, WebSocketEvent.APPOINTMENT_CONFIRMED, {
       appointmentId: appointment.id,
       bookingReference: appointment.bookingReference,
       status: 'CONFIRMED',
