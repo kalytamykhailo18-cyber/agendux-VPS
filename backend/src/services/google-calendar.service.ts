@@ -515,23 +515,32 @@ export const checkConnectionStatus = async (professionalId: string): Promise<{
       connected: true,
       calendarId: professional.googleCalendarId
     };
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Check connection status error:', error);
 
-    // If token is invalid, disconnect
-    await prisma.professional.update({
-      where: { id: professionalId },
-      data: {
-        googleCalendarConnected: false,
-        googleRefreshToken: null,
-        googleCalendarId: null
-      }
-    });
+    // Only disconnect on clear auth errors (401/403), not temporary issues
+    const statusCode = error?.code || error?.response?.status;
+    if (statusCode === 401 || statusCode === 403) {
+      await prisma.professional.update({
+        where: { id: professionalId },
+        data: {
+          googleCalendarConnected: false,
+          googleRefreshToken: null,
+          googleCalendarId: null
+        }
+      });
+
+      return {
+        connected: false,
+        calendarId: null,
+        error: 'Token expired or revoked'
+      };
+    }
 
     return {
-      connected: false,
+      connected: true,
       calendarId: null,
-      error: 'Token expired or revoked'
+      error: 'Temporary error checking connection'
     };
   }
 };
