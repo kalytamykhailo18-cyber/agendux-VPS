@@ -310,15 +310,20 @@ export const createAppointment = async (req: Request, res: Response) => {
       });
     }
 
-    // Fetch custom field values with labels for Google Calendar
-    const customFieldData = await prisma.appointmentCustomFieldValue.findMany({
-      where: { appointmentId: result.appointment.id },
-      include: { customField: { select: { label: true } } }
-    });
-    const customFields = customFieldData.map(cf => ({
-      label: cf.customField.label,
-      value: cf.value
-    }));
+    // Fetch custom field values for Google Calendar (non-blocking)
+    let customFields: { label: string; value: string }[] = [];
+    try {
+      const customFieldData = await prisma.appointmentCustomFieldValue.findMany({
+        where: { appointmentId: result.appointment.id },
+        include: { customField: { select: { fieldName: true } } }
+      });
+      customFields = customFieldData.map(cf => ({
+        label: cf.customField.fieldName,
+        value: cf.value
+      }));
+    } catch (cfErr) {
+      logger.error('Custom field fetch error (non-blocking):', cfErr);
+    }
 
     // Sync to Google Calendar (non-blocking)
     createCalendarEvent({
@@ -642,13 +647,14 @@ export const cancelAppointment = async (req: Request, res: Response) => {
       appointmentId: updatedAppointment.id
     });
 
-    // Delete Google Calendar event to free the time slot (non-blocking)
+    // Update Google Calendar event to red (CANCELLED) instead of deleting (non-blocking)
     if (appointment.googleEventId) {
-      deleteCalendarEvent(
-        appointment.professionalId,
-        appointment.googleEventId
-      ).catch(err => {
-        logger.error('Google Calendar delete error (non-blocking):', err);
+      updateCalendarEvent({
+        professionalId: appointment.professionalId,
+        googleEventId: appointment.googleEventId,
+        status: 'CANCELLED'
+      }).catch(err => {
+        logger.error('Google Calendar cancel update error (non-blocking):', err);
       });
     }
 

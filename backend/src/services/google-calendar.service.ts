@@ -214,10 +214,8 @@ export const createCalendarEvent = async (params: CreateEventParams): Promise<st
       }
     }
 
-    // Build summary: LASTNAME - Turno - WhatsApp
-    const nameParts = params.patientName.split(' ');
-    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ').toUpperCase() : nameParts[0].toUpperCase();
-    const summaryParts = [lastName, `Turno con ${professional.firstName} ${professional.lastName}`];
+    // Build summary: NOMBRE APELLIDO - Turno con {profesional} - WhatsApp
+    const summaryParts = [params.patientName.toUpperCase(), `Turno con ${professional.firstName} ${professional.lastName}`];
     if (params.patientWhatsapp) {
       summaryParts.push(params.patientWhatsapp);
     }

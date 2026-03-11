@@ -373,13 +373,14 @@ export const cancelAppointmentByProfessional = async (req: AuthRequest, res: Res
       }
     });
 
-    // Delete Google Calendar event to free the time slot (non-blocking)
+    // Update Google Calendar event to red (CANCELLED) instead of deleting (non-blocking)
     if (appointment.googleEventId) {
-      deleteCalendarEvent(
+      updateCalendarEvent({
         professionalId,
-        appointment.googleEventId
-      ).catch(err => {
-        logger.error('Google Calendar delete error (non-blocking):', err);
+        googleEventId: appointment.googleEventId,
+        status: 'CANCELLED'
+      }).catch(err => {
+        logger.error('Google Calendar cancel update error (non-blocking):', err);
       });
     }
 
