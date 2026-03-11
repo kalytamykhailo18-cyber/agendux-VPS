@@ -293,23 +293,20 @@ export const updateCalendarEvent = async (params: UpdateEventParams): Promise<bo
     const oauth2Client = await getAuthenticatedClient(params.professionalId);
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
-    // Get existing event
-    const existingEvent = await calendar.events.get({
-      calendarId: professional.googleCalendarId,
-      eventId: params.googleEventId
-    });
-
-    const updateData: calendar_v3.Schema$Event = {
-      ...existingEvent.data
-    };
+    // Use PATCH instead of PUT - only send changed fields, avoids read-only field conflicts
+    const patchData: calendar_v3.Schema$Event = {};
 
     // Update color if status changed
     if (params.status) {
-      updateData.colorId = EVENT_COLORS[params.status as keyof typeof EVENT_COLORS] || EVENT_COLORS.PENDING;
+      patchData.colorId = EVENT_COLORS[params.status as keyof typeof EVENT_COLORS] || EVENT_COLORS.PENDING;
 
-      // Update description for cancelled
+      // Update summary for cancelled
       if (params.status === 'CANCELLED') {
-        updateData.summary = `[CANCELADA] ${existingEvent.data.summary?.replace('[CANCELADA] ', '')}`;
+        const existingEvent = await calendar.events.get({
+          calendarId: professional.googleCalendarId,
+          eventId: params.googleEventId
+        });
+        patchData.summary = `[CANCELADA] ${existingEvent.data.summary?.replace('[CANCELADA] ', '')}`;
       }
     }
 
@@ -323,20 +320,20 @@ export const updateCalendarEvent = async (params: UpdateEventParams): Promise<bo
         ? params.endTime.toISOString().split('T')[1].substring(0, 5)
         : String(params.endTime).substring(0, 5);
 
-      updateData.start = {
+      patchData.start = {
         dateTime: `${dateStr}T${startTimeStr}:00`,
         timeZone: professional.timezone || 'America/Argentina/Buenos_Aires'
       };
-      updateData.end = {
+      patchData.end = {
         dateTime: `${dateStr}T${endTimeStr}:00`,
         timeZone: professional.timezone || 'America/Argentina/Buenos_Aires'
       };
     }
 
-    await calendar.events.update({
+    await calendar.events.patch({
       calendarId: professional.googleCalendarId,
       eventId: params.googleEventId,
-      requestBody: updateData,
+      requestBody: patchData,
       sendUpdates: 'none'
     });
 
