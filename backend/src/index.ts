@@ -231,8 +231,8 @@ const server = httpServer.listen(PORT, () => {
   }
 
   setTimeout(() => periodicGoogleCalendarSync(), 30 * 1000);
-  googleCalendarSyncInterval = setInterval(periodicGoogleCalendarSync, 10 * 60 * 1000);
-  logger.info('[GCal Sync] Periodic Google Calendar sync started (interval: 10 minutes)');
+  googleCalendarSyncInterval = setInterval(periodicGoogleCalendarSync, 5 * 60 * 1000);
+  logger.info('[GCal Sync] Periodic Google Calendar sync started (interval: 5 minutes)');
 });
 
 // Graceful shutdown
