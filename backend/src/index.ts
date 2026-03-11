@@ -39,6 +39,10 @@ import { startSubscriptionRenewalWorker, stopSubscriptionRenewalWorker } from '.
 // Import WebSocket configuration
 import { initializeWebSocket } from './config/socket.config';
 
+// Import Google Calendar sync
+import { syncFromGoogleCalendar } from './services/google-calendar.service';
+import prisma from './config/database';
+
 const app: Application = express();
 
 const PORT = process.env.PORT || 5000;
@@ -201,6 +205,34 @@ const server = httpServer.listen(PORT, () => {
 
   // Start subscription renewal worker
   startSubscriptionRenewalWorker();
+
+  // Periodic Google Calendar sync - every 10 minutes
+  // Detects events deleted from Google Calendar and notifies patients via WhatsApp + email
+  let googleCalendarSyncInterval: ReturnType<typeof setInterval> | null = null;
+
+  async function periodicGoogleCalendarSync() {
+    try {
+      const connectedProfessionals = await prisma.professional.findMany({
+        where: { googleCalendarConnected: true, googleRefreshToken: { not: null } },
+        select: { id: true }
+      });
+      if (connectedProfessionals.length === 0) return;
+      logger.info(`[GCal Sync] Syncing ${connectedProfessionals.length} connected professionals`);
+      for (const prof of connectedProfessionals) {
+        try {
+          await syncFromGoogleCalendar(prof.id);
+        } catch (err) {
+          logger.error(`[GCal Sync] Error syncing professional ${prof.id}:`, err);
+        }
+      }
+    } catch (error) {
+      logger.error('[GCal Sync] Periodic sync error:', error);
+    }
+  }
+
+  setTimeout(() => periodicGoogleCalendarSync(), 30 * 1000);
+  googleCalendarSyncInterval = setInterval(periodicGoogleCalendarSync, 10 * 60 * 1000);
+  logger.info('[GCal Sync] Periodic Google Calendar sync started (interval: 10 minutes)');
 });
 
 // Graceful shutdown
