@@ -14,6 +14,15 @@ import {
 // Returns all data needed for booking page by professional slug
 // ============================================
 
+// Get timezone offset in milliseconds for a given timezone and date
+// Returns the offset to subtract from local time to get UTC
+// e.g., for Argentina (UTC-3): returns -10800000 (so local - (-10800000) = local + 3h = UTC)
+function getTimezoneOffsetMs(timezone: string, date: Date): number {
+  const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
+  const tzDate = new Date(date.toLocaleString('en-US', { timeZone: timezone }));
+  return tzDate.getTime() - utcDate.getTime();
+}
+
 // Fixed fields that are always present in booking form
 const FIXED_FIELDS = [
   {
@@ -243,7 +252,8 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
       select: {
         id: true,
         isActive: true,
-        isSuspended: true
+        isSuspended: true,
+        timezone: true
       }
     });
 
@@ -378,6 +388,8 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
 
     // Generate available time slots
     const availableSlots: { time: string; available: boolean }[] = [];
+    // Timezone offset for converting local slot times to UTC (for external event comparison)
+    const tzOffset = getTimezoneOffsetMs(professional.timezone || 'America/Argentina/Buenos_Aires', selectedDate);
 
     for (const availability of availabilities) {
       // Parse start and end times
@@ -416,11 +428,9 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
         });
 
         // Check if slot overlaps with any external calendar event (Google Calendar)
-        // This implements requirement 9.2: Google events block platform availability
-        const slotStartDateTime = new Date(selectedDate);
-        slotStartDateTime.setHours(currentHour, currentMin, 0, 0);
-        const slotEndDateTime = new Date(selectedDate);
-        slotEndDateTime.setHours(slotEndHour, slotEndMin, 0, 0);
+        // Slot times are in professional's local timezone, external events are stored in UTC
+        const slotStartDateTime = new Date(selectedDate.getTime() + currentHour * 3600000 + currentMin * 60000 - tzOffset);
+        const slotEndDateTime = new Date(selectedDate.getTime() + slotEndHour * 3600000 + slotEndMin * 60000 - tzOffset);
 
         const isBlockedByExternalEvent = externalEvents.some((event) => {
           // Check for time overlap: slot overlaps if it starts before event ends AND ends after event starts
