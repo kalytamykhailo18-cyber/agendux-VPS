@@ -34,7 +34,7 @@ export async function processReminder(reminder: {
   };
 }): Promise<boolean> {
   try {
-    // Check if appointment is still active
+    // Check if appointment is still active (from joined query data)
     const validStatuses = ['PENDING', 'PENDING_PAYMENT', 'REMINDER_SENT', 'CONFIRMED'];
     if (!validStatuses.includes(reminder.appointment.status)) {
       // Mark reminder as cancelled since appointment is not active
@@ -43,6 +43,21 @@ export async function processReminder(reminder: {
         data: { status: 'cancelled' }
       });
       ServiceLogger.reminder(`Appointment ${reminder.appointmentId} is ${reminder.appointment.status}, cancelling reminder`);
+      return false;
+    }
+
+    // Fresh status check right before sending to close race condition window
+    // (appointment could have been cancelled between the batch query and now)
+    const freshAppointment = await prisma.appointment.findUnique({
+      where: { id: reminder.appointmentId },
+      select: { status: true }
+    });
+    if (!freshAppointment || !validStatuses.includes(freshAppointment.status)) {
+      await prisma.scheduledReminder.update({
+        where: { id: reminder.id },
+        data: { status: 'cancelled' }
+      });
+      ServiceLogger.reminder(`Appointment ${reminder.appointmentId} status changed to ${freshAppointment?.status || 'deleted'}, cancelling reminder`);
       return false;
     }
 

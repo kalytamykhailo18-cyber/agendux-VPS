@@ -283,7 +283,7 @@ export async function sendBookingConfirmation({ appointmentId }: BookingConfirma
       to: decryptedWhatsappNumber,
       contentSid: CONTENT_SIDS.BOOKING_CONFIRMATION,
       contentVariables: {
-        '1': `${appointment.patient.firstName} ${appointment.patient.lastName}`,
+        '1': `${appointment.patientFirstName || appointment.patient.firstName} ${appointment.patientLastName || appointment.patient.lastName}`,
         '2': formatDateForMessage(appointment.date),
         '3': formatTimeForMessage(appointment.startTime),
         '4': `${appointment.professional.firstName} ${appointment.professional.lastName}`,
@@ -343,7 +343,7 @@ export async function sendReminder({ appointmentId }: SendReminderParams): Promi
       to: decryptedWhatsappNumber,
       contentSid: CONTENT_SIDS.REMINDER,
       contentVariables: {
-        '1': `${appointment.patient.firstName} ${appointment.patient.lastName}`,
+        '1': `${appointment.patientFirstName || appointment.patient.firstName} ${appointment.patientLastName || appointment.patient.lastName}`,
         '2': formatDateForMessage(appointment.date),
         '3': formatTimeForMessage(appointment.startTime),
         '4': `${appointment.professional.firstName} ${appointment.professional.lastName}`
@@ -399,7 +399,7 @@ export async function sendCancellationNotification({ appointmentId }: SendCancel
     // SECURITY FIX: Decrypt patient whatsappNumber before sending
     const decryptedWhatsappNumber = decrypt(appointment.patient.whatsappNumber);
 
-    const patientName = `${appointment.patient.firstName} ${appointment.patient.lastName}`;
+    const patientName = `${appointment.patientFirstName || appointment.patient.firstName} ${appointment.patientLastName || appointment.patient.lastName}`;
     const professionalName = `${appointment.professional.firstName} ${appointment.professional.lastName}`;
     const date = formatDateForMessage(appointment.date);
     const time = formatTimeForMessage(appointment.startTime);
@@ -456,9 +456,16 @@ export async function scheduleRemindersForAppointment({
       orderBy: { reminderNumber: 'asc' }
     });
 
+    // Get professional timezone
+    const professional = await prisma.professional.findUnique({
+      where: { id: professionalId },
+      select: { timezone: true }
+    });
+    const timezone = professional?.timezone || 'America/Argentina/Buenos_Aires';
+
     // If no settings, use default (24 hours before)
     if (reminderSettings.length === 0) {
-      const appointmentDateTime = combineDateTime(appointmentDate, appointmentTime);
+      const appointmentDateTime = combineDateTime(appointmentDate, appointmentTime, timezone);
       const reminderTime = new Date(appointmentDateTime.getTime() - 24 * 60 * 60 * 1000);
 
       await prisma.scheduledReminder.create({
@@ -471,28 +478,27 @@ export async function scheduleRemindersForAppointment({
       return;
     }
 
-    // Get professional timezone
-    const professional = await prisma.professional.findUnique({
-      where: { id: professionalId },
-      select: { timezone: true }
-    });
-    const timezone = professional?.timezone || 'America/Argentina/Buenos_Aires';
-
     // Create scheduled reminders based on settings
     for (const setting of reminderSettings) {
-      const appointmentDateTime = combineDateTime(appointmentDate, appointmentTime);
+      const appointmentDateTime = combineDateTime(appointmentDate, appointmentTime, timezone);
       let reminderTime = new Date(appointmentDateTime.getTime() - setting.hoursBefore * 60 * 60 * 1000);
 
       // Handle night-before option for early morning appointments
       if (setting.enableNightBefore) {
-        const appointmentHour = appointmentDateTime.getUTCHours();
+        // Get the LOCAL hour of the appointment (not UTC)
+        const offsetMs = getTimezoneOffsetMs(timezone, appointmentDateTime);
+        const localAppointmentHour = new Date(appointmentDateTime.getTime() + offsetMs).getUTCHours();
+        const localReminderHour = new Date(reminderTime.getTime() + offsetMs).getUTCHours();
 
-        // If appointment is before 10 AM and reminder would be very early (before 7 AM)
-        if (appointmentHour < 10 && reminderTime.getUTCHours() < 7) {
-          // Send reminder the night before at 20:00 (8 PM)
-          reminderTime = new Date(appointmentDateTime);
-          reminderTime.setUTCDate(reminderTime.getUTCDate() - 1);
-          reminderTime.setUTCHours(20, 0, 0, 0);
+        // If appointment is before 10 AM local and reminder would be very early (before 7 AM local)
+        if (localAppointmentHour < 10 && localReminderHour < 7) {
+          // Send reminder the night before at 20:00 LOCAL time
+          // Start from midnight UTC of the appointment day, add 20 hours local, convert to UTC
+          const dayBefore = new Date(appointmentDateTime);
+          dayBefore.setUTCDate(dayBefore.getUTCDate() - 1);
+          dayBefore.setUTCHours(0, 0, 0, 0);
+          // 20:00 local = 20:00 + (-offset) in UTC. For Argentina: 20:00 - (-3h) = 23:00 UTC
+          reminderTime = new Date(dayBefore.getTime() + 20 * 3600000 - offsetMs);
         }
       }
 
@@ -512,11 +518,26 @@ export async function scheduleRemindersForAppointment({
   }
 }
 
-function combineDateTime(date: Date, time: Date): Date {
+// Get timezone offset in milliseconds (e.g., Argentina UTC-3 returns -10800000)
+function getTimezoneOffsetMs(timezone: string, date: Date): number {
+  const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
+  const tzDate = new Date(date.toLocaleString('en-US', { timeZone: timezone }));
+  return tzDate.getTime() - utcDate.getTime();
+}
+
+// Combine date and time into a proper UTC DateTime
+// Time values are stored as local Argentina time (e.g., 10:40 = 10:40 Argentina)
+// but in a Date with UTC epoch (1970-01-01T10:40:00.000Z), so getUTCHours() returns the local hour.
+// We must convert to real UTC by subtracting the timezone offset.
+function combineDateTime(date: Date, time: Date, timezone: string): Date {
   const combined = new Date(date);
   const timeDate = new Date(time);
+  // Set the local hours/minutes onto the date (still "fake UTC" at this point)
   combined.setUTCHours(timeDate.getUTCHours(), timeDate.getUTCMinutes(), 0, 0);
-  return combined;
+  // Convert from local time to real UTC by subtracting timezone offset
+  // For Argentina (UTC-3): offset = -3h, so we subtract -3h = add 3h
+  const offsetMs = getTimezoneOffsetMs(timezone, combined);
+  return new Date(combined.getTime() - offsetMs);
 }
 
 // ============================================
@@ -671,7 +692,7 @@ export async function processIncomingMessage({ from, body }: IncomingMessagePara
         to: decryptedWhatsappNumber,
         contentSid: CONTENT_SIDS.RECONFIRMATION,
         contentVariables: {
-          '1': `${patient.firstName} ${patient.lastName}`,
+          '1': `${appointment.patientFirstName || patient.firstName} ${appointment.patientLastName || patient.lastName}`,
           '2': formatDateForMessage(appointment.date),
           '3': formatTimeForMessage(appointment.startTime),
           '4': `${appointment.professional.firstName} ${appointment.professional.lastName}`

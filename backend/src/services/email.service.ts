@@ -413,7 +413,7 @@ export async function sendBookingConfirmationEmail({ appointmentId }: BookingCon
     // Prepare variables
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     const variables: EmailVariables = {
-      patient_name: `${appointment.patient.firstName} ${appointment.patient.lastName}`,
+      patient_name: `${appointment.patientFirstName || appointment.patient.firstName} ${appointment.patientLastName || appointment.patient.lastName}`,
       professional_name: `${appointment.professional.firstName} ${appointment.professional.lastName}`,
       date: formatDateForEmail(appointment.date),
       time: formatTimeForEmail(appointment.startTime),
@@ -469,7 +469,7 @@ export async function sendReminderEmail({ appointmentId }: SendReminderEmailPara
     // Prepare variables
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     const variables: EmailVariables = {
-      patient_name: `${appointment.patient.firstName} ${appointment.patient.lastName}`,
+      patient_name: `${appointment.patientFirstName || appointment.patient.firstName} ${appointment.patientLastName || appointment.patient.lastName}`,
       professional_name: `${appointment.professional.firstName} ${appointment.professional.lastName}`,
       date: formatDateForEmail(appointment.date),
       time: formatTimeForEmail(appointment.startTime),
@@ -519,7 +519,7 @@ export async function sendCancellationEmail({ appointmentId }: SendCancellationE
 
     // Prepare variables
     const variables: EmailVariables = {
-      patient_name: `${appointment.patient.firstName} ${appointment.patient.lastName}`,
+      patient_name: `${appointment.patientFirstName || appointment.patient.firstName} ${appointment.patientLastName || appointment.patient.lastName}`,
       professional_name: `${appointment.professional.firstName} ${appointment.professional.lastName}`,
       date: formatDateForEmail(appointment.date),
       time: formatTimeForEmail(appointment.startTime),

@@ -145,6 +145,10 @@ model Appointment {
   startTime         DateTime          @db.Time
   endTime           DateTime          @db.Time
 
+  // Denormalized patient name (snapshot at booking time, not affected by later patient updates)
+  patientFirstName  String?
+  patientLastName   String?
+
   status            AppointmentStatus @default(PENDING)
   bookingReference  String            @unique // Unique code for patient (e.g., ABC123)
 

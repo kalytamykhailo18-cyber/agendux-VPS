@@ -281,7 +281,9 @@ export const handleIncomingMessage = async (req: Request, res: Response) => {
     const { From, Body, MessageStatus, SmsStatus } = req.body;
 
     // Handle Twilio status callbacks (delivery notifications) - return 200
-    if (MessageStatus || SmsStatus) {
+    // IMPORTANT: Only treat as status callback if there is no Body/From,
+    // because interactive button responses include MessageStatus alongside the message
+    if ((MessageStatus || SmsStatus) && !Body) {
       res.set('Content-Type', 'text/xml');
       return res.send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
     }

@@ -252,7 +252,7 @@ export const createAppointment = async (req: Request, res: Response) => {
       const depositRequired = professional.depositEnabled && professional.depositAmount;
       const initialStatus = depositRequired ? 'PENDING_PAYMENT' : 'PENDING';
 
-      // Create appointment
+      // Create appointment (snapshot patient name for stable reminder messages)
       const appointment = await tx.appointment.create({
         data: {
           professionalId: professional.id,
@@ -260,6 +260,8 @@ export const createAppointment = async (req: Request, res: Response) => {
           date: appointmentDate,
           startTime,
           endTime,
+          patientFirstName: firstName,
+          patientLastName: lastName,
           status: initialStatus,
           bookingReference: bookingReference!,
           depositRequired: depositRequired ? true : false,
