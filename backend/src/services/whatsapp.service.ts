@@ -610,32 +610,47 @@ export async function processIncomingMessage({ from, body }: IncomingMessagePara
         }
       },
       orderBy: { date: 'asc' as const },
-      take: 1,
       include: {
-        professional: true
+        professional: true,
+        scheduledReminders: {
+          where: { status: 'sent' },
+          orderBy: { sentAt: 'desc' as const },
+          take: 1
+        }
       }
     };
 
-    // Find the patient by WhatsApp number hash (try primary, then alternate)
-    let patient = await prisma.patient.findFirst({
-      where: {
-        whatsappNumberHash: phoneHash
-      },
-      include: {
-        appointments: appointmentFilter
-      }
-    });
+    // Find ALL patients with this phone number (may exist across multiple professionals)
+    // Prefer the patient whose appointment has the most recently sent reminder
+    const hashesToTry = [phoneHash, ...(alternateHash ? [alternateHash] : [])];
+    let patient: any = null;
 
-    // If not found, try alternate Argentine format
-    if ((!patient || patient.appointments.length === 0) && alternateHash) {
-      patient = await prisma.patient.findFirst({
-        where: {
-          whatsappNumberHash: alternateHash
-        },
-        include: {
-          appointments: appointmentFilter
-        }
+    for (const hash of hashesToTry) {
+      const candidates = await prisma.patient.findMany({
+        where: { whatsappNumberHash: hash },
+        include: { appointments: appointmentFilter }
       });
+      for (const candidate of candidates) {
+        if (candidate.appointments.length === 0) continue;
+        if (!patient || patient.appointments.length === 0) {
+          patient = candidate;
+          continue;
+        }
+        // Compare: prefer candidate whose appointment has a more recently sent reminder
+        const getLatestReminder = (p: any) => {
+          let latest = 0;
+          for (const apt of p.appointments) {
+            if (apt.scheduledReminders?.[0]?.sentAt) {
+              const t = new Date(apt.scheduledReminders[0].sentAt).getTime();
+              if (t > latest) latest = t;
+            }
+          }
+          return latest;
+        };
+        if (getLatestReminder(candidate) > getLatestReminder(patient)) {
+          patient = candidate;
+        }
+      }
     }
 
     if (!patient || patient.appointments.length === 0) {
@@ -651,7 +666,21 @@ export async function processIncomingMessage({ from, body }: IncomingMessagePara
       };
     }
 
-    const appointment = patient.appointments[0];
+    // Pick the appointment the patient is most likely responding to:
+    // Prefer the one with the most recently sent reminder, fallback to earliest by date
+    let appointment = patient.appointments[0];
+    if (patient.appointments.length > 1) {
+      const withRecentReminder = patient.appointments
+        .filter((a: any) => a.scheduledReminders?.length > 0 && a.scheduledReminders[0].sentAt)
+        .sort((a: any, b: any) => {
+          const aTime = new Date(a.scheduledReminders[0].sentAt).getTime();
+          const bTime = new Date(b.scheduledReminders[0].sentAt).getTime();
+          return bTime - aTime; // most recent first
+        });
+      if (withRecentReminder.length > 0) {
+        appointment = withRecentReminder[0];
+      }
+    }
     const normalizedBody = body.toLowerCase().trim();
 
     // SECURITY FIX: Decrypt patient whatsappNumber for sending responses
