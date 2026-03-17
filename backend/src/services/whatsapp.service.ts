@@ -203,33 +203,33 @@ interface SendTemplateParams {
   contentVariables: Record<string, string>;
 }
 
-export async function sendWhatsAppTemplate({ to, contentSid, contentVariables }: SendTemplateParams): Promise<boolean> {
+export async function sendWhatsAppTemplate({ to, contentSid, contentVariables }: SendTemplateParams): Promise<{ success: boolean; messageSid?: string }> {
   try {
     const client = getTwilioClient();
     if (!client) {
       logger.warn('Twilio not configured - skipping template message');
-      return false;
+      return { success: false };
     }
 
     if (!TWILIO_WHATSAPP_NUMBER) {
       logger.error('TWILIO_WHATSAPP_NUMBER not configured');
-      return false;
+      return { success: false };
     }
 
     const formattedTo = formatWhatsAppNumber(to);
 
-    await client.messages.create({
+    const message = await client.messages.create({
       from: `whatsapp:${TWILIO_WHATSAPP_NUMBER}`,
       to: formattedTo,
       contentSid,
       contentVariables: JSON.stringify(contentVariables)
     });
 
-    ServiceLogger.whatsapp('template_message_sent', { to: formattedTo, contentSid });
-    return true;
+    ServiceLogger.whatsapp('template_message_sent', { to: formattedTo, contentSid, messageSid: message.sid });
+    return { success: true, messageSid: message.sid };
   } catch (error) {
     logger.error('Error sending WhatsApp template', { error, to, contentSid });
-    return false;
+    return { success: false };
   }
 }
 
@@ -279,7 +279,7 @@ export async function sendBookingConfirmation({ appointmentId }: BookingConfirma
     const cancelUrl = `${frontendUrl}/cancel?ref=${appointment.bookingReference}`;
 
     // Send via approved Content Template
-    return await sendWhatsAppTemplate({
+    const result = await sendWhatsAppTemplate({
       to: decryptedWhatsappNumber,
       contentSid: CONTENT_SIDS.BOOKING_CONFIRMATION,
       contentVariables: {
@@ -292,6 +292,7 @@ export async function sendBookingConfirmation({ appointmentId }: BookingConfirma
         '7': cancelUrl
       }
     });
+    return result.success;
   } catch (error) {
     logger.error('Error sending booking confirmation', { error, appointmentId });
     return false;
@@ -306,7 +307,7 @@ interface SendReminderParams {
   appointmentId: string;
 }
 
-export async function sendReminder({ appointmentId }: SendReminderParams): Promise<boolean> {
+export async function sendReminder({ appointmentId }: SendReminderParams): Promise<{ sent: boolean; messageSid?: string }> {
   try {
     // Get appointment with all related data
     const appointment = await prisma.appointment.findUnique({
@@ -326,20 +327,20 @@ export async function sendReminder({ appointmentId }: SendReminderParams): Promi
 
     if (!appointment) {
       logger.error('Appointment not found', { appointmentId });
-      return false;
+      return { sent: false };
     }
 
     // Don't send reminders for cancelled/completed appointments
     if (appointment.status === 'CANCELLED' || appointment.status === 'COMPLETED' || appointment.status === 'NO_SHOW') {
       ServiceLogger.whatsapp('reminder_skipped', { appointmentId, status: appointment.status });
-      return true;
+      return { sent: true };
     }
 
     // SECURITY FIX: Decrypt patient whatsappNumber before sending
     const decryptedWhatsappNumber = decrypt(appointment.patient.whatsappNumber);
 
     // Send via approved Content Template
-    const sent = await sendWhatsAppTemplate({
+    const result = await sendWhatsAppTemplate({
       to: decryptedWhatsappNumber,
       contentSid: CONTENT_SIDS.REMINDER,
       contentVariables: {
@@ -351,17 +352,17 @@ export async function sendReminder({ appointmentId }: SendReminderParams): Promi
     });
 
     // Update appointment status to REMINDER_SENT if still pending
-    if (sent && (appointment.status === 'PENDING' || appointment.status === 'PENDING_PAYMENT')) {
+    if (result.success && (appointment.status === 'PENDING' || appointment.status === 'PENDING_PAYMENT')) {
       await prisma.appointment.update({
         where: { id: appointmentId },
         data: { status: 'REMINDER_SENT' }
       });
     }
 
-    return sent;
+    return { sent: result.success, messageSid: result.messageSid };
   } catch (error) {
     logger.error('Error sending reminder', { error, appointmentId });
-    return false;
+    return { sent: false };
   }
 }
 
@@ -405,7 +406,7 @@ export async function sendCancellationNotification({ appointmentId }: SendCancel
     const time = formatTimeForMessage(appointment.startTime);
 
     // Send via approved Content Template, fallback to plain text
-    const templateSent = await sendWhatsAppTemplate({
+    const templateResult = await sendWhatsAppTemplate({
       to: decryptedWhatsappNumber,
       contentSid: CONTENT_SIDS.CANCELLATION,
       contentVariables: {
@@ -417,7 +418,7 @@ export async function sendCancellationNotification({ appointmentId }: SendCancel
       }
     });
 
-    if (!templateSent) {
+    if (!templateResult.success) {
       logger.warn('Cancellation template failed, trying plain text', { appointmentId });
       await sendWhatsAppMessage({
         to: decryptedWhatsappNumber,
@@ -561,13 +562,8 @@ export async function cancelScheduledReminders(appointmentId: string): Promise<v
 }
 
 // ============================================
-// PROCESS INCOMING WHATSAPP MESSAGE
+// CONFIRMATION/CANCELLATION HANDLERS (shared by SID-based and heuristic matching)
 // ============================================
-
-interface IncomingMessageParams {
-  from: string; // WhatsApp number
-  body: string; // Message content
-}
 
 interface ProcessMessageResult {
   success: boolean;
@@ -576,10 +572,182 @@ interface ProcessMessageResult {
   message?: string;
 }
 
-export async function processIncomingMessage({ from, body }: IncomingMessageParams): Promise<ProcessMessageResult> {
+async function handleConfirmation(appointment: any, patient: any, decryptedWhatsappNumber: string): Promise<ProcessMessageResult> {
+  const confirmedAppointment = await prisma.appointment.update({
+    where: { id: appointment.id },
+    data: { status: 'CONFIRMED' }
+  });
+
+  // Notify professional dashboard in real-time
+  emitToProfessional(appointment.professionalId, WebSocketEvent.APPOINTMENT_CONFIRMED, {
+    appointmentId: confirmedAppointment.id,
+    bookingReference: confirmedAppointment.bookingReference,
+    status: confirmedAppointment.status,
+    confirmedVia: 'whatsapp'
+  });
+
+  // Update Google Calendar event color to green (CONFIRMED)
+  if (appointment.googleEventId) {
+    updateCalendarEvent({
+      professionalId: appointment.professionalId,
+      googleEventId: appointment.googleEventId,
+      status: 'CONFIRMED'
+    }).catch(err => {
+      logger.error('Google Calendar color update error (non-blocking):', err);
+    });
+  }
+
+  // Send reconfirmation response - try template first, fallback to plain text
+  const reconfirmResult = await sendWhatsAppTemplate({
+    to: decryptedWhatsappNumber,
+    contentSid: CONTENT_SIDS.RECONFIRMATION,
+    contentVariables: {
+      '1': `${appointment.patientFirstName || patient.firstName} ${appointment.patientLastName || patient.lastName}`,
+      '2': formatDateForMessage(appointment.date),
+      '3': formatTimeForMessage(appointment.startTime),
+      '4': `${appointment.professional.firstName} ${appointment.professional.lastName}`
+    }
+  });
+
+  // Fallback to plain text if template fails
+  if (!reconfirmResult.success) {
+    await sendWhatsAppMessage({
+      to: decryptedWhatsappNumber,
+      message: `✅ Tu cita del ${formatDateForMessage(appointment.date)} a las ${formatTimeForMessage(appointment.startTime)} con ${appointment.professional.firstName} ${appointment.professional.lastName} ha sido confirmada. ¡Te esperamos!`
+    });
+  }
+
+  return {
+    success: true,
+    action: 'CONFIRMED',
+    appointmentId: appointment.id
+  };
+}
+
+async function handleCancellation(appointment: any, patient: any, decryptedWhatsappNumber: string): Promise<ProcessMessageResult> {
+  const updatedAppointment = await prisma.appointment.update({
+    where: { id: appointment.id },
+    data: {
+      status: 'CANCELLED',
+      cancelledAt: new Date(),
+      cancelledBy: 'patient',
+      cancellationReason: 'Cancelado via WhatsApp'
+    }
+  });
+
+  // Cancel any scheduled reminders
+  await cancelScheduledReminders(appointment.id);
+
+  // Emit WebSocket event to professional dashboard
+  emitToProfessional(appointment.professionalId, WebSocketEvent.APPOINTMENT_CANCELLED, {
+    appointmentId: updatedAppointment.id,
+    bookingReference: updatedAppointment.bookingReference,
+    status: updatedAppointment.status,
+    cancelledAt: updatedAppointment.cancelledAt,
+    cancellationReason: updatedAppointment.cancellationReason,
+    cancelledBy: updatedAppointment.cancelledBy
+  });
+
+  // Emit WebSocket event to admin dashboard
+  emitToAdmins(WebSocketEvent.APPOINTMENT_CANCELLED, {
+    professionalId: appointment.professionalId,
+    appointmentId: updatedAppointment.id
+  });
+
+  // Update Google Calendar event to red (CANCELLED) instead of deleting (non-blocking)
+  if (appointment.googleEventId) {
+    updateCalendarEvent({
+      professionalId: appointment.professionalId,
+      googleEventId: appointment.googleEventId,
+      status: 'CANCELLED'
+    }).catch(err => {
+      logger.error('Google Calendar cancel update error (non-blocking):', err);
+    });
+  }
+
+  // Send cancellation response
+  await sendWhatsAppMessage({
+    to: decryptedWhatsappNumber,
+    message: `Tu cita del ${formatDateForMessage(appointment.date)} ha sido cancelada. Si deseas reprogramar, puedes hacerlo en línea.`
+  });
+
+  return {
+    success: true,
+    action: 'CANCELLED',
+    appointmentId: appointment.id
+  };
+}
+
+// ============================================
+// PROCESS INCOMING WHATSAPP MESSAGE
+// ============================================
+
+interface IncomingMessageParams {
+  from: string; // WhatsApp number
+  body: string; // Message content
+  originalMessageSid?: string; // Twilio OriginalRepliedMessageSid for button responses
+}
+
+export async function processIncomingMessage({ from, body, originalMessageSid }: IncomingMessageParams): Promise<ProcessMessageResult> {
   try {
     // Clean the phone number (remove whatsapp: prefix if present)
     const cleanNumber = from.replace('whatsapp:', '').replace(/[^\d+]/g, '');
+
+    // STRATEGY: If we have the Twilio OriginalRepliedMessageSid (from button clicks),
+    // use it to find the EXACT appointment the patient is responding to.
+    // This prevents matching the wrong appointment when multiple reminders
+    // are sent to the same phone number.
+    if (originalMessageSid) {
+      const matchedReminder = await prisma.scheduledReminder.findFirst({
+        where: { twilioMessageSid: originalMessageSid },
+        include: {
+          appointment: {
+            include: { professional: true }
+          }
+        }
+      });
+
+      if (matchedReminder && matchedReminder.appointment) {
+        const apt = matchedReminder.appointment;
+        const validStatuses = ['PENDING', 'REMINDER_SENT', 'PENDING_PAYMENT'];
+        if (validStatuses.includes(apt.status)) {
+          // Find the patient for this appointment to get decrypted phone number
+          const matchedPatient = await prisma.patient.findUnique({
+            where: { id: apt.patientId }
+          });
+
+          if (matchedPatient) {
+            logger.info(`Matched appointment ${apt.id} via OriginalRepliedMessageSid ${originalMessageSid}`);
+
+            const decryptedWhatsappNumber = decrypt(matchedPatient.whatsappNumber);
+            const normalizedBody = body.toLowerCase().trim();
+            const confirmKeywords = ['si', 'sí', 'confirmo', 'confirmar', 'ok', 'yes', 'confirm', '1'];
+            const cancelKeywords = ['no', 'cancelo', 'cancelar', 'cancel', '2'];
+
+            if (confirmKeywords.some(keyword => normalizedBody.includes(keyword))) {
+              return await handleConfirmation(apt, matchedPatient, decryptedWhatsappNumber);
+            }
+
+            if (cancelKeywords.some(keyword => normalizedBody.includes(keyword))) {
+              return await handleCancellation(apt, matchedPatient, decryptedWhatsappNumber);
+            }
+
+            // Unknown response
+            await sendWhatsAppMessage({
+              to: decryptedWhatsappNumber,
+              message: 'No entendí tu respuesta. Por favor responde "SI" para confirmar o "NO" para cancelar tu cita.'
+            });
+            return { success: false, action: 'UNKNOWN', message: 'Respuesta no reconocida' };
+          }
+        }
+      }
+      // If OriginalRepliedMessageSid didn't match (e.g., old reminders without SID stored),
+      // fall through to the heuristic-based matching below
+      logger.info(`OriginalRepliedMessageSid ${originalMessageSid} not found in DB, falling back to heuristic matching`);
+    }
+
+    // FALLBACK: Heuristic-based matching (for reminders sent before SID tracking was added,
+    // or for plain text responses without OriginalRepliedMessageSid)
 
     // SECURITY FIX: WhatsApp numbers are encrypted in DB, so we can't use 'contains'
     // Instead, search by hash which is indexed and searchable
@@ -691,111 +859,11 @@ export async function processIncomingMessage({ from, body }: IncomingMessagePara
     const cancelKeywords = ['no', 'cancelo', 'cancelar', 'cancel', '2'];
 
     if (confirmKeywords.some(keyword => normalizedBody.includes(keyword))) {
-      // Confirm the appointment
-      const confirmedAppointment = await prisma.appointment.update({
-        where: { id: appointment.id },
-        data: { status: 'CONFIRMED' }
-      });
-
-      // Notify professional dashboard in real-time
-      emitToProfessional(appointment.professionalId, WebSocketEvent.APPOINTMENT_CONFIRMED, {
-        appointmentId: confirmedAppointment.id,
-        bookingReference: confirmedAppointment.bookingReference,
-        status: confirmedAppointment.status,
-        confirmedVia: 'whatsapp'
-      });
-
-      // Update Google Calendar event color to green (CONFIRMED)
-      if (appointment.googleEventId) {
-        updateCalendarEvent({
-          professionalId: appointment.professionalId,
-          googleEventId: appointment.googleEventId,
-          status: 'CONFIRMED'
-        }).catch(err => {
-          logger.error('Google Calendar color update error (non-blocking):', err);
-        });
-      }
-
-      // Send reconfirmation response - try template first, fallback to plain text
-      const reconfirmSent = await sendWhatsAppTemplate({
-        to: decryptedWhatsappNumber,
-        contentSid: CONTENT_SIDS.RECONFIRMATION,
-        contentVariables: {
-          '1': `${appointment.patientFirstName || patient.firstName} ${appointment.patientLastName || patient.lastName}`,
-          '2': formatDateForMessage(appointment.date),
-          '3': formatTimeForMessage(appointment.startTime),
-          '4': `${appointment.professional.firstName} ${appointment.professional.lastName}`
-        }
-      });
-
-      // Fallback to plain text if template fails
-      if (!reconfirmSent) {
-        await sendWhatsAppMessage({
-          to: decryptedWhatsappNumber,
-          message: `✅ Tu cita del ${formatDateForMessage(appointment.date)} a las ${formatTimeForMessage(appointment.startTime)} con ${appointment.professional.firstName} ${appointment.professional.lastName} ha sido confirmada. ¡Te esperamos!`
-        });
-      }
-
-      return {
-        success: true,
-        action: 'CONFIRMED',
-        appointmentId: appointment.id
-      };
+      return await handleConfirmation(appointment, patient, decryptedWhatsappNumber);
     }
 
     if (cancelKeywords.some(keyword => normalizedBody.includes(keyword))) {
-      // Cancel the appointment
-      const updatedAppointment = await prisma.appointment.update({
-        where: { id: appointment.id },
-        data: {
-          status: 'CANCELLED',
-          cancelledAt: new Date(),
-          cancelledBy: 'patient',
-          cancellationReason: 'Cancelado via WhatsApp'
-        }
-      });
-
-      // Cancel any scheduled reminders
-      await cancelScheduledReminders(appointment.id);
-
-      // Emit WebSocket event to professional dashboard
-      emitToProfessional(appointment.professionalId, WebSocketEvent.APPOINTMENT_CANCELLED, {
-        appointmentId: updatedAppointment.id,
-        bookingReference: updatedAppointment.bookingReference,
-        status: updatedAppointment.status,
-        cancelledAt: updatedAppointment.cancelledAt,
-        cancellationReason: updatedAppointment.cancellationReason,
-        cancelledBy: updatedAppointment.cancelledBy
-      });
-
-      // Emit WebSocket event to admin dashboard
-      emitToAdmins(WebSocketEvent.APPOINTMENT_CANCELLED, {
-        professionalId: appointment.professionalId,
-        appointmentId: updatedAppointment.id
-      });
-
-      // Update Google Calendar event to red (CANCELLED) instead of deleting (non-blocking)
-      if (appointment.googleEventId) {
-        updateCalendarEvent({
-          professionalId: appointment.professionalId,
-          googleEventId: appointment.googleEventId,
-          status: 'CANCELLED'
-        }).catch(err => {
-          logger.error('Google Calendar cancel update error (non-blocking):', err);
-        });
-      }
-
-      // Send cancellation response
-      await sendWhatsAppMessage({
-        to: decryptedWhatsappNumber,
-        message: `Tu cita del ${formatDateForMessage(appointment.date)} ha sido cancelada. Si deseas reprogramar, puedes hacerlo en línea.`
-      });
-
-      return {
-        success: true,
-        action: 'CANCELLED',
-        appointmentId: appointment.id
-      };
+      return await handleCancellation(appointment, patient, decryptedWhatsappNumber);
     }
 
     // Unknown response

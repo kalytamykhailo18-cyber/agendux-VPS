@@ -62,7 +62,7 @@ export async function processReminder(reminder: {
     }
 
     // Send the WhatsApp reminder
-    const whatsappSent = await sendReminder({ appointmentId: reminder.appointmentId });
+    const reminderResult = await sendReminder({ appointmentId: reminder.appointmentId });
 
     // Also send email reminder if patient has email
     if (reminder.appointment.patient.email) {
@@ -74,16 +74,17 @@ export async function processReminder(reminder: {
       }
     }
 
-    if (whatsappSent) {
-      // Mark reminder as sent
+    if (reminderResult.sent) {
+      // Mark reminder as sent and store Twilio message SID for matching button responses
       await prisma.scheduledReminder.update({
         where: { id: reminder.id },
         data: {
           status: 'sent',
-          sentAt: new Date()
+          sentAt: new Date(),
+          ...(reminderResult.messageSid ? { twilioMessageSid: reminderResult.messageSid } : {})
         }
       });
-      ServiceLogger.reminder(`Reminder sent successfully for appointment ${reminder.appointmentId}`);
+      ServiceLogger.reminder(`Reminder sent successfully for appointment ${reminder.appointmentId}`, { messageSid: reminderResult.messageSid });
       return true;
     } else {
       logger.error(`Failed to send WhatsApp reminder for appointment ${reminder.appointmentId}`);

@@ -36,13 +36,13 @@ export const sendWhatsAppDemo = async (req: Request, res: Response) => {
     const fullNumber = `${countryCode}${phoneNumber}`;
 
     // Send WhatsApp demo via approved template (no variables - static content)
-    const sent = await sendWhatsAppTemplate({
+    const result = await sendWhatsAppTemplate({
       to: fullNumber,
       contentSid: DEMO_CONTENT_SID,
       contentVariables: {}
     });
 
-    if (!sent) {
+    if (!result.success) {
       return res.status(500).json({
         success: false,
         error: 'No se pudo enviar el mensaje. Verifica que el número sea correcto e intenta nuevamente.'

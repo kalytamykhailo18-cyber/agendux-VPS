@@ -278,7 +278,7 @@ export const handleIncomingMessage = async (req: Request, res: Response) => {
       }
     }
 
-    const { From, Body, MessageStatus, SmsStatus } = req.body;
+    const { From, Body, MessageStatus, SmsStatus, OriginalRepliedMessageSid } = req.body;
 
     // Handle Twilio status callbacks (delivery notifications) - return 200
     // IMPORTANT: Only treat as status callback if there is no Body/From,
@@ -292,12 +292,13 @@ export const handleIncomingMessage = async (req: Request, res: Response) => {
       return res.status(400).send('Bad Request');
     }
 
-    logger.info(`Incoming WhatsApp message from ${From}: ${Body}`);
+    logger.info(`Incoming WhatsApp message from ${From}: ${Body}`, { OriginalRepliedMessageSid });
 
     // Process the message
     const result = await processIncomingMessage({
       from: From,
-      body: Body
+      body: Body,
+      originalMessageSid: OriginalRepliedMessageSid
     });
 
     logger.info('Message processing result:', result);

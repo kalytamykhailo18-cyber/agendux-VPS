@@ -386,12 +386,14 @@ model ScheduledReminder {
   scheduledFor    DateTime
   sentAt          DateTime?
   status          String    @default("pending") // pending, sent, cancelled
+  twilioMessageSid String?  // Twilio message SID for matching button responses
 
   createdAt       DateTime  @default(now())
 
   // Performance indexes (Section 12.1 - Speed)
   @@index([scheduledFor, status]) // Fast pending reminder queries
   @@index([appointmentId]) // Fast lookup by appointment
+  @@index([twilioMessageSid]) // Fast lookup by Twilio message SID
   @@map("scheduled_reminders")
 }
 
