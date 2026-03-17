@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { HelmetProvider } from 'react-helmet-async';
 import { useAppDispatch, useAppSelector } from './store';
 import { getCurrentUser } from './store/slices/authSlice';
 import AppRoutes from './routes';
@@ -20,9 +21,11 @@ function App() {
   }, [dispatch, token, isAuthenticated]);
 
   return (
-    <WebSocketProvider>
-      <AppRoutes />
-    </WebSocketProvider>
+    <HelmetProvider>
+      <WebSocketProvider>
+        <AppRoutes />
+      </WebSocketProvider>
+    </HelmetProvider>
   );
 }
 

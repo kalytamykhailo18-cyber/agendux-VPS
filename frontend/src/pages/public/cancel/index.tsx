@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../../store';
 import {
@@ -109,15 +110,24 @@ const CancelBookingPage = () => {
     dispatch(clearCancelBookingState());
   };
 
+  const seoHelmet = (
+    <Helmet>
+      <title>Cancelar cita | Agendux</title>
+      <meta name="description" content="Cancelá o reagendá tu cita en Agendux. Ingresá tu código de reserva y email para gestionar tu turno." />
+      <link rel="canonical" href="https://agendux.com/cancel" />
+      <meta name="robots" content="noindex" />
+    </Helmet>
+  );
+
   // Cancelled confirmation view
   if (cancelled) {
-    return <CancelledConfirmation onGoHome={handleGoHome} />;
+    return <>{seoHelmet}<CancelledConfirmation onGoHome={handleGoHome} /></>;
   }
 
   // Appointment details view
   if (appointment) {
     return (
-      <AppointmentDetails
+      <>{seoHelmet}<AppointmentDetails
         appointment={appointment}
         error={error}
         reason={reason}
@@ -128,13 +138,13 @@ const CancelBookingPage = () => {
         onConfirmCancel={handleCancel}
         onReschedule={handleReschedule}
         onSearchAnother={handleSearchAnother}
-      />
+      /></>
     );
   }
 
   // Lookup form view
   return (
-    <LookupForm
+    <>{seoHelmet}<LookupForm
       reference={reference}
       email={email}
       lookupError={lookupError}
@@ -144,7 +154,7 @@ const CancelBookingPage = () => {
       onEmailChange={setEmail}
       onSubmit={handleLookup}
       onGoHome={handleGoHome}
-    />
+    /></>
   );
 };
 

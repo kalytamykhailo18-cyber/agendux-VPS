@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useAppSelector } from '../../../store';
@@ -17,8 +18,29 @@ const FAQSection = () => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
+  const faqJsonLd = useMemo(() => {
+    if (faqs.length === 0) return null;
+    return JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((faq) => ({
+        '@type': 'Question',
+        name: faq.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: faq.answer,
+        },
+      })),
+    });
+  }, [faqs]);
+
   return (
     <div className="bg-gray-50 py-20">
+      {faqJsonLd && (
+        <Helmet>
+          <script type="application/ld+json">{faqJsonLd}</script>
+        </Helmet>
+      )}
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { Button, TextField, CircularProgress } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -114,6 +115,11 @@ const DudasPage = () => {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
+      <Helmet>
+        <title>Contacto y dudas | Agendux</title>
+        <meta name="description" content="¿Tenés dudas sobre Agendux? Completá el formulario y te respondemos a la brevedad. Gestión de turnos online para profesionales." />
+        <link rel="canonical" href="https://agendux.com/dudas" />
+      </Helmet>
       <div className="bg-white rounded-md shadow-sm p-6 sm:p-8">
         <h1 className="text-2xl font-bold text-gray-900 text-center mb-2">
           ¿Tenés dudas?

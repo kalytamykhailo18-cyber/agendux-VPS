@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /professional
+Disallow: /login
+Disallow: /booking/confirmation
+Disallow: /cancel
+
+Sitemap: https://agendux.com/sitemap.xml

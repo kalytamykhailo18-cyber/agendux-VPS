@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../../../store';
@@ -243,6 +244,15 @@ const BookingPage = () => {
 
   return (
     <div className="container-narrow safe-area-top safe-area-bottom">
+      <Helmet>
+        <title>Reservar cita con {pageData.professional.fullName} | Agendux</title>
+        <meta name="description" content={`Reservá tu cita con ${pageData.professional.fullName} online. Elegí fecha y horario disponible en Agendux.`} />
+        <link rel="canonical" href={`https://agendux.com/${slug}`} />
+        <meta property="og:title" content={`Reservar cita con ${pageData.professional.fullName} | Agendux`} />
+        <meta property="og:description" content={`Reservá tu cita con ${pageData.professional.fullName} online. Elegí fecha y horario disponible.`} />
+        <meta property="og:url" content={`https://agendux.com/${slug}`} />
+      </Helmet>
+
       {/* Professional header */}
       <div className="mb-4 sm:mb-6 text-center fade-down-normal">
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 zoom-in-fast">

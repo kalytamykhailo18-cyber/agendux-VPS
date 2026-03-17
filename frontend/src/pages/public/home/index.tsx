@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../../../store';
 import { getSiteContent } from '../../../store/slices/siteContentSlice';
@@ -36,6 +37,12 @@ const HomePage = () => {
 
   return (
     <div className="bg-white">
+      <Helmet>
+        <title>Agendux — Gestión de turnos online gratis para profesionales</title>
+        <meta name="description" content="Dejá de perder tiempo dando turnos por mensajes. Con Agendux tus pacientes reservan solos 24/7. Recordatorios por WhatsApp + Google Calendar. Comenzá gratis." />
+        <link rel="canonical" href="https://agendux.com/" />
+      </Helmet>
+
       {/* 1. Hero Section */}
       <HeroSection onStartFree={handleStartFree} />
 

@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 
 const PrivacyPage = () => {
   useEffect(() => {
@@ -7,6 +8,11 @@ const PrivacyPage = () => {
 
   return (
     <div className="mx-auto max-w-3xl zoom-in-normal">
+      <Helmet>
+        <title>Política de Privacidad | Agendux</title>
+        <meta name="description" content="Política de privacidad de Agendux. Cómo recopilamos, usamos y protegemos tu información personal en nuestra plataforma de gestión de turnos." />
+        <link rel="canonical" href="https://agendux.com/privacidad" />
+      </Helmet>
       <div className="rounded-md bg-white p-6 sm:p-8 shadow-sm">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 fade-down-fast">
           Política de Privacidad
