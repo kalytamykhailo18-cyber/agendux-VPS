@@ -25,6 +25,7 @@ import demoRoutes from './demo.routes';
 import testimonialRoutes from './testimonial.routes';
 import contactRoutes from './contact.routes';
 import siteContentRoutes from './site-content.routes';
+import sitemapRoutes from './sitemap.routes';
 
 /**
  * Configure all application routes
@@ -74,4 +75,7 @@ export function configureRoutes(app: Application): void {
 
   // Site content routes - public cached for landing, admin no cache
   app.use('/api/site-content', longCache, siteContentRoutes);
+
+  // Sitemap route - public, cached
+  app.use('/api/sitemap', longCache, sitemapRoutes);
 }
