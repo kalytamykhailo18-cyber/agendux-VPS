@@ -224,6 +224,25 @@ const BookingPage = () => {
     return null;
   }
 
+  // JSON-LD structured data for professional booking page
+  const professionalJsonLd = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'ProfessionalService',
+    name: pageData.professional.fullName,
+    url: `https://agendux.com/${slug}`,
+    description: `Reservá tu cita con ${pageData.professional.fullName} online. Elegí fecha y horario disponible.`,
+    provider: {
+      '@type': 'Organization',
+      name: 'Agendux',
+      url: 'https://agendux.com',
+    },
+    potentialAction: {
+      '@type': 'ReserveAction',
+      target: `https://agendux.com/${slug}`,
+      name: `Reservar cita con ${pageData.professional.fullName}`,
+    },
+  });
+
   // Show confirmation if booking was successful
   if (bookingConfirmation) {
     return (
@@ -251,6 +270,7 @@ const BookingPage = () => {
         <meta property="og:title" content={`Reservar cita con ${pageData.professional.fullName} | Agendux`} />
         <meta property="og:description" content={`Reservá tu cita con ${pageData.professional.fullName} online. Elegí fecha y horario disponible.`} />
         <meta property="og:url" content={`https://agendux.com/${slug}`} />
+        <script type="application/ld+json">{professionalJsonLd}</script>
       </Helmet>
 
       {/* Professional header */}
