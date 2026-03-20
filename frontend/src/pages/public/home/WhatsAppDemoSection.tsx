@@ -122,7 +122,7 @@ const WhatsAppDemoSection = () => {
                       if (!country) return selected;
                       return (
                         <span className="flex items-center gap-2">
-                          <img src={getFlagUrl(country.flag)} alt={country.country} width={20} height={15} style={{ objectFit: 'cover' }} />
+                          <img src={getFlagUrl(country.flag)} alt={country.country} width={20} height={15} loading="lazy" decoding="async" style={{ objectFit: 'cover' }} />
                           <span>{country.country}</span>
                           <span className="text-gray-500">({country.code})</span>
                         </span>
@@ -132,7 +132,7 @@ const WhatsAppDemoSection = () => {
                     {COUNTRY_CODES.map((country) => (
                       <MenuItem key={country.code} value={country.code}>
                         <span className="flex items-center gap-2">
-                          <img src={getFlagUrl(country.flag)} alt={country.country} width={20} height={15} style={{ objectFit: 'cover' }} />
+                          <img src={getFlagUrl(country.flag)} alt={country.country} width={20} height={15} loading="lazy" decoding="async" style={{ objectFit: 'cover' }} />
                           <span>{country.country}</span>
                           <span className="text-gray-500">({country.code})</span>
                         </span>

@@ -39,7 +39,7 @@ const PublicLayout = () => {
                 },
               }}
             >
-              <img src="/logo2.png" alt="Agendux" className="h-8 sm:h-10 w-auto" />
+              <img src="/logo2.png" alt="Agendux" width={152} height={40} className="h-8 sm:h-10 w-auto" />
             </Button>
 
             {/* Right side buttons */}
@@ -132,7 +132,7 @@ const PublicLayout = () => {
       {/* Simple footer - responsive */}
       <footer className="mt-auto bg-gray-900">
         <div className="container-dashboard py-4 sm:py-6 text-center">
-          <img src="/logo2.png" alt="Agendux" className="h-8 w-auto mx-auto mb-3 opacity-80" />
+          <img src="/logo2.png" alt="Agendux" width={122} height={32} loading="lazy" decoding="async" className="h-8 w-auto mx-auto mb-3 opacity-80" />
           <p className="text-xs sm:text-sm text-gray-400">
             &copy; {new Date().getFullYear()} Agendux. Todos los derechos reservados.
           </p>

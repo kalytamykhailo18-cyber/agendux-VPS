@@ -35,9 +35,15 @@ export default defineConfig({
     // Rollup options for code splitting
     rollupOptions: {
       output: {
-        // Simple vendor chunk - all node_modules together to avoid load order issues
+        // Split vendor chunks for better caching and smaller initial load
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
+            if (id.includes('chart.js') || id.includes('react-chartjs')) {
+              return 'vendor-charts';
+            }
+            if (id.includes('@mui')) {
+              return 'vendor-mui';
+            }
             return 'vendor';
           }
         },

@@ -24,7 +24,7 @@ const HeroSection = ({ onStartFree }: HeroSectionProps) => {
         <div className="flex items-center justify-center gap-3 sm:gap-4 mb-8 fade-down-fast">
           {/* Google Calendar Logo */}
           <div className="flex items-center justify-center zoom-in-fast">
-            <svg viewBox="0 0 200 200" className="w-12 h-12 sm:w-14 sm:h-14">
+            <svg viewBox="0 0 200 200" width={56} height={56} className="w-12 h-12 sm:w-14 sm:h-14">
               <defs>
                 <clipPath id="calClipHero">
                   <path d="M32 0 H168 Q200 0 200 32 V150 L150 200 H32 Q0 200 0 168 V32 Q0 0 32 0 Z"/>
@@ -53,7 +53,7 @@ const HeroSection = ({ onStartFree }: HeroSectionProps) => {
 
           {/* Gear Icon - Connecting element */}
           <div className="flex items-center justify-center w-22 h-22 sm:w-28 sm:h-28 zoom-in-normal">
-            <img src="/gear.gif" alt="Sync" className="w-22 h-22 sm:w-28 sm:h-28" />
+            <img src="/gear.gif" alt="Sync" width={112} height={112} decoding="async" className="w-22 h-22 sm:w-28 sm:h-28" />
           </div>
 
           {/* WhatsApp Logo */}
@@ -61,6 +61,9 @@ const HeroSection = ({ onStartFree }: HeroSectionProps) => {
             <img
               src="/WhatsApp.png"
               alt="WhatsApp"
+              width={56}
+              height={56}
+              decoding="async"
               className="w-12 h-12 sm:w-14 sm:h-14"
               style={{ filter: 'drop-shadow(2px 3px 3px rgba(0,0,0,0.3))' }}
             />
