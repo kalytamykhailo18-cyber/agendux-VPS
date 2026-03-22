@@ -31,6 +31,9 @@ const DudasPage = lazy(() => import('../pages/public/dudas'));
 const PrivacyPage = lazy(() => import('../pages/public/privacy'));
 const DepositConfirmationPage = lazy(() => import('../pages/public/deposit-confirmation'));
 const PsicologosPage = lazy(() => import('../pages/public/landing/PsicologosPage'));
+const MedicosPage = lazy(() => import('../pages/public/landing/MedicosPage'));
+const PeluqueriasPage = lazy(() => import('../pages/public/landing/PeluqueriasPage'));
+const ConsultoriosPage = lazy(() => import('../pages/public/landing/ConsultoriosPage'));
 
 // Login pages
 const AdminLoginPage = lazy(() => import('../pages/admin/login'));
@@ -97,6 +100,30 @@ const AppRoutes = () => {
           element={
             <Suspense fallback={<PageLoadingFallback />}>
               <PsicologosPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/para-medicos"
+          element={
+            <Suspense fallback={<PageLoadingFallback />}>
+              <MedicosPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/para-peluquerias"
+          element={
+            <Suspense fallback={<PageLoadingFallback />}>
+              <PeluqueriasPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/para-consultorios"
+          element={
+            <Suspense fallback={<PageLoadingFallback />}>
+              <ConsultoriosPage />
             </Suspense>
           }
         />

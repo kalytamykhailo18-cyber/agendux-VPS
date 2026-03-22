@@ -9,7 +9,7 @@ import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
-const PsicologosPage = () => {
+const PeluqueriasPage = () => {
   const navigate = useNavigate();
 
   const handleRegister = () => {
@@ -19,9 +19,9 @@ const PsicologosPage = () => {
   const jsonLd = JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'Service',
-    name: 'Agendux para Psicólogos',
-    description: 'Sistema de gestión de turnos online para psicólogos. Reservas 24/7, recordatorios por WhatsApp y sincronización con Google Calendar.',
-    url: 'https://agendux.com/para-psicologos',
+    name: 'Agendux para Peluquerías',
+    description: 'Sistema de gestión de turnos online para peluquerías y salones de belleza. Reservas 24/7, recordatorios por WhatsApp y sincronización con Google Calendar.',
+    url: 'https://agendux.com/para-peluquerias',
     provider: {
       '@type': 'Organization',
       name: 'Agendux',
@@ -34,12 +34,12 @@ const PsicologosPage = () => {
   return (
     <div className="bg-white">
       <Helmet>
-        <title>Agenda online para psicólogos — Gestión de turnos | Agendux</title>
-        <meta name="description" content="Sistema de turnos online para psicólogos. Tus pacientes reservan solos 24/7. Recordatorios automáticos por WhatsApp. Reducí ausencias hasta un 75%. Comenzá gratis." />
-        <link rel="canonical" href="https://agendux.com/para-psicologos" />
-        <meta property="og:title" content="Agenda online para psicólogos | Agendux" />
-        <meta property="og:description" content="Sistema de turnos online para psicólogos. Tus pacientes reservan solos 24/7. Recordatorios por WhatsApp. Comenzá gratis." />
-        <meta property="og:url" content="https://agendux.com/para-psicologos" />
+        <title>Agenda online para peluquerías — Gestión de turnos | Agendux</title>
+        <meta name="description" content="Sistema de turnos online para peluquerías y salones de belleza. Tus clientes reservan solos 24/7. Recordatorios automáticos por WhatsApp. Reducí ausencias hasta un 75%. Comenzá gratis." />
+        <link rel="canonical" href="https://agendux.com/para-peluquerias" />
+        <meta property="og:title" content="Agenda online para peluquerías | Agendux" />
+        <meta property="og:description" content="Sistema de turnos online para peluquerías. Tus clientes reservan solos 24/7. Recordatorios por WhatsApp. Comenzá gratis." />
+        <meta property="og:url" content="https://agendux.com/para-peluquerias" />
         <script type="application/ld+json">{jsonLd}</script>
       </Helmet>
 
@@ -47,10 +47,10 @@ const PsicologosPage = () => {
       <div className="mx-auto max-w-7xl px-4 pt-12 pb-16 sm:px-6 lg:px-8">
         <div className="text-center">
           <p className="text-blue-600 font-semibold text-sm sm:text-base mb-4 fade-down-fast">
-            Diseñado para profesionales de la salud mental
+            Diseñado para peluquerías y salones de belleza
           </p>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl md:text-5xl fade-down-fast">
-            Agenda online para psicólogos
+            Agenda online para peluquerías
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600 fade-up-normal">
             Dejá de perder tiempo coordinando turnos.
@@ -58,27 +58,18 @@ const PsicologosPage = () => {
             Y de sufrir ausencias sin aviso.
           </p>
           <p className="mx-auto mt-4 max-w-2xl text-base text-gray-600 fade-up-normal">
-            Con Agendux, tus pacientes reservan solos las 24 horas y reciben recordatorios automáticos por WhatsApp que reducen el ausentismo.
+            Con Agendux, tus clientes reservan solos las 24 horas y reciben recordatorios automáticos por WhatsApp que reducen el ausentismo.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3">
             <Button
               variant="contained"
               onClick={handleRegister}
-              sx={{
-                width: { xs: '100%', sm: 'auto' },
-                textTransform: 'none',
-                px: 5,
-                py: 1.75,
-                fontSize: '1.125rem',
-                fontWeight: 600,
-              }}
+              sx={{ width: { xs: '100%', sm: 'auto' }, textTransform: 'none', px: 5, py: 1.75, fontSize: '1.125rem', fontWeight: 600 }}
               className="fade-up-fast"
             >
               Comenzar Gratis — Sin Tarjeta
             </Button>
-            <p className="text-sm text-gray-500 fade-up-normal">
-              Obtené tu link personalizado en minutos. Sin compromiso.
-            </p>
+            <p className="text-sm text-gray-500 fade-up-normal">Obtené tu link personalizado en minutos. Sin compromiso.</p>
           </div>
         </div>
       </div>
@@ -87,30 +78,28 @@ const PsicologosPage = () => {
       <div className="bg-gray-50 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 fade-down-fast">
-              ¿Te suena familiar?
-            </h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 fade-down-fast">¿Te suena familiar?</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <div className="bg-white rounded-lg p-6 shadow-sm fade-up-normal">
               <AccessTimeIcon sx={{ fontSize: 40, color: '#ef4444', mb: 2 }} />
-              <h3 className="font-semibold text-gray-900 mb-2">Perdés tiempo coordinando</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">WhatsApp que no para</h3>
               <p className="text-gray-600 text-sm">
-                Respondés mensajes de WhatsApp a cualquier hora para agendar, confirmar y reprogramar turnos. Tiempo que podrías dedicar a tus pacientes.
+                Mensajes a cualquier hora para pedir turno, cambiar horario, preguntar disponibilidad. Mientras atendés un cliente, se acumulan los mensajes sin responder.
               </p>
             </div>
             <div className="bg-white rounded-lg p-6 shadow-sm fade-up-normal">
               <TrendingDownIcon sx={{ fontSize: 40, color: '#ef4444', mb: 2 }} />
-              <h3 className="font-semibold text-gray-900 mb-2">Pacientes que no asisten</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">Clientes que no vienen</h3>
               <p className="text-gray-600 text-sm">
-                Las ausencias sin aviso dejan huecos en tu agenda que no podés llenar. Perdés ingresos y tiempo disponible que otro paciente podría usar.
+                Reservaron turno y no aparecen. Ese horario queda vacío y otro cliente que quería venir se quedó sin lugar.
               </p>
             </div>
             <div className="bg-white rounded-lg p-6 shadow-sm fade-up-normal">
               <AttachMoneyIcon sx={{ fontSize: 40, color: '#ef4444', mb: 2 }} />
-              <h3 className="font-semibold text-gray-900 mb-2">Ingresos afectados</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">Sillón vacío, plata perdida</h3>
               <p className="text-gray-600 text-sm">
-                Cada turno perdido es dinero que no entra. Si atendés 6 pacientes por día y 2 no vienen, estás perdiendo un tercio de tus ingresos.
+                Cada turno que se pierde es un servicio que no cobrás. Las ausencias de última hora no se recuperan.
               </p>
             </div>
           </div>
@@ -121,12 +110,8 @@ const PsicologosPage = () => {
       <div className="py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 fade-down-fast">
-              Cómo Agendux resuelve esto
-            </h2>
-            <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto fade-up-normal">
-              Un sistema diseñado para que gestionar tus turnos sea automático
-            </p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 fade-down-fast">Cómo Agendux resuelve esto</h2>
+            <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto fade-up-normal">Un sistema diseñado para que gestionar los turnos de tu peluquería sea automático</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <div className="text-center fade-up-normal">
@@ -134,48 +119,40 @@ const PsicologosPage = () => {
                 <CalendarMonthIcon sx={{ fontSize: 32, color: '#1976d2' }} />
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Reservas online 24/7</h3>
-              <p className="text-gray-600 text-sm">
-                Tus pacientes eligen fecha y horario desde tu link personalizado. Funciona de noche, fines de semana y feriados. Vos no tenés que hacer nada.
-              </p>
+              <p className="text-gray-600 text-sm">Tus clientes eligen fecha y horario desde tu link. Pueden reservar de noche, mientras vos descansás.</p>
             </div>
             <div className="text-center fade-up-normal">
               <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
                 <WhatsAppIcon sx={{ fontSize: 32, color: '#25D366' }} />
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Recordatorios por WhatsApp</h3>
-              <p className="text-gray-600 text-sm">
-                Cada paciente recibe un recordatorio automático antes de su sesión. Eso reduce las ausencias hasta un 75% sin que tengas que llamar a nadie.
-              </p>
+              <p className="text-gray-600 text-sm">Cada cliente recibe un recordatorio automático antes de su turno. Reducí las ausencias hasta un 75%.</p>
             </div>
             <div className="text-center fade-up-normal">
               <div className="mx-auto w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
                 <EventAvailableIcon sx={{ fontSize: 32, color: '#7c3aed' }} />
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Google Calendar sincronizado</h3>
-              <p className="text-gray-600 text-sm">
-                Cada turno aparece automáticamente en tu Google Calendar. Sin duplicar información, sin errores manuales.
-              </p>
+              <p className="text-gray-600 text-sm">Cada turno aparece automáticamente en tu calendario. Sin anotar a mano, sin confusiones.</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Beneficios concretos */}
+      {/* Beneficios */}
       <div className="bg-gray-50 py-16">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 fade-down-fast">
-              Resultados concretos para tu consultorio
-            </h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 fade-down-fast">Resultados concretos para tu peluquería</h2>
           </div>
           <div className="space-y-4">
             {[
               'Reducí hasta un 75% las ausencias con recordatorios automáticos por WhatsApp',
-              'Ahorrá 1-2 horas por día que antes dedicabas a coordinar turnos',
-              'Tus pacientes reservan solos a cualquier hora, sin depender de tu disponibilidad',
-              'Tu agenda siempre sincronizada con Google Calendar, sin cargar turnos a mano',
-              'Link personalizado (agendux.com/tunombre) para compartir en redes, WhatsApp o tu firma de email',
-              'Código QR listo para imprimir y poner en tu consultorio',
+              'Dejá de responder mensajes mientras atendés: tus clientes reservan solos',
+              'Tu agenda siempre actualizada en Google Calendar, sin anotar a mano',
+              'Link personalizado (agendux.com/tunombre) para compartir en Instagram, WhatsApp o tu bio',
+              'Código QR listo para imprimir y poner en el salón',
+              'Funciona las 24 horas: tus clientes reservan cuando quieran, incluso de madrugada',
             ].map((benefit, i) => (
               <div key={i} className="flex items-start gap-3 fade-up-normal">
                 <CheckCircleIcon sx={{ color: '#22c55e', fontSize: 24, mt: 0.25, flexShrink: 0 }} />
@@ -190,9 +167,7 @@ const PsicologosPage = () => {
       <div className="py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 fade-down-fast">
-              Empezá en 3 pasos
-            </h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 fade-down-fast">Empezá en 3 pasos</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <div className="text-center fade-up-normal">
@@ -203,51 +178,35 @@ const PsicologosPage = () => {
             <div className="text-center fade-up-normal">
               <div className="mx-auto w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4">2</div>
               <h3 className="font-semibold text-gray-900 mb-2">Configurá tu agenda</h3>
-              <p className="text-gray-600 text-sm">Definí tus horarios disponibles, duración de sesión y días de atención.</p>
+              <p className="text-gray-600 text-sm">Definí tus horarios, duración de cada servicio y días de atención.</p>
             </div>
             <div className="text-center fade-up-normal">
               <div className="mx-auto w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4">3</div>
               <h3 className="font-semibold text-gray-900 mb-2">Compartí tu link</h3>
-              <p className="text-gray-600 text-sm">Enviá tu link a tus pacientes por WhatsApp, redes o email. Ellos reservan solos.</p>
+              <p className="text-gray-600 text-sm">Poné tu link en Instagram, WhatsApp o imprimí el QR en tu salón. Tus clientes reservan solos.</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* CTA final */}
+      {/* CTA */}
       <div className="bg-blue-600 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white fade-down-fast">
-            ¿Listo para automatizar tus turnos?
-          </h2>
-          <p className="mt-4 text-lg text-blue-100 max-w-2xl mx-auto fade-up-normal">
-            Empezá hoy gratis. Sin tarjeta, sin compromiso, cancelá cuando quieras.
-          </p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white fade-down-fast">¿Listo para automatizar los turnos de tu peluquería?</h2>
+          <p className="mt-4 text-lg text-blue-100 max-w-2xl mx-auto fade-up-normal">Empezá hoy gratis. Sin tarjeta, sin compromiso, cancelá cuando quieras.</p>
           <Button
             variant="contained"
             onClick={handleRegister}
-            sx={{
-              mt: 4,
-              bgcolor: 'white',
-              color: 'primary.main',
-              textTransform: 'none',
-              px: 5,
-              py: 1.5,
-              fontSize: '1.1rem',
-              fontWeight: 600,
-              '&:hover': { bgcolor: 'grey.100' },
-            }}
+            sx={{ mt: 4, bgcolor: 'white', color: 'primary.main', textTransform: 'none', px: 5, py: 1.5, fontSize: '1.1rem', fontWeight: 600, '&:hover': { bgcolor: 'grey.100' } }}
             className="zoom-in-slow"
           >
             Comenzar Gratis — Sin Tarjeta
           </Button>
-          <p className="mt-4 text-sm text-blue-200 fade-up-normal">
-            14 días de prueba gratis • Sin compromiso • Cancelá cuando quieras
-          </p>
+          <p className="mt-4 text-sm text-blue-200 fade-up-normal">14 días de prueba gratis • Sin compromiso • Cancelá cuando quieras</p>
         </div>
       </div>
     </div>
   );
 };
 
-export default PsicologosPage;
+export default PeluqueriasPage;
