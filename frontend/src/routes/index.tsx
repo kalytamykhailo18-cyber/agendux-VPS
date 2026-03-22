@@ -30,6 +30,7 @@ const CancelBookingPage = lazy(() => import('../pages/public/cancel'));
 const DudasPage = lazy(() => import('../pages/public/dudas'));
 const PrivacyPage = lazy(() => import('../pages/public/privacy'));
 const DepositConfirmationPage = lazy(() => import('../pages/public/deposit-confirmation'));
+const PsicologosPage = lazy(() => import('../pages/public/landing/PsicologosPage'));
 
 // Login pages
 const AdminLoginPage = lazy(() => import('../pages/admin/login'));
@@ -88,6 +89,14 @@ const AppRoutes = () => {
           element={
             <Suspense fallback={<PageLoadingFallback />}>
               <HomePage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/para-psicologos"
+          element={
+            <Suspense fallback={<PageLoadingFallback />}>
+              <PsicologosPage />
             </Suspense>
           }
         />

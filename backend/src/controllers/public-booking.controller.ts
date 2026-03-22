@@ -87,7 +87,9 @@ export const getBookingPageData = async (req: Request, res: Response) => {
         depositEnabled: true,
         depositAmount: true,
         isActive: true,
-        isSuspended: true
+        isSuspended: true,
+        addressStreet: true,
+        addressCity: true
       }
     });
 
@@ -174,7 +176,9 @@ export const getBookingPageData = async (req: Request, res: Response) => {
         lastName: professional.lastName,
         fullName: `${professional.firstName} ${professional.lastName}`,
         slug: professional.slug,
-        timezone: professional.timezone
+        timezone: professional.timezone,
+        addressStreet: professional.addressStreet || null,
+        addressCity: professional.addressCity || null
       },
       availability: {
         appointmentDuration: settings?.appointmentDuration || 30,

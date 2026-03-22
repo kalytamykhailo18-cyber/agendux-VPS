@@ -32,6 +32,9 @@ export const getSitemap = async (req: Request, res: Response): Promise<void> => 
     xml += `  <url>\n    <loc>https://agendux.com/dudas</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
     xml += `  <url>\n    <loc>https://agendux.com/privacidad</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.4</priority>\n  </url>\n`;
 
+    // Landing pages
+    xml += `  <url>\n    <loc>https://agendux.com/para-psicologos</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
+
     // Dynamic professional booking pages
     for (const prof of professionals) {
       const lastmod = prof.updatedAt.toISOString().split('T')[0];

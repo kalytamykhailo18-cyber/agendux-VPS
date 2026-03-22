@@ -225,9 +225,11 @@ const BookingPage = () => {
   }
 
   // JSON-LD structured data for professional booking page
-  const professionalJsonLd = JSON.stringify({
+  // Use LocalBusiness when address is available, ProfessionalService otherwise
+  const hasAddress = pageData.professional.addressStreet || pageData.professional.addressCity;
+  const jsonLdData: Record<string, unknown> = {
     '@context': 'https://schema.org',
-    '@type': 'ProfessionalService',
+    '@type': hasAddress ? 'LocalBusiness' : 'ProfessionalService',
     name: pageData.professional.fullName,
     url: `https://agendux.com/${slug}`,
     description: `Reservá tu cita con ${pageData.professional.fullName} online. Elegí fecha y horario disponible.`,
@@ -241,7 +243,16 @@ const BookingPage = () => {
       target: `https://agendux.com/${slug}`,
       name: `Reservar cita con ${pageData.professional.fullName}`,
     },
-  });
+  };
+  if (hasAddress) {
+    jsonLdData.address = {
+      '@type': 'PostalAddress',
+      ...(pageData.professional.addressStreet && { streetAddress: pageData.professional.addressStreet }),
+      ...(pageData.professional.addressCity && { addressLocality: pageData.professional.addressCity }),
+      addressCountry: 'AR',
+    };
+  }
+  const professionalJsonLd = JSON.stringify(jsonLdData);
 
   // Show confirmation if booking was successful
   if (bookingConfirmation) {

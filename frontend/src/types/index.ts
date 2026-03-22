@@ -424,6 +424,8 @@ export interface BookingPageData {
     fullName: string;
     slug: string;
     timezone: string;
+    addressStreet: string | null;
+    addressCity: string | null;
   };
   availability: {
     appointmentDuration: number;
