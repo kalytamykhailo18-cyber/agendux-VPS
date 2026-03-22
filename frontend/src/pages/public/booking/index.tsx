@@ -232,11 +232,13 @@ const BookingPage = () => {
     '@type': hasAddress ? 'LocalBusiness' : 'ProfessionalService',
     name: pageData.professional.fullName,
     url: `https://agendux.com/${slug}`,
+    image: 'https://agendux.com/icon-512.png',
     description: `Reservá tu cita con ${pageData.professional.fullName} online. Elegí fecha y horario disponible.`,
     provider: {
       '@type': 'Organization',
       name: 'Agendux',
       url: 'https://agendux.com',
+      logo: 'https://agendux.com/icon-512.png',
     },
     potentialAction: {
       '@type': 'ReserveAction',

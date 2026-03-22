@@ -3,7 +3,7 @@
   "short_name": "Agendux",
   "description": "Plataforma de gestión de turnos online para profesionales. Reservas 24/7, recordatorios por WhatsApp y Google Calendar.",
   "start_url": "/",
-  "display": "standalone",
+  "display": "browser",
   "background_color": "#ffffff",
   "theme_color": "#1976d2",
   "lang": "es",
