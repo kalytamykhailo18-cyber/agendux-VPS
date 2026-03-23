@@ -44,15 +44,23 @@ export const verifyGoogleToken = async (idToken: string): Promise<GoogleUserInfo
 
 // Generate unique URL slug from name
 export const generateSlug = (firstName: string, lastName: string): string => {
-  const baseSlug = lastName
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remove accents
-    .replace(/[^a-z0-9]/g, '-') // Replace non-alphanumeric with dash
-    .replace(/-+/g, '-') // Replace multiple dashes with single
-    .replace(/^-|-$/g, ''); // Remove leading/trailing dashes
+  const sanitize = (str: string) =>
+    str
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove accents
+      .replace(/[^a-z0-9]/g, '-') // Replace non-alphanumeric with dash
+      .replace(/-+/g, '-') // Replace multiple dashes with single
+      .replace(/^-|-$/g, ''); // Remove leading/trailing dashes
 
-  return baseSlug || 'professional';
+  // Try lastName first, then firstName, then both combined
+  const lastSlug = sanitize(lastName || '');
+  if (lastSlug) return lastSlug;
+
+  const firstSlug = sanitize(firstName || '');
+  if (firstSlug) return firstSlug;
+
+  return 'professional';
 };
 
 // Make slug unique by adding number if exists
