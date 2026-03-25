@@ -6,6 +6,7 @@ import { getSiteContent } from '../../../store/slices/siteContentSlice';
 import HeroSection from './HeroSection';
 import FeaturesSection from './FeaturesSection';
 import WhatsAppDemoSection from './WhatsAppDemoSection';
+import VideosSection from './VideosSection';
 import HowItWorksSection from './HowItWorksSection';
 import PricingSection from './PricingSection';
 import TestimonialsSection from './TestimonialsSection';
@@ -55,7 +56,10 @@ const HomePage = () => {
       {/* 4. Testimonials Section */}
       <TestimonialsSection />
 
-      {/* 5. How It Works Section */}
+      {/* 5. Videos Section */}
+      <VideosSection />
+
+      {/* 6. How It Works Section */}
       <HowItWorksSection />
 
       {/* 6. Pricing Section */}
