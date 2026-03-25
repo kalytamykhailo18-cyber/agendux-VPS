@@ -194,15 +194,16 @@ const DatePicker = ({
                     minWidth: 0,
                     p: { xs: 0.5, sm: 1 },
                     fontSize: { xs: '0.875rem', sm: '1rem' },
-                    fontWeight: 'medium',
+                    fontWeight: selected ? 'bold' : available ? 600 : 'normal',
                     borderRadius: '6px',
-                    color: !isDisplayedMonth ? 'text.disabled' : selected ? 'white' : 'text.primary',
-                    bgcolor: selected ? 'primary.main' : 'transparent',
+                    color: !isDisplayedMonth ? '#d1d5db' : selected ? 'white' : available ? '#1e40af' : '#d1d5db',
+                    bgcolor: selected ? 'primary.main' : available ? '#dbeafe' : 'transparent',
                     '&:hover': {
-                      bgcolor: selected ? 'primary.dark' : 'action.hover',
+                      bgcolor: selected ? 'primary.dark' : available ? '#bfdbfe' : 'transparent',
                     },
                     '&.Mui-disabled': {
-                      color: 'text.disabled',
+                      color: '#d1d5db',
+                      bgcolor: 'transparent',
                     },
                     ...(todayDate && !selected && {
                       border: '2px solid',
@@ -225,15 +226,19 @@ const DatePicker = ({
       {/* Legend */}
       <div className="mt-4 flex flex-wrap justify-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-500 fade-up-slow">
         <div className="flex items-center gap-1 fade-right-fast">
-          <div className="h-3 w-3 rounded-full ring-2 ring-blue-500" />
+          <div className="h-3 w-3 rounded-sm bg-blue-100 ring-2 ring-blue-500" />
           <span>Hoy</span>
         </div>
         <div className="flex items-center gap-1 zoom-in-fast">
-          <div className="h-3 w-3 rounded-full bg-blue-600" />
+          <div className="h-3 w-3 rounded-sm bg-blue-600" />
           <span>Seleccionado</span>
         </div>
         <div className="flex items-center gap-1 fade-left-fast">
-          <div className="h-3 w-3 rounded-full bg-gray-200" />
+          <div className="h-3 w-3 rounded-sm bg-blue-100" />
+          <span>Disponible</span>
+        </div>
+        <div className="flex items-center gap-1 fade-left-fast">
+          <div className="h-3 w-3 rounded-sm bg-gray-100" />
           <span>No disponible</span>
         </div>
       </div>
