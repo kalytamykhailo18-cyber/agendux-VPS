@@ -45,46 +45,54 @@ const PlansSection = ({
       </div>
 
       {/* Plans Grid */}
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 max-w-3xl mx-auto">
         {plans.map((plan, index) => {
           const isCurrentPlan = currentSubscription?.plan.id === plan.id;
           const price = selectedPeriod === 'MONTHLY' ? plan.monthlyPrice : plan.annualPrice;
-          const cardAnimation = index === 0 ? 'fade-left-fast' : index === 1 ? 'zoom-in-normal' : 'fade-right-fast';
+          const isPremium = plan.monthlyPrice > 0;
+          const cardAnimation = index === 0 ? 'fade-left-fast' : 'fade-right-fast';
 
           return (
             <div
               key={plan.id}
-              className={`rounded-lg bg-white shadow-sm overflow-hidden ${cardAnimation} ${
-                isCurrentPlan ? 'ring-2 ring-blue-500' : ''
-              }`}
+              className={`rounded-lg overflow-hidden ${cardAnimation} ${
+                isPremium ? 'bg-blue-600 text-white shadow-lg ring-2 ring-blue-600' : 'bg-white shadow-sm'
+              } ${isCurrentPlan && !isPremium ? 'ring-2 ring-blue-500' : ''}`}
             >
               {isCurrentPlan && (
-                <div className="bg-blue-500 text-white text-center text-sm py-1 fade-down-fast">
+                <div className={`text-center text-sm py-1 fade-down-fast ${isPremium ? 'bg-blue-700 text-white' : 'bg-blue-500 text-white'}`}>
                   Plan Actual
                 </div>
               )}
+              {isPremium && !isCurrentPlan && (
+                <div className="bg-blue-700 text-white text-center text-sm py-1 fade-down-fast">
+                  Recomendado
+                </div>
+              )}
               <div className="p-6">
-                <h3 className="text-lg font-bold text-gray-900 fade-up-fast">{plan.name}</h3>
+                <h3 className={`text-lg font-bold fade-up-fast ${isPremium ? 'text-white' : 'text-gray-900'}`}>{plan.name}</h3>
                 {plan.description && (
-                  <p className="mt-1 text-sm text-gray-500 fade-up-normal">{plan.description}</p>
+                  <p className={`mt-1 text-sm fade-up-normal ${isPremium ? 'text-blue-100' : 'text-gray-500'}`}>{plan.description}</p>
                 )}
                 <div className="mt-4 fade-right-normal">
-                  <span className="text-3xl font-bold text-gray-900">
-                    {formatPrice(price)}
+                  <span className={`text-3xl font-bold ${isPremium ? 'text-white' : 'text-gray-900'}`}>
+                    {price === 0 ? 'Gratis' : formatPrice(price)}
                   </span>
-                  <span className="text-gray-500">
-                    /{selectedPeriod === 'MONTHLY' ? 'mes' : 'año'}
-                  </span>
+                  {price > 0 && (
+                    <span className={isPremium ? 'text-blue-200' : 'text-gray-500'}>
+                      /{selectedPeriod === 'MONTHLY' ? 'mes' : 'año'}
+                    </span>
+                  )}
                 </div>
                 <ul className="mt-6 space-y-3">
                   {plan.features.map((feature, featureIndex) => (
                     <li
                       key={featureIndex}
-                      className={`flex items-start gap-2 text-sm text-gray-600 ${
+                      className={`flex items-start gap-2 text-sm ${isPremium ? 'text-blue-100' : 'text-gray-600'} ${
                         featureIndex % 2 === 0 ? 'fade-left-normal' : 'fade-right-normal'
                       }`}
                     >
-                      <CheckIcon sx={{ fontSize: 16, mt: 0.5, color: 'rgb(34, 197, 94)', flexShrink: 0 }} />
+                      <CheckIcon sx={{ fontSize: 16, mt: 0.5, color: isPremium ? '#93c5fd' : 'rgb(34, 197, 94)', flexShrink: 0 }} />
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -94,7 +102,14 @@ const PlansSection = ({
                   onClick={() => onSubscribe(plan.id)}
                   disabled={isCurrentPlan && currentSubscription?.billingPeriod === selectedPeriod}
                   fullWidth
-                  sx={{ mt: 3 }}
+                  sx={{
+                    mt: 3,
+                    ...(isPremium && {
+                      bgcolor: 'white',
+                      color: 'primary.main',
+                      '&:hover': { bgcolor: 'grey.100' },
+                    }),
+                  }}
                 >
                   {isCurrentPlan
                     ? currentSubscription?.billingPeriod === selectedPeriod
