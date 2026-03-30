@@ -69,11 +69,11 @@ const TimeSlots = ({
                 fontWeight: 'medium',
                 textTransform: 'none',
                 minHeight: { xs: 48, sm: 40 },
-                bgcolor: slot.available && slot.time !== selectedTime ? 'grey.100' : undefined,
-                color: slot.available && slot.time !== selectedTime ? 'text.primary' : undefined,
-                borderColor: slot.available && slot.time !== selectedTime ? 'grey.300' : undefined,
+                bgcolor: slot.available && slot.time !== selectedTime ? '#dbeafe' : undefined,
+                color: slot.available && slot.time !== selectedTime ? '#1e40af' : undefined,
+                borderColor: slot.available && slot.time !== selectedTime ? '#93c5fd' : undefined,
                 '&:hover': {
-                  bgcolor: slot.available && slot.time !== selectedTime ? 'action.hover' : undefined,
+                  bgcolor: slot.available && slot.time !== selectedTime ? '#bfdbfe' : undefined,
                   borderColor: slot.available && slot.time !== selectedTime ? 'primary.main' : undefined,
                 },
                 '&.Mui-disabled': {
