@@ -663,7 +663,7 @@ export const getFullyBookedDates = async (req: Request, res: Response) => {
         }
       }
 
-      if (totalAvailableSlots > 0 && (bookedCount + externalBlockedCount) >= totalAvailableSlots) {
+      if (totalAvailableSlots <= 0 || (bookedCount + externalBlockedCount) >= totalAvailableSlots) {
         fullyBookedDates.push(dateStr);
       }
 
