@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   getBookingPageData,
   getAvailableSlots,
+  getFullyBookedDates,
   holdSlot,
   releaseHold,
   cleanupHolds
@@ -21,6 +22,12 @@ const router = Router();
 router.get('/:slug',
   validateParams(slugParamSchema),
   getBookingPageData
+);
+
+// GET /api/booking/:slug/fully-booked-dates - Get dates with no available slots
+router.get('/:slug/fully-booked-dates',
+  validateParams(slugParamSchema),
+  getFullyBookedDates
 );
 
 // GET /api/booking/:slug/slots - Get available time slots for a specific date

@@ -95,6 +95,8 @@ interface PublicBookingState {
   sessionId: string;
   currentHold: { holdId: string; expiresAt: string } | null;
   holdError: string | null;
+  // Fully booked dates for calendar
+  fullyBookedDates: string[];
   // Deposit confirmation page state
   appointmentByRef: AppointmentByRef | null;
   appointmentByRefError: string | null;
@@ -120,6 +122,8 @@ const initialState: PublicBookingState = {
   sessionId: generateSessionId(),
   currentHold: null,
   holdError: null,
+  // Fully booked dates for calendar
+  fullyBookedDates: [],
   // Deposit confirmation page state
   appointmentByRef: null,
   appointmentByRefError: null
@@ -151,6 +155,26 @@ export const getBookingPageData = createAsyncThunk<
       return rejectWithValue(message);
     } finally {
       dispatch(stopLoading());
+    }
+  }
+);
+
+// Get fully booked dates for a month (background, no loading spinner)
+export const getFullyBookedDates = createAsyncThunk<
+  string[],
+  { slug: string; month: string },
+  { rejectValue: string }
+>(
+  'publicBooking/getFullyBookedDates',
+  async ({ slug, month }, { rejectWithValue }) => {
+    try {
+      const response = await api.get<ApiResponse<{ fullyBookedDates: string[] }>>(`/booking/${slug}/fully-booked-dates?month=${month}`);
+      if (response.data.success && response.data.data) {
+        return response.data.data.fullyBookedDates;
+      }
+      return rejectWithValue('Error');
+    } catch {
+      return rejectWithValue('Error');
     }
   }
 );
@@ -498,6 +522,12 @@ const publicBookingSlice = createSlice({
     builder
       .addCase(refreshAvailableSlots.fulfilled, (state, action: PayloadAction<AvailableSlotsData>) => {
         state.availableSlots = action.payload;
+      });
+
+    // Fully booked dates (background, silent fail)
+    builder
+      .addCase(getFullyBookedDates.fulfilled, (state, action: PayloadAction<string[]>) => {
+        state.fullyBookedDates = action.payload;
       });
 
     // Fetch appointment by reference (deposit confirmation page)

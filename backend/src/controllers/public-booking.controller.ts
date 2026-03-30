@@ -492,6 +492,192 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
 };
 
 // ============================================
+// FULLY BOOKED DATES
+// Returns dates in a month where all slots are taken
+// ============================================
+
+export const getFullyBookedDates = async (req: Request, res: Response) => {
+  try {
+    const { slug } = req.params;
+    const month = (req.query.month as string) || '';
+
+    if (!slug || !month || !/^\d{4}-\d{2}$/.test(month)) {
+      return res.status(400).json({ success: false, error: 'Slug y mes (YYYY-MM) requeridos' });
+    }
+
+    const professional = await prisma.professional.findUnique({
+      where: { slug },
+      select: { id: true, isActive: true, isSuspended: true, timezone: true }
+    });
+
+    if (!professional || !professional.isActive || professional.isSuspended) {
+      return res.status(404).json({ success: false, error: 'Profesional no encontrado' });
+    }
+
+    const settings = await prisma.professionalSettings.findUnique({
+      where: { professionalId: professional.id },
+      select: { appointmentDuration: true, minBookingAdvanceHours: true, maxBookingAdvanceDays: true }
+    });
+
+    const appointmentDuration = settings?.appointmentDuration || 30;
+
+    // Build date range for the month
+    const [year, mo] = month.split('-').map(Number);
+    const monthStart = new Date(year, mo - 1, 1);
+    const monthEnd = new Date(year, mo, 0); // last day of month
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const minDate = new Date(Date.now() + (settings?.minBookingAdvanceHours || 0) * 3600000);
+    minDate.setHours(0, 0, 0, 0);
+    const maxDate = new Date(today.getTime() + (settings?.maxBookingAdvanceDays || 60) * 86400000);
+
+    const rangeStart = monthStart > minDate ? monthStart : minDate;
+    const rangeEnd = monthEnd < maxDate ? monthEnd : maxDate;
+
+    if (rangeStart > rangeEnd) {
+      return res.json({ success: true, data: { fullyBookedDates: [] } });
+    }
+
+    // Get all availability config
+    const availabilities = await prisma.availability.findMany({
+      where: { professionalId: professional.id, isActive: true },
+      orderBy: { slotNumber: 'asc' }
+    });
+
+    // Group by dayOfWeek and compute total slots per dow
+    const availByDow: Record<number, { startTime: string; endTime: string }[]> = {};
+    const totalSlotsByDow: Record<number, number> = {};
+
+    for (const a of availabilities) {
+      if (!availByDow[a.dayOfWeek]) availByDow[a.dayOfWeek] = [];
+      availByDow[a.dayOfWeek].push({ startTime: a.startTime, endTime: a.endTime });
+
+      // Count slots for this availability period
+      const [sh, sm] = a.startTime.split(':').map(Number);
+      const [eh, em] = a.endTime.split(':').map(Number);
+      const totalMinutes = (eh * 60 + em) - (sh * 60 + sm);
+      const slots = Math.floor(totalMinutes / appointmentDuration);
+      totalSlotsByDow[a.dayOfWeek] = (totalSlotsByDow[a.dayOfWeek] || 0) + slots;
+    }
+
+    // Batch fetch appointments for the range
+    const appointments = await prisma.appointment.findMany({
+      where: {
+        professionalId: professional.id,
+        date: { gte: rangeStart, lte: rangeEnd },
+        status: { notIn: ['CANCELLED'] }
+      },
+      select: { date: true, startTime: true }
+    });
+
+    // Group appointments by date string
+    const appointmentsByDate: Record<string, number> = {};
+    for (const apt of appointments) {
+      const dateStr = apt.date.toISOString().split('T')[0];
+      appointmentsByDate[dateStr] = (appointmentsByDate[dateStr] || 0) + 1;
+    }
+
+    // Batch fetch external calendar events for the range
+    const rangeStartDt = new Date(rangeStart);
+    rangeStartDt.setHours(0, 0, 0, 0);
+    const rangeEndDt = new Date(rangeEnd);
+    rangeEndDt.setHours(23, 59, 59, 999);
+
+    const externalEvents = await prisma.externalCalendarEvent.findMany({
+      where: {
+        professionalId: professional.id,
+        startTime: { lte: rangeEndDt },
+        endTime: { gte: rangeStartDt }
+      },
+      select: { startTime: true, endTime: true }
+    });
+
+    // Batch fetch blocked dates
+    const blockedDates = await prisma.blockedDate.findMany({
+      where: {
+        professionalId: professional.id,
+        date: { gte: rangeStart, lte: rangeEnd }
+      },
+      select: { date: true }
+    });
+    const blockedSet = new Set(blockedDates.map(b => b.date.toISOString().split('T')[0]));
+
+    // Iterate through each date in range
+    const fullyBookedDates: string[] = [];
+    const timezone = professional.timezone || 'America/Argentina/Buenos_Aires';
+
+    const currentDate = new Date(rangeStart);
+    while (currentDate <= rangeEnd) {
+      const dateStr = currentDate.toISOString().split('T')[0];
+      const dow = currentDate.getDay();
+
+      // Skip if no availability or blocked (already disabled in frontend)
+      if (!availByDow[dow] || blockedSet.has(dateStr)) {
+        currentDate.setDate(currentDate.getDate() + 1);
+        continue;
+      }
+
+      let totalAvailableSlots = totalSlotsByDow[dow] || 0;
+      const bookedCount = appointmentsByDate[dateStr] || 0;
+
+      // For today, exclude past slots
+      if (currentDate.getTime() === today.getTime()) {
+        const now = new Date();
+        let pastSlots = 0;
+        for (const avail of availByDow[dow]) {
+          const [sh, sm] = avail.startTime.split(':').map(Number);
+          const [eh, em] = avail.endTime.split(':').map(Number);
+          let h = sh, m = sm;
+          while (h < eh || (h === eh && m + appointmentDuration <= em)) {
+            const slotTime = new Date(currentDate);
+            slotTime.setHours(h, m, 0, 0);
+            if (slotTime <= now) pastSlots++;
+            m += appointmentDuration;
+            while (m >= 60) { m -= 60; h++; }
+          }
+        }
+        totalAvailableSlots -= pastSlots;
+      }
+
+      // Count external events that block slots
+      let externalBlockedCount = 0;
+      const tzOffset = getTimezoneOffsetMs(timezone, currentDate);
+      for (const avail of availByDow[dow]) {
+        const [sh, sm] = avail.startTime.split(':').map(Number);
+        const [eh, em] = avail.endTime.split(':').map(Number);
+        let h = sh, m = sm;
+        while (h < eh || (h === eh && m + appointmentDuration <= em)) {
+          const slotStartUtc = new Date(currentDate.getTime() + h * 3600000 + m * 60000 - tzOffset);
+          let sem = m + appointmentDuration;
+          let seh = h;
+          while (sem >= 60) { sem -= 60; seh++; }
+          const slotEndUtc = new Date(currentDate.getTime() + seh * 3600000 + sem * 60000 - tzOffset);
+
+          const isBlocked = externalEvents.some(e => slotStartUtc < e.endTime && slotEndUtc > e.startTime);
+          if (isBlocked) externalBlockedCount++;
+
+          m += appointmentDuration;
+          while (m >= 60) { m -= 60; h++; }
+        }
+      }
+
+      if (totalAvailableSlots > 0 && (bookedCount + externalBlockedCount) >= totalAvailableSlots) {
+        fullyBookedDates.push(dateStr);
+      }
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return res.json({ success: true, data: { fullyBookedDates } });
+  } catch (error) {
+    logger.error('Error getting fully booked dates:', error);
+    return res.json({ success: true, data: { fullyBookedDates: [] } });
+  }
+};
+
+// ============================================
 // SLOT HOLD MANAGEMENT (Requirement 10.1)
 // "When someone starts booking, that slot should be temporarily held"
 // ============================================

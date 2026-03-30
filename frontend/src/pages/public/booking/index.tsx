@@ -14,7 +14,8 @@ import {
   holdSlot,
   releaseHold,
   refreshAvailableSlots,
-  clearHoldError
+  clearHoldError,
+  getFullyBookedDates
 } from '../../../store/slices/publicBookingSlice';
 import DatePicker from './DatePicker';
 import TimeSlots from './TimeSlots';
@@ -41,7 +42,8 @@ const BookingPage = () => {
     error,
     notFound,
     sessionId,
-    holdError
+    holdError,
+    fullyBookedDates
   } = useAppSelector((state) => state.publicBooking);
 
   // Ref to track previous time selection for releasing holds
@@ -59,6 +61,23 @@ const BookingPage = () => {
     return () => {
       dispatch(clearBookingState());
     };
+  }, [dispatch, slug]);
+
+  // Load fully booked dates for current month on mount
+  useEffect(() => {
+    if (slug && pageData) {
+      const now = new Date();
+      const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      dispatch(getFullyBookedDates({ slug, month: monthStr }));
+    }
+  }, [dispatch, slug, pageData]);
+
+  // Handle month change in calendar
+  const handleMonthChange = useCallback((year: number, month: number) => {
+    if (slug) {
+      const monthStr = `${year}-${String(month + 1).padStart(2, '0')}`;
+      dispatch(getFullyBookedDates({ slug, month: monthStr }));
+    }
   }, [dispatch, slug]);
 
   // Load available slots when date is selected
@@ -325,6 +344,8 @@ const BookingPage = () => {
             timezone={pageData.professional.timezone}
             minBookingAdvanceHours={pageData.availability.minBookingAdvanceHours}
             maxBookingAdvanceDays={pageData.availability.maxBookingAdvanceDays}
+            fullyBookedDates={fullyBookedDates}
+            onMonthChange={handleMonthChange}
           />
         </div>
 

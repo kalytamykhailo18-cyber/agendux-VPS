@@ -12,6 +12,8 @@ interface DatePickerProps {
   timezone: string;
   minBookingAdvanceHours?: number;
   maxBookingAdvanceDays?: number;
+  fullyBookedDates?: string[];
+  onMonthChange?: (year: number, month: number) => void;
 }
 
 const DAYS_OF_WEEK = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
@@ -26,7 +28,9 @@ const DatePicker = ({
   availabilitySlots,
   blockedDates,
   minBookingAdvanceHours = 0,
-  maxBookingAdvanceDays = 60
+  maxBookingAdvanceDays = 60,
+  fullyBookedDates = [],
+  onMonthChange
 }: DatePickerProps) => {
   const today = useMemo(() => {
     const now = new Date();
@@ -92,20 +96,24 @@ const DatePicker = ({
     if (displayMonth === 0) {
       setDisplayMonth(11);
       setDisplayYear((y) => y - 1);
+      onMonthChange?.(displayYear - 1, 11);
     } else {
       setDisplayMonth((m) => m - 1);
+      onMonthChange?.(displayYear, displayMonth - 1);
     }
-  }, [canGoPrev, displayMonth]);
+  }, [canGoPrev, displayMonth, displayYear, onMonthChange]);
 
   const goToNextMonth = useCallback(() => {
     if (!canGoNext) return;
     if (displayMonth === 11) {
       setDisplayMonth(0);
       setDisplayYear((y) => y + 1);
+      onMonthChange?.(displayYear + 1, 0);
     } else {
       setDisplayMonth((m) => m + 1);
+      onMonthChange?.(displayYear, displayMonth + 1);
     }
-  }, [canGoNext, displayMonth]);
+  }, [canGoNext, displayMonth, displayYear, onMonthChange]);
 
   // Check if a date is available for booking
   const isDateAvailable = (date: Date): boolean => {
@@ -115,6 +123,7 @@ const DatePicker = ({
     if (!availableDaysOfWeek.has(date.getDay())) return false;
     const dateStr = date.toISOString().split('T')[0];
     if (blockedDates.includes(dateStr)) return false;
+    if (fullyBookedDates.includes(dateStr)) return false;
     return true;
   };
 
