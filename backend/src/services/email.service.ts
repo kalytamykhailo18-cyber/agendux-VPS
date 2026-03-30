@@ -595,3 +595,40 @@ export async function sendSubscriptionCancelledEmail(
     return false;
   }
 }
+
+// Send notification to professional when a new booking is created
+export async function sendNewBookingNotificationEmail(
+  professionalEmail: string,
+  professionalName: string,
+  patientName: string,
+  date: string,
+  time: string
+): Promise<boolean> {
+  try {
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background-color: #1976d2; padding: 20px; border-radius: 8px 8px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 20px;">Nuevo turno reservado</h1>
+        </div>
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 0 0 8px 8px;">
+          <p style="color: #333; font-size: 16px;">Hola ${professionalName},</p>
+          <p style="color: #333; font-size: 16px;">Se ha reservado un nuevo turno en tu agenda:</p>
+          <div style="background-color: white; padding: 16px; border-radius: 8px; margin: 16px 0;">
+            <p style="margin: 8px 0; color: #333;"><strong>Paciente:</strong> ${patientName}</p>
+            <p style="margin: 8px 0; color: #333;"><strong>Fecha:</strong> ${date}</p>
+            <p style="margin: 8px 0; color: #333;"><strong>Hora:</strong> ${time}</p>
+          </div>
+          <p style="color: #666; font-size: 14px;">Podés ver todos tus turnos en tu panel de Agendux.</p>
+        </div>
+      </div>
+    `;
+    return await sendEmail({
+      to: professionalEmail,
+      subject: `Nuevo turno: ${patientName} - ${date} ${time}`,
+      html
+    });
+  } catch (error) {
+    logger.error('Error sending new booking notification email', { error, professionalEmail });
+    return false;
+  }
+}

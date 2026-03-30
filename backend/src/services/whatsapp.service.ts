@@ -987,3 +987,20 @@ export async function updateReminderSettings(
     orderBy: { reminderNumber: 'asc' }
   });
 }
+
+// Send WhatsApp notification to professional when a new booking is created
+export async function sendNewBookingWhatsAppToProfessional(
+  professionalPhone: string,
+  professionalName: string,
+  patientName: string,
+  date: string,
+  time: string
+): Promise<boolean> {
+  try {
+    const message = `Hola ${professionalName}, se reservó un nuevo turno en tu agenda.\n\nPaciente: ${patientName}\nFecha: ${date}\nHora: ${time}\n\nPodés ver tus turnos en agendux.com`;
+    return await sendWhatsAppMessage({ to: professionalPhone, message });
+  } catch (error) {
+    logger.error('Error sending new booking WhatsApp to professional', { error });
+    return false;
+  }
+}

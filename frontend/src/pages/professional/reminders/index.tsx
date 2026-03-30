@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Button, Select, MenuItem, FormControl, InputLabel, Checkbox, FormControlLabel } from '@mui/material';
+import { Button, Select, MenuItem, FormControl, InputLabel, Checkbox, FormControlLabel, Switch } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
+import EmailIcon from '@mui/icons-material/Email';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { useAppDispatch, useAppSelector } from '../../../store';
 import {
   getReminderSettings,
@@ -10,6 +12,7 @@ import {
   clearError,
   clearSuccessMessage
 } from '../../../store/slices/whatsappSlice';
+import api from '../../../config/api';
 import type { ReminderSettingInput } from '../../../types';
 
 // RULE: Page folder structure - index.tsx + flat components (NO subdirectories)
@@ -37,9 +40,21 @@ const RemindersPage = () => {
   const [localReminders, setLocalReminders] = useState<ReminderSettingInput[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
 
+  // Notification preferences state
+  const [notifyEmail, setNotifyEmail] = useState(true);
+  const [notifyWhatsapp, setNotifyWhatsapp] = useState(false);
+  const [notifSaved, setNotifSaved] = useState(false);
+
   // Load settings on mount
   useEffect(() => {
     dispatch(getReminderSettings());
+    // Load notification preferences
+    api.get('/professional/profile/notifications').then(res => {
+      if (res.data.success && res.data.data) {
+        setNotifyEmail(res.data.data.notifyNewBookingEmail);
+        setNotifyWhatsapp(res.data.data.notifyNewBookingWhatsapp);
+      }
+    }).catch(() => {});
   }, [dispatch]);
 
   // Initialize local state when data loads
@@ -105,6 +120,17 @@ const RemindersPage = () => {
     setHasChanges(true);
   };
 
+  // Save notification preferences
+  const handleNotifToggle = async (field: 'notifyNewBookingEmail' | 'notifyNewBookingWhatsapp', value: boolean) => {
+    if (field === 'notifyNewBookingEmail') setNotifyEmail(value);
+    if (field === 'notifyNewBookingWhatsapp') setNotifyWhatsapp(value);
+    try {
+      await api.put('/professional/profile/notifications', { [field]: value });
+      setNotifSaved(true);
+      setTimeout(() => setNotifSaved(false), 2000);
+    } catch {}
+  };
+
   // Save changes
   const handleSave = async () => {
     // Renumber reminders sequentially
@@ -137,6 +163,41 @@ const RemindersPage = () => {
           {successMessage}
         </div>
       )}
+
+      {/* Notification preferences */}
+      <div className="mb-6 rounded-lg bg-white p-4 shadow-sm">
+        <h2 className="text-lg font-semibold text-gray-900 mb-3">Avisos de nuevos turnos</h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Elegí cómo querés recibir un aviso cuando un paciente reserve un turno
+        </p>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <EmailIcon sx={{ color: '#1976d2', fontSize: 20 }} />
+              <span className="text-sm text-gray-700">Email</span>
+            </div>
+            <Switch
+              checked={notifyEmail}
+              onChange={(e) => handleNotifToggle('notifyNewBookingEmail', e.target.checked)}
+              size="small"
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <WhatsAppIcon sx={{ color: '#25D366', fontSize: 20 }} />
+              <span className="text-sm text-gray-700">WhatsApp</span>
+            </div>
+            <Switch
+              checked={notifyWhatsapp}
+              onChange={(e) => handleNotifToggle('notifyNewBookingWhatsapp', e.target.checked)}
+              size="small"
+            />
+          </div>
+        </div>
+        {notifSaved && (
+          <p className="mt-2 text-xs text-green-600">Preferencias guardadas</p>
+        )}
+      </div>
 
       {/* Reminders list */}
       <div className="space-y-4">

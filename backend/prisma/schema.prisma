@@ -218,6 +218,10 @@ model ProfessionalSettings {
   minBookingAdvanceHours    Int       @default(0)  // 0 = same day allowed
   maxBookingAdvanceDays     Int       @default(60) // max days ahead patients can book
 
+  // Notification preferences for new bookings
+  notifyNewBookingEmail     Boolean   @default(true)
+  notifyNewBookingWhatsapp  Boolean   @default(false)
+
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 

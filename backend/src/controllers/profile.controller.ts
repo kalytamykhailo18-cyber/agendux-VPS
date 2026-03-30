@@ -123,3 +123,61 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
     });
   }
 };
+
+// Get notification preferences
+export const getNotificationPreferences = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ success: false, error: 'No autorizado' });
+
+    const professional = await prisma.professional.findUnique({ where: { userId }, select: { id: true } });
+    if (!professional) return res.status(404).json({ success: false, error: 'Profesional no encontrado' });
+
+    const settings = await prisma.professionalSettings.findUnique({
+      where: { professionalId: professional.id },
+      select: { notifyNewBookingEmail: true, notifyNewBookingWhatsapp: true }
+    });
+
+    return res.json({
+      success: true,
+      data: {
+        notifyNewBookingEmail: settings?.notifyNewBookingEmail ?? true,
+        notifyNewBookingWhatsapp: settings?.notifyNewBookingWhatsapp ?? false
+      }
+    });
+  } catch (error) {
+    logger.error('Error getting notification preferences:', error);
+    return res.status(500).json({ success: false, error: 'Error al obtener preferencias' });
+  }
+};
+
+// Update notification preferences
+export const updateNotificationPreferences = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ success: false, error: 'No autorizado' });
+
+    const professional = await prisma.professional.findUnique({ where: { userId }, select: { id: true } });
+    if (!professional) return res.status(404).json({ success: false, error: 'Profesional no encontrado' });
+
+    const { notifyNewBookingEmail, notifyNewBookingWhatsapp } = req.body;
+
+    await prisma.professionalSettings.upsert({
+      where: { professionalId: professional.id },
+      update: {
+        ...(notifyNewBookingEmail !== undefined && { notifyNewBookingEmail }),
+        ...(notifyNewBookingWhatsapp !== undefined && { notifyNewBookingWhatsapp })
+      },
+      create: {
+        professionalId: professional.id,
+        notifyNewBookingEmail: notifyNewBookingEmail ?? true,
+        notifyNewBookingWhatsapp: notifyNewBookingWhatsapp ?? false
+      }
+    });
+
+    return res.json({ success: true, message: 'Preferencias actualizadas' });
+  } catch (error) {
+    logger.error('Error updating notification preferences:', error);
+    return res.status(500).json({ success: false, error: 'Error al actualizar preferencias' });
+  }
+};

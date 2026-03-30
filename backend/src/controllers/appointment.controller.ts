@@ -7,11 +7,13 @@ import {
   sendBookingConfirmation,
   sendCancellationNotification,
   scheduleRemindersForAppointment,
-  cancelScheduledReminders
+  cancelScheduledReminders,
+  sendNewBookingWhatsAppToProfessional
 } from '../services/whatsapp.service';
 import {
   sendBookingConfirmationEmail,
-  sendCancellationEmail
+  sendCancellationEmail,
+  sendNewBookingNotificationEmail
 } from '../services/email.service';
 import { createDepositPreference } from '../services/mercadopago.service';
 import { consumeSlotHold, validateHoldForBooking } from '../services/slot-hold.service';
@@ -89,7 +91,9 @@ export const createAppointment = async (req: Request, res: Response) => {
         isSuspended: true,
         depositEnabled: true,
         depositAmount: true,
-        timezone: true
+        timezone: true,
+        phone: true,
+        userId: true
       }
     });
 
@@ -389,6 +393,36 @@ export const createAppointment = async (req: Request, res: Response) => {
       appointmentId: result.appointment.id,
       status: result.appointment.status
     });
+
+    // Notify professional about new booking (non-blocking)
+    const notifSettings = await prisma.professionalSettings.findUnique({
+      where: { professionalId: professional.id },
+      select: { notifyNewBookingEmail: true, notifyNewBookingWhatsapp: true }
+    });
+
+    const patientFullName = `${result.patient.firstName} ${result.patient.lastName}`;
+    const professionalFullName = `${professional.firstName} ${professional.lastName}`;
+    const appointmentDateFormatted = new Date(`${date}T12:00:00Z`).toLocaleDateString('es-AR', {
+      weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC'
+    });
+
+    if (notifSettings?.notifyNewBookingEmail) {
+      const user = await prisma.user.findUnique({
+        where: { id: professional.userId },
+        select: { email: true }
+      });
+      if (user?.email) {
+        sendNewBookingNotificationEmail(
+          user.email, professionalFullName, patientFullName, appointmentDateFormatted, time
+        ).catch(err => logger.error('Pro booking email notification error (non-blocking):', err));
+      }
+    }
+
+    if (notifSettings?.notifyNewBookingWhatsapp && professional.phone) {
+      sendNewBookingWhatsAppToProfessional(
+        professional.phone, professionalFullName, patientFullName, appointmentDateFormatted, time
+      ).catch(err => logger.error('Pro booking WhatsApp notification error (non-blocking):', err));
+    }
 
     // Format response — use noon UTC to avoid timezone day shift
     const appointmentDate2 = new Date(`${date}T12:00:00Z`);

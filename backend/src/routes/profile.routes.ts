@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getProfile, updateProfile } from '../controllers/profile.controller';
+import { getProfile, updateProfile, getNotificationPreferences, updateNotificationPreferences } from '../controllers/profile.controller';
 import { authenticateToken, requireRole } from '../middlewares/auth.middleware';
 
 const router = Router();
@@ -13,5 +13,11 @@ router.get('/', getProfile);
 
 // PUT /api/professional/profile - Update profile
 router.put('/', updateProfile);
+
+// GET /api/professional/profile/notifications - Get notification preferences
+router.get('/notifications', getNotificationPreferences);
+
+// PUT /api/professional/profile/notifications - Update notification preferences
+router.put('/notifications', updateNotificationPreferences);
 
 export default router;
