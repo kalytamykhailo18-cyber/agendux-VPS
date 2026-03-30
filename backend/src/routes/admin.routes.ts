@@ -6,6 +6,7 @@ import {
   getProfessionalDetail,
   suspendProfessional,
   activateProfessional,
+  updateProfessionalSlug,
   getProfessionalAvailability,
   updateProfessionalAvailability,
   getProfessionalBlockedDates,
@@ -35,6 +36,7 @@ router.get('/professionals', getProfessionals);
 router.get('/professionals/:id', getProfessionalDetail);
 router.put('/professionals/:id/suspend', suspendProfessional);
 router.put('/professionals/:id/activate', activateProfessional);
+router.put('/professionals/:id/slug', updateProfessionalSlug);
 
 // Professional settings management (admin can edit)
 router.get('/professionals/:id/availability', getProfessionalAvailability);

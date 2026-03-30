@@ -312,8 +312,32 @@ const ProfessionalDetailModal = ({ professionalId, onClose }: ProfessionalDetail
                     <p className="text-sm font-medium text-gray-900">{selectedProfessional.email}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Slug</p>
-                    <p className="text-sm font-medium text-gray-900">/{selectedProfessional.slug}</p>
+                    <p className="text-xs text-gray-500 mb-1">Slug</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-500">/</span>
+                      <TextField
+                        size="small"
+                        defaultValue={selectedProfessional.slug}
+                        onBlur={async (e) => {
+                          const newSlug = e.target.value.trim();
+                          if (newSlug && newSlug !== selectedProfessional.slug) {
+                            try {
+                              const { default: api } = await import('../../../config/api');
+                              const res = await api.put(`/admin/professionals/${selectedProfessional.id}/slug`, { slug: newSlug });
+                              if (res.data.success) {
+                                dispatch(getProfessionalDetail(selectedProfessional.id));
+                              }
+                            } catch (err: unknown) {
+                              const error = err as { response?: { data?: { error?: string } } };
+                              alert(error.response?.data?.error || 'Error al actualizar slug');
+                              e.target.value = selectedProfessional.slug;
+                            }
+                          }
+                        }}
+                        sx={{ flex: 1 }}
+                        inputProps={{ style: { fontSize: '0.875rem' } }}
+                      />
+                    </div>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Teléfono</p>

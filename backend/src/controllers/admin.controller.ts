@@ -323,6 +323,35 @@ export const activateProfessional = async (req: Request, res: Response) => {
   }
 };
 
+// PUT /api/admin/professionals/:id/slug
+export const updateProfessionalSlug = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { slug } = req.body;
+
+    if (!slug || typeof slug !== 'string') {
+      return res.status(400).json({ success: false, error: 'Slug requerido' });
+    }
+
+    const sanitized = slug.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    if (!sanitized) {
+      return res.status(400).json({ success: false, error: 'Slug inválido' });
+    }
+
+    const existing = await prisma.professional.findUnique({ where: { slug: sanitized } });
+    if (existing && existing.id !== id) {
+      return res.status(400).json({ success: false, error: 'Ese slug ya está en uso por otro profesional' });
+    }
+
+    await prisma.professional.update({ where: { id }, data: { slug: sanitized } });
+
+    return res.json({ success: true, message: 'Slug actualizado', data: { slug: sanitized } });
+  } catch (error) {
+    logger.error('Error updating professional slug:', error);
+    return res.status(500).json({ success: false, error: 'Error al actualizar slug' });
+  }
+};
+
 // ============================================
 // SUBSCRIPTION PLANS MANAGEMENT
 // ============================================
