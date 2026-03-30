@@ -39,7 +39,6 @@ const TimeSlots = ({
   }
 
   const availableSlots = slots.filter((slot) => slot.available);
-  const bookedSlots = slots.filter((slot) => !slot.available);
 
   return (
     <div className="rounded-lg bg-white p-4 sm:p-6 shadow-sm zoom-in-normal">
@@ -93,11 +92,6 @@ const TimeSlots = ({
         </div>
       )}
 
-      {/* Summary */}
-      <div className="mt-4 flex justify-between text-xs sm:text-sm text-gray-500 fade-up-slow">
-        <span className="fade-left-fast">{availableSlots.length} disponible{availableSlots.length !== 1 ? 's' : ''}</span>
-        <span className="fade-right-fast">{bookedSlots.length} ocupado{bookedSlots.length !== 1 ? 's' : ''}</span>
-      </div>
     </div>
   );
 };
