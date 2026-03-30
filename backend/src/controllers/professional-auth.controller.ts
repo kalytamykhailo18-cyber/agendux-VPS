@@ -83,7 +83,7 @@ export const googleAuth = async (req: Request, res: Response): Promise<void> => 
                 {
                   professionalId: newProfessional.id,
                   type: 'REMINDER',
-                  messageText: 'Hola {patient_name}, te recordamos tu turno con {professional_name} mañana {appointment_date} a las {appointment_time}. ¿Confirmas tu asistencia?',
+                  messageText: 'Hola {patient_name}, te recordamos tu turno con {professional_name} el {appointment_date} a las {appointment_time}. ¿Confirmas tu asistencia?',
                   isActive: true
                 },
                 {
@@ -182,7 +182,7 @@ export const googleAuth = async (req: Request, res: Response): Promise<void> => 
             {
               professionalId: newProfessional.id,
               type: 'REMINDER',
-              messageText: 'Hola {patient_name}, te recordamos tu turno con {professional_name} mañana {appointment_date} a las {appointment_time}. ¿Confirmas tu asistencia?',
+              messageText: 'Hola {patient_name}, te recordamos tu turno con {professional_name} el {appointment_date} a las {appointment_time}. ¿Confirmas tu asistencia?',
               isActive: true
             },
             {
