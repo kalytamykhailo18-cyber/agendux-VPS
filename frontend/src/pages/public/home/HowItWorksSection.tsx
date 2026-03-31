@@ -16,11 +16,7 @@ const steps = [
     title: 'Creá tu agenda en minutos',
     description: (
       <>
-        Definí tus servicios (ej. turno de Odontología, corte de pelo, control médico),
-        horarios disponibles, duración de cada turno y precios. Sincronizá con tu Google Calendar
-        (bidireccional y en tiempo real).
-        <br /><br />
-        <span className="text-gray-500">Todo se configura desde un panel intuitivo y amigable.</span>
+        Definí la duración de tus turnos + tus días y horarios de atención. Conectá tu cuenta de Google Calendar y tené siempre tu agenda sincronizada en tiempo real.
       </>
     ),
   },
