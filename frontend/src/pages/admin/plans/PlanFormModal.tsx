@@ -195,7 +195,7 @@ const PlanFormModal = ({
           <Button
             variant="contained"
             onClick={onSave}
-            disabled={!formData.name || formData.monthlyPrice <= 0 || formData.annualPrice <= 0}
+            disabled={!formData.name || formData.monthlyPrice < 0 || formData.annualPrice < 0}
             className="zoom-in-fast"
             sx={{ textTransform: 'none' }}
           >
