@@ -125,7 +125,7 @@ const AdminPlansPage = () => {
 
   // Save plan
   const handleSave = async () => {
-    if (!formData.name || formData.monthlyPrice <= 0 || formData.annualPrice <= 0) {
+    if (!formData.name || formData.monthlyPrice < 0 || formData.annualPrice < 0) {
       return;
     }
 
