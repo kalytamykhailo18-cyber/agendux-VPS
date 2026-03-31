@@ -60,7 +60,7 @@ const FeaturesSection = () => {
             Obtené tu Link y QR Gratis
           </Button>
           <p className="mt-3 text-sm text-gray-500 fade-up-normal">
-            Sin tarjeta, sin compromiso. Probalo gratis 14 días.
+            Sin tener que instalar programas ni saber de tecnología
           </p>
         </div>
       </div>

@@ -16,7 +16,7 @@ const CTASection = ({ onRegister }: CTASectionProps) => {
   const title = cta?.title || '¿Listo para dejar de perder tiempo con los turnos?';
   const subtitle = cta?.subtitle || 'Obtené tu link y QR en minutos. Empezá hoy mismo sin complicaciones.';
   const buttonText = cta?.buttonText || 'Comenzar Gratis - Sin Tarjeta';
-  const subtext = cta?.subtext || '14 días de prueba gratis • Sin compromiso • Cancelá cuando quieras';
+  const subtext = cta?.subtext || 'Sin tener que instalar programas ni saber de tecnología';
 
   return (
     <div className="bg-blue-600 py-16">

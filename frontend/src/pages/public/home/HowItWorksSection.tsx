@@ -349,7 +349,7 @@ const HowItWorksSection = () => {
 
           {/* Microcopy */}
           <p className="mt-4 text-sm text-gray-500 fade-up-normal">
-            Sin tarjeta • 14 días de prueba gratis • Obtené tu link y QR en minutos
+            Sin tener que instalar programas ni saber de tecnología
           </p>
         </div>
       </div>

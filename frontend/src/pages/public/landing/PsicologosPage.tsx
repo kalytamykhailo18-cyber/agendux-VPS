@@ -242,7 +242,7 @@ const PsicologosPage = () => {
             Comenzar Gratis — Sin Tarjeta
           </Button>
           <p className="mt-4 text-sm text-blue-200 fade-up-normal">
-            14 días de prueba gratis • Sin compromiso • Cancelá cuando quieras
+            Sin tener que instalar programas ni saber de tecnología
           </p>
         </div>
       </div>
