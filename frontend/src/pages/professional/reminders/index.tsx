@@ -207,7 +207,7 @@ const RemindersPage = () => {
             className="rounded-lg bg-white p-4 shadow-sm"
           >
             <div className="flex items-center justify-between">
-              <h3 className="font-medium text-gray-900">Recordatorio al paciente sobre su turno {index + 1}</h3>
+              <h3 className="font-medium text-gray-900">Recordatorio al paciente sobre su turno (WhatsApp + email) {index + 1}</h3>
               {localReminders.length > 1 && (
                 <Button
                   variant="text"
