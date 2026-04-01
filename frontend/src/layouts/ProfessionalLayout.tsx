@@ -145,30 +145,30 @@ const ProfessionalLayout = () => {
               </Button>
             </div>
           )}
-        </nav>
 
-        {/* Sidebar footer - Logout */}
-        <div className="border-t p-3 sm:p-4">
-          <Button
-            onClick={handleLogout}
-            fullWidth
-            startIcon={<LogoutIcon />}
-            sx={{
-              justifyContent: 'flex-start',
-              gap: '12px',
-              px: '12px',
-              py: { xs: '12px', sm: '10px' },
-              fontSize: { xs: '14px', sm: '16px' },
-              textTransform: 'none',
-              color: '#dc2626',
-              '&:hover': {
-                backgroundColor: '#fef2f2',
-              },
-            }}
-          >
-            Cerrar Sesión
-          </Button>
-        </div>
+          {/* Logout inside scrollable area so it's always accessible on mobile */}
+          <div className="mt-4 border-t pt-4 pb-4">
+            <Button
+              onClick={handleLogout}
+              fullWidth
+              startIcon={<LogoutIcon />}
+              sx={{
+                justifyContent: 'flex-start',
+                gap: '12px',
+                px: '12px',
+                py: { xs: '12px', sm: '10px' },
+                fontSize: { xs: '14px', sm: '16px' },
+                textTransform: 'none',
+                color: '#dc2626',
+                '&:hover': {
+                  backgroundColor: '#fef2f2',
+                },
+              }}
+            >
+              Cerrar Sesión
+            </Button>
+          </div>
+        </nav>
       </aside>
 
       {/* Main content area */}
