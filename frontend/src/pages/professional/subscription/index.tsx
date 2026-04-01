@@ -117,9 +117,12 @@ const ProfessionalSubscriptionPage = () => {
 
       {/* Free plan message */}
       {!currentSubscription && (
-        <div className="mb-6 rounded-lg bg-green-50 p-4 text-green-700 zoom-in-fast">
+        <div className="mb-6 rounded-lg bg-blue-50 p-4 text-blue-700 zoom-in-fast">
           <p className="text-sm fade-up-normal">
-            Este plan es gratuito, no requiere tarjeta de crédito.
+            Gracias por probar Agendux. Ya tenés tu link habilitado. Ante cualquier duda podés escribirnos a info@agendux.com
+          </p>
+          <p className="text-sm mt-2 fade-up-normal">
+            En el Plan Premium podrás solicitar un QR gratuito y elegir el nombre que quieras para tu link agendux.com/nombrequeelijas listo para compartir en tus redes sociales y en tu sala de espera.
           </p>
         </div>
       )}
