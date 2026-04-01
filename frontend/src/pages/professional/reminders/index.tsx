@@ -160,30 +160,6 @@ const RemindersPage = () => {
         </div>
       )}
 
-      {/* Notification preferences */}
-      <div className="mb-6 rounded-lg bg-white p-4 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900 mb-3">Aviso al profesional sobre nuevos turnos</h2>
-        <p className="text-sm text-gray-600 mb-4">
-          Elegí cómo querés recibir un aviso cuando un paciente reserve un turno
-        </p>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <EmailIcon sx={{ color: '#1976d2', fontSize: 20 }} />
-              <span className="text-sm text-gray-700">Email</span>
-            </div>
-            <Switch
-              checked={notifyEmail}
-              onChange={(e) => handleNotifToggle('notifyNewBookingEmail', e.target.checked)}
-              size="small"
-            />
-          </div>
-        </div>
-        {notifSaved && (
-          <p className="mt-2 text-xs text-green-600">Preferencias guardadas</p>
-        )}
-      </div>
-
       {/* Reminders list */}
       <div className="space-y-4">
         {localReminders.map((reminder, index) => (
@@ -313,6 +289,30 @@ const RemindersPage = () => {
             <span>La opción "noche anterior" evita enviar mensajes muy temprano</span>
           </li>
         </ul>
+      </div>
+
+      {/* Notification preferences - below reminders */}
+      <div className="mt-6 rounded-lg bg-white p-4 shadow-sm">
+        <h2 className="text-lg font-semibold text-gray-900 mb-3">Aviso al profesional sobre nuevos turnos</h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Elegí si querés o no recibir un correo electrónico cuando un paciente reserve un turno. Actives o no esta opción, el turno igual quedará agendado.
+        </p>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <EmailIcon sx={{ color: '#1976d2', fontSize: 20 }} />
+              <span className="text-sm text-gray-700">Email</span>
+            </div>
+            <Switch
+              checked={notifyEmail}
+              onChange={(e) => handleNotifToggle('notifyNewBookingEmail', e.target.checked)}
+              size="small"
+            />
+          </div>
+        </div>
+        {notifSaved && (
+          <p className="mt-2 text-xs text-green-600">Preferencias guardadas</p>
+        )}
       </div>
     </div>
   );
