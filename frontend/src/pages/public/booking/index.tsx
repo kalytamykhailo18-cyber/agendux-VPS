@@ -310,7 +310,10 @@ const BookingPage = () => {
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 zoom-in-fast">
           Reservar cita con {pageData.professional.fullName}
         </h1>
-        <p className="mt-2 text-sm sm:text-base text-gray-600 fade-up-normal">
+        <p className="mt-2 text-base sm:text-lg text-blue-600 font-semibold fade-up-fast">
+          agendux.com/{slug}
+        </p>
+        <p className="mt-1 text-sm sm:text-base text-gray-600 fade-up-normal">
           Selecciona una fecha y horario disponible para agendar tu cita
         </p>
       </div>
