@@ -4,7 +4,6 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import EmailIcon from '@mui/icons-material/Email';
-import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { useAppDispatch, useAppSelector } from '../../../store';
 import {
   getReminderSettings,
@@ -42,7 +41,6 @@ const RemindersPage = () => {
 
   // Notification preferences state
   const [notifyEmail, setNotifyEmail] = useState(true);
-  const [notifyWhatsapp, setNotifyWhatsapp] = useState(false);
   const [notifSaved, setNotifSaved] = useState(false);
 
   // Load settings on mount
@@ -52,7 +50,6 @@ const RemindersPage = () => {
     api.get('/professional/profile/notifications').then(res => {
       if (res.data.success && res.data.data) {
         setNotifyEmail(res.data.data.notifyNewBookingEmail);
-        setNotifyWhatsapp(res.data.data.notifyNewBookingWhatsapp);
       }
     }).catch(() => {});
   }, [dispatch]);
@@ -121,9 +118,8 @@ const RemindersPage = () => {
   };
 
   // Save notification preferences
-  const handleNotifToggle = async (field: 'notifyNewBookingEmail' | 'notifyNewBookingWhatsapp', value: boolean) => {
-    if (field === 'notifyNewBookingEmail') setNotifyEmail(value);
-    if (field === 'notifyNewBookingWhatsapp') setNotifyWhatsapp(value);
+  const handleNotifToggle = async (field: 'notifyNewBookingEmail', value: boolean) => {
+    setNotifyEmail(value);
     try {
       await api.put('/professional/profile/notifications', { [field]: value });
       setNotifSaved(true);
@@ -179,17 +175,6 @@ const RemindersPage = () => {
             <Switch
               checked={notifyEmail}
               onChange={(e) => handleNotifToggle('notifyNewBookingEmail', e.target.checked)}
-              size="small"
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <WhatsAppIcon sx={{ color: '#25D366', fontSize: 20 }} />
-              <span className="text-sm text-gray-700">WhatsApp</span>
-            </div>
-            <Switch
-              checked={notifyWhatsapp}
-              onChange={(e) => handleNotifToggle('notifyNewBookingWhatsapp', e.target.checked)}
               size="small"
             />
           </div>
