@@ -105,10 +105,31 @@ export async function createSubscriptionPayment(req: Request, res: Response) {
 
     const price = billingPeriod === 'MONTHLY' ? Number(plan.monthlyPrice) : Number(plan.annualPrice);
     if (price <= 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Este plan es gratuito y no requiere pago.'
+      // Free plan — create subscription directly without payment
+      const existing = await prisma.subscription.findUnique({
+        where: { professionalId: professional.id }
       });
+      if (existing) {
+        await prisma.subscription.update({
+          where: { id: existing.id },
+          data: { planId, status: 'ACTIVE', startDate: new Date() }
+        });
+      } else {
+        const newSub = await prisma.subscription.create({
+          data: {
+            professionalId: professional.id,
+            planId,
+            billingPeriod,
+            status: 'ACTIVE',
+            startDate: new Date()
+          }
+        });
+        await prisma.professional.update({
+          where: { id: professional.id },
+          data: { subscriptionId: newSub.id }
+        });
+      }
+      return res.json({ success: true, message: 'Plan gratuito activado correctamente' });
     }
 
     // Use recurring subscription by default (automatic renewal)
@@ -226,6 +247,25 @@ export async function changePlan(req: Request, res: Response) {
       where: { professionalId: professional.id }
     });
 
+    // Check if changing to a free plan
+    const newPlan = await prisma.subscriptionPlan.findUnique({ where: { id: planId } });
+    if (!newPlan) {
+      return res.status(404).json({ success: false, error: 'Plan no encontrado' });
+    }
+    const newPrice = billingPeriod === 'MONTHLY' ? Number(newPlan.monthlyPrice) : Number(newPlan.annualPrice);
+    if (newPrice <= 0) {
+      if (existingSubscription?.mercadoPagoSubscriptionId) {
+        try { await cancelRecurringSubscription(professional.id); } catch (e) { logger.error('Failed to cancel old subscription:', e); }
+      }
+      if (existingSubscription) {
+        await prisma.subscription.update({ where: { id: existingSubscription.id }, data: { planId, status: 'ACTIVE', startDate: new Date(), mercadoPagoSubscriptionId: null } });
+      } else {
+        const newSub = await prisma.subscription.create({ data: { professionalId: professional.id, planId, billingPeriod, status: 'ACTIVE', startDate: new Date() } });
+        await prisma.professional.update({ where: { id: professional.id }, data: { subscriptionId: newSub.id } });
+      }
+      return res.json({ success: true, message: 'Plan gratuito activado correctamente' });
+    }
+
     // If changing from recurring subscription, cancel the old one first
     if (existingSubscription?.mercadoPagoSubscriptionId) {
       try {
@@ -233,7 +273,6 @@ export async function changePlan(req: Request, res: Response) {
         logger.info(`Cancelled old recurring subscription for professional ${professional.id}`);
       } catch (error) {
         logger.error('Failed to cancel old subscription:', error);
-        // Continue anyway - will create new subscription
       }
     }
 
