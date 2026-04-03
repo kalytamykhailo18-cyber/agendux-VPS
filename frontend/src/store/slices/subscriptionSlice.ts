@@ -72,6 +72,11 @@ export const subscribeToPlan = createAsyncThunk(
     try {
       dispatch(startLoading());
       const response = await api.post('/subscription/subscribe', data);
+      // Free plan activated directly (no MercadoPago redirect needed)
+      if (response.data.success && !response.data.preference) {
+        dispatch(getMySubscription());
+        return null;
+      }
       return response.data.preference;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Error al crear suscripción');
@@ -88,6 +93,11 @@ export const changePlan = createAsyncThunk(
     try {
       dispatch(startLoading());
       const response = await api.post('/subscription/change-plan', data);
+      // Free plan activated directly (no MercadoPago redirect needed)
+      if (response.data.success && !response.data.preference) {
+        dispatch(getMySubscription());
+        return null;
+      }
       return response.data.preference;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Error al cambiar plan');
@@ -155,7 +165,11 @@ const subscriptionSlice = createSlice({
     // Subscribe to plan
     builder
       .addCase(subscribeToPlan.fulfilled, (state, action) => {
-        state.preference = action.payload;
+        if (action.payload) {
+          state.preference = action.payload;
+        } else {
+          state.successMessage = 'Plan gratuito activado correctamente';
+        }
         state.error = null;
       })
       .addCase(subscribeToPlan.rejected, (state, action) => {
@@ -165,7 +179,11 @@ const subscriptionSlice = createSlice({
     // Change plan
     builder
       .addCase(changePlan.fulfilled, (state, action) => {
-        state.preference = action.payload;
+        if (action.payload) {
+          state.preference = action.payload;
+        } else {
+          state.successMessage = 'Plan gratuito activado correctamente';
+        }
         state.error = null;
       })
       .addCase(changePlan.rejected, (state, action) => {
