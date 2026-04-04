@@ -147,7 +147,7 @@ export const disconnectCalendar = async (professionalId: string): Promise<boolea
 // https://developers.google.com/calendar/api/v3/reference/colors/get
 const EVENT_COLORS = {
   CONFIRMED: '10',    // Green (Basil)
-  PENDING: '5',       // Yellow (Banana)
+  PENDING: '9',       // Indigo (Blueberry)
   REMINDER_SENT: '5', // Yellow (Banana)
   PENDING_PAYMENT: '6', // Orange (Tangerine)
   CANCELLED: '11',    // Red (Tomato)
