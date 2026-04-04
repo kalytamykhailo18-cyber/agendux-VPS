@@ -116,13 +116,13 @@ const ProfessionalSubscriptionPage = () => {
       />
 
       {/* Free plan message */}
-      {!currentSubscription && (
+      {(!currentSubscription || (currentSubscription && currentSubscription.plan.monthlyPrice === 0)) && (
         <div className="mb-6 rounded-lg bg-blue-50 p-4 text-blue-700 zoom-in-fast">
           <p className="text-sm fade-up-normal">
-            Gracias por probar Agendux. Ya tenés tu link habilitado. Ante cualquier duda podés escribirnos a info@agendux.com
+            ¡Felicitaciones, ya tenés activa tu cuenta en Agendux! Ante cualquier duda podés escribirnos a info@agendux.com
           </p>
           <p className="text-sm mt-2 fade-up-normal">
-            En el Plan Premium podrás solicitar un QR gratuito y elegir el nombre que quieras para tu link agendux.com/nombrequeelijas listo para compartir en tus redes sociales y en tu sala de espera.
+            Con Agendux Premium tendrás más funciones, podrás elegir el nombre que quieras para tu link agendux.com/nombrequequieras y un QR gratuito para compartir en tus redes sociales y en tu sala de espera.
           </p>
         </div>
       )}
