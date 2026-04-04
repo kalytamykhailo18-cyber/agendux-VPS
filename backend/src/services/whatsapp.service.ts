@@ -357,6 +357,15 @@ export async function sendReminder({ appointmentId }: SendReminderParams): Promi
         where: { id: appointmentId },
         data: { status: 'REMINDER_SENT' }
       });
+
+      // Update Google Calendar event color to yellow (reminder sent)
+      if (appointment.googleEventId) {
+        updateCalendarEvent({
+          googleEventId: appointment.googleEventId,
+          professionalId: appointment.professionalId,
+          status: 'REMINDER_SENT'
+        }).catch(err => logger.error('Calendar color update error (non-blocking):', err));
+      }
     }
 
     return { sent: result.success, messageSid: result.messageSid };
