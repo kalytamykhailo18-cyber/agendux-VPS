@@ -194,6 +194,26 @@ export const googleAuth = async (req: Request, res: Response): Promise<void> => 
           ]
         });
 
+        // Auto-subscribe to free plan
+        const freePlan = await tx.subscriptionPlan.findFirst({
+          where: { isActive: true, monthlyPrice: 0 }
+        });
+        if (freePlan) {
+          const subscription = await tx.subscription.create({
+            data: {
+              professionalId: newProfessional.id,
+              planId: freePlan.id,
+              billingPeriod: 'MONTHLY',
+              status: 'ACTIVE',
+              startDate: new Date()
+            }
+          });
+          await tx.professional.update({
+            where: { id: newProfessional.id },
+            data: { subscriptionId: subscription.id }
+          });
+        }
+
         return { user: newUser, professional: newProfessional };
       });
 

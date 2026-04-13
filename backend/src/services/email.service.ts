@@ -602,9 +602,13 @@ export async function sendNewBookingNotificationEmail(
   professionalName: string,
   patientName: string,
   date: string,
-  time: string
+  time: string,
+  customFields: { label: string; value: string }[] = []
 ): Promise<boolean> {
   try {
+    const customFieldsHtml = customFields.length > 0
+      ? customFields.map(cf => `<p style="margin: 8px 0; color: #333;"><strong>${cf.label}:</strong> ${cf.value}</p>`).join('')
+      : '';
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background-color: #1976d2; padding: 20px; border-radius: 8px 8px 0 0;">
@@ -617,6 +621,7 @@ export async function sendNewBookingNotificationEmail(
             <p style="margin: 8px 0; color: #333;"><strong>Paciente:</strong> ${patientName}</p>
             <p style="margin: 8px 0; color: #333;"><strong>Fecha:</strong> ${date}</p>
             <p style="margin: 8px 0; color: #333;"><strong>Hora:</strong> ${time}</p>
+            ${customFieldsHtml}
           </div>
           <p style="color: #666; font-size: 14px;">Podés ver todos tus turnos en tu panel de Agendux.</p>
         </div>

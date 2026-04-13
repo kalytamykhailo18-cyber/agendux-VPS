@@ -413,7 +413,7 @@ export const createAppointment = async (req: Request, res: Response) => {
       });
       if (user?.email) {
         sendNewBookingNotificationEmail(
-          user.email, professionalFullName, patientFullName, appointmentDateFormatted, time
+          user.email, professionalFullName, patientFullName, appointmentDateFormatted, time, customFields
         ).catch(err => logger.error('Pro booking email notification error (non-blocking):', err));
       }
     }
