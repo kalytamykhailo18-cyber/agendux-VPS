@@ -780,7 +780,7 @@ export async function processIncomingMessage({ from, body, originalMessageSid }:
     const appointmentFilter = {
       where: {
         status: {
-          in: ['PENDING', 'REMINDER_SENT', 'PENDING_PAYMENT'] as string[]
+          in: ['PENDING', 'REMINDER_SENT', 'PENDING_PAYMENT', 'CONFIRMED'] as string[]
         },
         date: {
           gte: today
@@ -868,6 +868,10 @@ export async function processIncomingMessage({ from, body, originalMessageSid }:
     const cancelKeywords = ['no', 'cancelo', 'cancelar', 'cancel', '2'];
 
     if (confirmKeywords.some(keyword => normalizedBody.includes(keyword))) {
+      if (appointment.status === 'CONFIRMED') {
+        await sendWhatsAppMessage({ to: cleanNumber, message: 'Tu turno ya está confirmado. ¡Te esperamos!' });
+        return { success: true, action: 'ALREADY_CONFIRMED', message: 'Turno ya confirmado' };
+      }
       return await handleConfirmation(appointment, patient, decryptedWhatsappNumber);
     }
 
