@@ -3,15 +3,27 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../App';
 import { api } from '../api';
 import CreateModal from '../components/CreateModal';
+import LocalShippingRoundedIcon from '@mui/icons-material/LocalShippingRounded';
+import WarehouseRoundedIcon from '@mui/icons-material/WarehouseRounded';
+import FlightRoundedIcon from '@mui/icons-material/FlightRounded';
+import BookmarkRoundedIcon from '@mui/icons-material/BookmarkRounded';
+import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded';
+import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
+import InventoryRoundedIcon from '@mui/icons-material/InventoryRounded';
+import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
+import SellRoundedIcon from '@mui/icons-material/SellRounded';
+import LockRoundedIcon from '@mui/icons-material/LockRounded';
 import './DashboardPage.css';
 
 const PIPELINE = [
-  { key: 'DISPATCHED_USA', label: 'USA', sublabel: 'Outbound', icon: '🇺🇸', dot: 'dot-usa', color: 'var(--accent)' },
-  { key: 'ARRIVED_BOG', label: 'Bogota', sublabel: 'Warehouse', icon: '🇨🇴', dot: 'dot-bog', color: 'var(--green)' },
-  { key: 'DISPATCHED_BOG', label: 'In Transit', sublabel: 'BOG → DXB', icon: '✈️', dot: 'dot-transit', color: 'var(--orange)' },
-  { key: 'RESERVED_IN_TRANSIT', label: 'Reserved', sublabel: 'In Transit', icon: '🔒', dot: 'dot-reserved', color: 'var(--purple)' },
-  { key: 'ARRIVED_DXB', label: 'Dubai', sublabel: 'Warehouse', icon: '🇦🇪', dot: 'dot-dubai', color: 'var(--indigo)' },
-  { key: 'ARRIVED_DXB_SOLD', label: 'Sold', sublabel: 'Complete', icon: '✅', dot: 'dot-sold', color: 'var(--green)' },
+  { key: 'DISPATCHED_USA', label: 'USA', sublabel: 'Outbound', Icon: LocalShippingRoundedIcon, dot: 'dot-usa', color: 'var(--accent)' },
+  { key: 'ARRIVED_BOG', label: 'Bogota', sublabel: 'Warehouse', Icon: WarehouseRoundedIcon, dot: 'dot-bog', color: 'var(--green)' },
+  { key: 'DISPATCHED_BOG', label: 'In Transit', sublabel: 'BOG to DXB', Icon: FlightRoundedIcon, dot: 'dot-transit', color: 'var(--orange)' },
+  { key: 'RESERVED_IN_TRANSIT', label: 'Reserved', sublabel: 'In Transit', Icon: BookmarkRoundedIcon, dot: 'dot-reserved', color: 'var(--purple)' },
+  { key: 'ARRIVED_DXB', label: 'Dubai', sublabel: 'Warehouse', Icon: StorefrontRoundedIcon, dot: 'dot-dubai', color: 'var(--indigo)' },
+  { key: 'ARRIVED_DXB_SOLD', label: 'Sold', sublabel: 'Complete', Icon: CheckCircleRoundedIcon, dot: 'dot-sold', color: 'var(--green)' },
 ];
 
 function AnimatedNumber({ value, delay = 0 }) {
@@ -69,7 +81,8 @@ export default function DashboardPage() {
         </div>
         <div className="page-actions">
           <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
-            + Dispatch from USA
+            <AddRoundedIcon fontSize="small" />
+            Dispatch from USA
           </button>
         </div>
       </div>
@@ -77,53 +90,60 @@ export default function DashboardPage() {
       {/* Pipeline flow visualization */}
       <div className="pipeline-section" style={{ animationDelay: '0.1s' }}>
         <div className="pipeline">
-          {PIPELINE.map((stage, i) => (
-            <div key={stage.key} className="pipeline-stage" style={{ animationDelay: `${0.1 + i * 0.08}s` }}>
-              {i > 0 && (
-                <div className="pipeline-arrow">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path d="M5 12h14M13 6l6 6-6 6" stroke="var(--border)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+          {PIPELINE.map((stage, i) => {
+            const StageIcon = stage.Icon;
+            return (
+              <div key={stage.key} className="pipeline-stage" style={{ animationDelay: `${0.1 + i * 0.08}s` }}>
+                {i > 0 && (
+                  <div className="pipeline-arrow">
+                    <ArrowForwardRoundedIcon sx={{ color: 'var(--border)', fontSize: 22 }} />
+                  </div>
+                )}
+                <div
+                  className={`pipeline-card ${counts[stage.key] > 0 ? 'has-units' : ''}`}
+                  onClick={() => navigate(`/units?state=${stage.key}`)}
+                  style={{ '--stage-color': stage.color }}
+                >
+                  <div className="pipeline-icon">
+                    <StageIcon sx={{ fontSize: 30, color: stage.color }} />
+                  </div>
+                  <div className="pipeline-count" style={{ color: stage.color }}>
+                    <AnimatedNumber value={counts[stage.key]} delay={200 + i * 100} />
+                  </div>
+                  <div className="pipeline-label">{stage.label}</div>
+                  <div className="pipeline-sublabel">{stage.sublabel}</div>
                 </div>
-              )}
-              <div
-                className={`pipeline-card ${counts[stage.key] > 0 ? 'has-units' : ''}`}
-                onClick={() => navigate(`/units?state=${stage.key}`)}
-                style={{ '--stage-color': stage.color }}
-              >
-                <div className="pipeline-icon">{stage.icon}</div>
-                <div className="pipeline-count" style={{ color: stage.color }}>
-                  <AnimatedNumber value={counts[stage.key]} delay={200 + i * 100} />
-                </div>
-                <div className="pipeline-label">{stage.label}</div>
-                <div className="pipeline-sublabel">{stage.sublabel}</div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
       {/* Summary cards */}
       <div className="summary-row">
         <div className="summary-card card" style={{ animationDelay: '0.3s' }}>
+          <InventoryRoundedIcon sx={{ fontSize: 24, color: 'var(--accent)', mb: 0.5 }} />
           <div className="summary-value" style={{ color: 'var(--accent)' }}>
             <AnimatedNumber value={dashboard.total} delay={300} />
           </div>
           <div className="summary-label">Total Units</div>
         </div>
         <div className="summary-card card" style={{ animationDelay: '0.4s' }}>
+          <TrendingUpRoundedIcon sx={{ fontSize: 24, color: 'var(--orange)', mb: 0.5 }} />
           <div className="summary-value" style={{ color: 'var(--orange)' }}>
             <AnimatedNumber value={counts.DISPATCHED_BOG + counts.RESERVED_IN_TRANSIT} delay={400} />
           </div>
           <div className="summary-label">In Transit</div>
         </div>
         <div className="summary-card card" style={{ animationDelay: '0.5s' }}>
+          <SellRoundedIcon sx={{ fontSize: 24, color: 'var(--green)', mb: 0.5 }} />
           <div className="summary-value" style={{ color: 'var(--green)' }}>
             <AnimatedNumber value={counts.ARRIVED_DXB_SOLD} delay={500} />
           </div>
           <div className="summary-label">Sold</div>
         </div>
         <div className="summary-card card" style={{ animationDelay: '0.6s' }}>
+          <LockRoundedIcon sx={{ fontSize: 24, color: 'var(--purple)', mb: 0.5 }} />
           <div className="summary-value" style={{ color: 'var(--purple)' }}>
             <AnimatedNumber value={counts.RESERVED_IN_TRANSIT} delay={600} />
           </div>

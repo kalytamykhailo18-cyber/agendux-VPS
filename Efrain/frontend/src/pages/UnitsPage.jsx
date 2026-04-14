@@ -3,6 +3,8 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../App';
 import { api } from '../api';
 import CreateModal from '../components/CreateModal';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import Inventory2RoundedIcon from '@mui/icons-material/Inventory2Rounded';
 import './UnitsPage.css';
 
 const VALID_TRANSITIONS = {
@@ -147,7 +149,8 @@ export default function UnitsPage() {
             </button>
           ))}
           <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
-            + Dispatch from USA
+            <AddRoundedIcon fontSize="small" />
+            Dispatch from USA
           </button>
         </div>
       </div>
@@ -183,7 +186,7 @@ export default function UnitsPage() {
           </div>
         ) : units.length === 0 ? (
           <div className="empty-state">
-            <div style={{ fontSize: 40, marginBottom: 12 }}>📦</div>
+            <Inventory2RoundedIcon sx={{ fontSize: 40, color: 'var(--text-secondary)', mb: 1 }} />
             <p style={{ fontSize: 16, fontWeight: 500 }}>No units found</p>
             <p style={{ marginTop: 4 }}>Dispatch units from USA to get started</p>
           </div>
