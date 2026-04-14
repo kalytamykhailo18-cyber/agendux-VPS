@@ -1,0 +1,117 @@
+.units-page .page-header {
+  animation: fadeInUp 0.4s ease both;
+}
+
+.selected-count {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.clear-filter {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 13px;
+  cursor: pointer;
+  margin-left: 8px;
+  font-family: inherit;
+}
+.clear-filter:hover {
+  text-decoration: underline;
+}
+
+/* Filter tabs */
+.filter-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  animation: fadeInUp 0.4s ease both;
+  animation-delay: 0.1s;
+}
+.filter-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.filter-tab:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+.filter-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.filter-tab.active .tab-count {
+  color: rgba(255,255,255,0.8);
+}
+.tab-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.state-dot-DISPATCHED_USA { background: var(--accent); }
+.state-dot-ARRIVED_BOG { background: var(--green); }
+.state-dot-DISPATCHED_BOG { background: var(--orange); }
+.state-dot-RESERVED_IN_TRANSIT { background: var(--purple); }
+.state-dot-ARRIVED_DXB { background: var(--indigo); }
+.state-dot-ARRIVED_DXB_SOLD { background: var(--green); }
+.filter-tab.active .tab-dot {
+  background: #fff;
+}
+.tab-count {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* Table animations */
+.unit-row {
+  animation: fadeInUp 0.3s ease both;
+}
+.action-btns {
+  display: flex;
+  gap: 6px;
+}
+.final-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Loading shimmer */
+.loading-state {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.loading-shimmer {
+  height: 48px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, #f0f0f2 25%, #e8e8ea 50%, #f0f0f2 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@media (max-width: 768px) {
+  .filter-tabs {
+    -webkit-overflow-scrolling: touch;
+  }
+  .page-actions {
+    flex-wrap: wrap;
+  }
+}
