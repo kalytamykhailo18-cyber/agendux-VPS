@@ -395,14 +395,18 @@ export const syncFromGoogleCalendar = async (professionalId: string): Promise<nu
     const oauth2Client = await getAuthenticatedClient(professionalId);
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
-    // Get events from now to 3 months ahead
+    // Get events from start of today to 3 months ahead
+    // IMPORTANT: use start of today (not "now") so events that have already started today
+    // are still returned by Google. Otherwise the sync would mistakenly treat them as deleted.
     const now = new Date();
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
     const threeMonthsLater = new Date();
     threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
 
     const response = await calendar.events.list({
       calendarId: professional.googleCalendarId,
-      timeMin: now.toISOString(),
+      timeMin: startOfToday.toISOString(),
       timeMax: threeMonthsLater.toISOString(),
       singleEvents: true,
       orderBy: 'startTime'
@@ -411,17 +415,24 @@ export const syncFromGoogleCalendar = async (professionalId: string): Promise<nu
     const events = response.data.items || [];
     let syncedCount = 0;
 
-    // Get existing platform appointments' Google event IDs (active ones only)
-    const existingAppointments = await prisma.appointment.findMany({
+    // Get ALL platform appointments with Google event IDs (including cancelled/completed)
+    // so the sync never mistakes a platform-created event for an external one.
+    // A cancelled appointment's Google Calendar event should NOT create an external event
+    // that blocks availability.
+    const allPlatformAppointments = await prisma.appointment.findMany({
       where: {
         professionalId,
         googleEventId: { not: null },
-        status: { notIn: ['CANCELLED', 'COMPLETED', 'NO_SHOW'] },
-        date: { gte: now }
+        date: { gte: startOfToday }
       },
-      select: { id: true, googleEventId: true }
+      select: { id: true, googleEventId: true, status: true }
     });
-    const platformEventIds = new Set(existingAppointments.map(a => a.googleEventId));
+    const platformEventIds = new Set(allPlatformAppointments.map(a => a.googleEventId));
+
+    // For deletion detection, only use active appointments
+    const existingAppointments = allPlatformAppointments.filter(
+      a => !['CANCELLED', 'COMPLETED', 'NO_SHOW'].includes(a.status)
+    );
 
     // Detect Agendux appointments deleted from Google Calendar
     const googleEventIds = new Set(events.map(e => e.id).filter(Boolean));

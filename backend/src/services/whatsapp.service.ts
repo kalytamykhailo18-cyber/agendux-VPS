@@ -493,22 +493,24 @@ export async function scheduleRemindersForAppointment({
       const appointmentDateTime = combineDateTime(appointmentDate, appointmentTime, timezone);
       let reminderTime = new Date(appointmentDateTime.getTime() - setting.hoursBefore * 60 * 60 * 1000);
 
-      // Handle night-before option for early morning appointments
+      // Handle night-before option: if the reminder would arrive before 9 AM local,
+      // send it at 20:00 the night before instead
       if (setting.enableNightBefore) {
-        // Get the LOCAL hour of the appointment (not UTC)
         const offsetMs = getTimezoneOffsetMs(timezone, appointmentDateTime);
-        const localAppointmentHour = new Date(appointmentDateTime.getTime() + offsetMs).getUTCHours();
-        const localReminderHour = new Date(reminderTime.getTime() + offsetMs).getUTCHours();
+        const localReminderDate = new Date(reminderTime.getTime() + offsetMs);
+        const localReminderHour = localReminderDate.getUTCHours();
 
-        // If appointment is before 10 AM local and reminder would be very early (before 7 AM local)
-        if (localAppointmentHour < 10 && localReminderHour < 7) {
+        if (localReminderHour < 9) {
           // Send reminder the night before at 20:00 LOCAL time
-          // Start from midnight UTC of the appointment day, add 20 hours local, convert to UTC
-          const dayBefore = new Date(appointmentDateTime);
-          dayBefore.setUTCDate(dayBefore.getUTCDate() - 1);
-          dayBefore.setUTCHours(0, 0, 0, 0);
-          // 20:00 local = 20:00 + (-offset) in UTC. For Argentina: 20:00 - (-3h) = 23:00 UTC
-          reminderTime = new Date(dayBefore.getTime() + 20 * 3600000 - offsetMs);
+          // Get the LOCAL date of when the reminder would fire
+          const reminderLocalDate = new Date(reminderTime.getTime() + offsetMs);
+          reminderLocalDate.setUTCHours(0, 0, 0, 0);
+          // Go back one day and set to 20:00 local, then convert to UTC
+          const nightBefore = new Date(reminderLocalDate.getTime() - 24 * 3600000 + 20 * 3600000 - offsetMs);
+          // Only use nightBefore if it's before the original reminder time (sanity check)
+          if (nightBefore < reminderTime) {
+            reminderTime = nightBefore;
+          }
         }
       }
 
