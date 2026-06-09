@@ -17,6 +17,7 @@ interface BookingConfirmationProps {
   patientEmail: string;
   depositRequired: boolean;
   depositAmount?: number;
+  depositPaymentUrl?: string | null;
   status: string;
   onNewBooking: () => void;
 }
@@ -30,6 +31,7 @@ const BookingConfirmation = ({
   patientEmail,
   depositRequired,
   depositAmount,
+  depositPaymentUrl,
   status,
   onNewBooking
 }: BookingConfirmationProps) => {
@@ -40,7 +42,15 @@ const BookingConfirmation = ({
 
   const isPendingPayment = status === 'PENDING_PAYMENT';
 
-  // Handle redirect to Mercado Pago when preference is created
+  // Auto-redirect to MercadoPago immediately if the payment URL was provided
+  // at booking time. This dramatically reduces unpaid abandonment rates.
+  useEffect(() => {
+    if (isPendingPayment && depositPaymentUrl) {
+      window.location.href = depositPaymentUrl;
+    }
+  }, [isPendingPayment, depositPaymentUrl]);
+
+  // Handle redirect to Mercado Pago when preference is created via button click (fallback)
   useEffect(() => {
     if (depositPaymentPreference?.initPoint) {
       // Redirect to Mercado Pago payment page

@@ -1,20 +1,22 @@
-import { Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from '@mui/material';
 
 interface CancelSubscriptionModalProps {
   nextBillingDate: string | null;
   formatDate: (dateStr: string | null) => string;
   onClose: () => void;
   onConfirm: () => void;
+  loading?: boolean;
 }
 
 const CancelSubscriptionModal = ({
   nextBillingDate,
   formatDate,
   onClose,
-  onConfirm
+  onConfirm,
+  loading = false
 }: CancelSubscriptionModalProps) => {
   return (
-    <Dialog open={true} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={true} onClose={loading ? undefined : onClose} maxWidth="sm" fullWidth>
       <DialogTitle>¿Cancelar suscripción?</DialogTitle>
       <DialogContent>
         <p className="text-sm text-gray-500">
@@ -27,6 +29,7 @@ const CancelSubscriptionModal = ({
         <Button
           variant="outlined"
           onClick={onClose}
+          disabled={loading}
         >
           Mantener suscripción
         </Button>
@@ -34,8 +37,10 @@ const CancelSubscriptionModal = ({
           variant="contained"
           color="error"
           onClick={onConfirm}
+          disabled={loading}
+          startIcon={loading ? <CircularProgress size={16} color="inherit" /> : undefined}
         >
-          Sí, cancelar
+          {loading ? 'Cancelando...' : 'Sí, cancelar'}
         </Button>
       </DialogActions>
     </Dialog>

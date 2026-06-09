@@ -33,6 +33,7 @@ const ProfessionalSubscriptionPage = () => {
   // Local state
   const [selectedPeriod, setSelectedPeriod] = useState<BillingPeriod>('MONTHLY');
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   // Check URL params for payment status
   const paymentStatus = searchParams.get('status');
@@ -60,12 +61,12 @@ const ProfessionalSubscriptionPage = () => {
     };
   }, [dispatch]);
 
-  // Clear success message after 5 seconds
+  // Clear success message after 10 seconds
   useEffect(() => {
     if (successMessage) {
       const timer = setTimeout(() => {
         dispatch(clearSuccessMessage());
-      }, 5000);
+      }, 10000);
       return () => clearTimeout(timer);
     }
   }, [successMessage, dispatch]);
@@ -81,9 +82,19 @@ const ProfessionalSubscriptionPage = () => {
 
   // Handle cancel
   const handleCancelSubscription = async () => {
-    await dispatch(cancelSubscription());
-    setShowCancelModal(false);
-    dispatch(getMySubscription());
+    setCancelling(true);
+    try {
+      const result = await dispatch(cancelSubscription());
+      // Always refresh from server to get authoritative state
+      await dispatch(getMySubscription());
+      setShowCancelModal(false);
+      // If the cancel was rejected, error is already set in state by the slice
+      if (cancelSubscription.rejected.match(result)) {
+        // keep modal closed; error banner will show from state.error
+      }
+    } finally {
+      setCancelling(false);
+    }
   };
 
   // Format date
@@ -157,6 +168,7 @@ const ProfessionalSubscriptionPage = () => {
           formatDate={formatDate}
           onClose={() => setShowCancelModal(false)}
           onConfirm={handleCancelSubscription}
+          loading={cancelling}
         />
       )}
     </div>

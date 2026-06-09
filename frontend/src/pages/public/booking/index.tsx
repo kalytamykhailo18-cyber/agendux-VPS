@@ -287,6 +287,7 @@ const BookingPage = () => {
         patientEmail={bookingConfirmation.patient.email}
         depositRequired={bookingConfirmation.deposit.required}
         depositAmount={bookingConfirmation.deposit.amount}
+        depositPaymentUrl={bookingConfirmation.deposit.paymentUrl}
         status={bookingConfirmation.appointment.status}
         onNewBooking={handleNewBooking}
       />

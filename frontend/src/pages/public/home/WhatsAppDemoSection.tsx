@@ -184,37 +184,6 @@ const WhatsAppDemoSection = () => {
               </p>
             </div>
           </div>
-
-          {/* Example message preview */}
-          <div className="mt-8 rounded-xl bg-gray-50 p-4 sm:p-6 fade-up-slow">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3 fade-down-fast">
-              Ejemplo del mensaje que recibirás:
-            </h3>
-            <div className="rounded-lg bg-white p-4 border border-gray-200 shadow-sm">
-              <div className="flex gap-3 items-start">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center">
-                  <WhatsAppIcon sx={{ fontSize: 20, color: '#FFFFFF' }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm sm:text-base text-gray-800 leading-relaxed">
-                    ¡Hola! 👋 Este es un mensaje de ejemplo de <strong>Agendux</strong>.
-                    <br />
-                    <br />
-                    Así es como tus pacientes recibirán recordatorios automáticos de sus citas:
-                    <br />
-                    📌 Fecha: Lunes 19 de Enero de 2026 
-                    <br />
-                    🕐 Hora: 10:00
-                    <br />
-                    👤 Profesional: Dr. García
-                    <br />
-                    <br />
-                    ¿Querés automatizar tus citas? Registrate en agendux.com
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
