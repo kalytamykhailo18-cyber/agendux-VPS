@@ -69,11 +69,15 @@ async function processSubscriptionRenewals() {
     const now = new Date();
 
     // Find subscriptions that have expired or will expire within 24 hours
+    // Free plans (monthlyPrice = 0) are excluded - they never expire
     const expiringSubscriptions = await prisma.subscription.findMany({
       where: {
         status: 'ACTIVE',
         nextBillingDate: {
           lte: new Date(now.getTime() + 24 * 60 * 60 * 1000) // Within next 24 hours
+        },
+        plan: {
+          monthlyPrice: { gt: 0 }
         }
       },
       include: {
@@ -289,11 +293,15 @@ async function handlePastDueSubscriptions() {
     const now = new Date();
     const cancelThreshold = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // 7 days ago
 
+    // Free plans (monthlyPrice = 0) are excluded - they never get cancelled automatically
     const pastDueSubscriptions = await prisma.subscription.findMany({
       where: {
         status: 'PAST_DUE',
         nextBillingDate: {
           lt: cancelThreshold
+        },
+        plan: {
+          monthlyPrice: { gt: 0 }
         }
       },
       include: {

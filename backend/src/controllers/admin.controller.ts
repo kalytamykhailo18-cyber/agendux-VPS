@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { logger } from '../utils/logger';
 import prisma from '../config/database';
 import type { Prisma } from '@prisma/client';
+import { updateRecurringSubscriptionsAmountForPlan } from '../services/mercadopago.service';
 
 // ============================================
 // DASHBOARD STATS
@@ -461,6 +462,26 @@ export const updatePlan = async (req: Request, res: Response) => {
       data: updateData
     });
 
+    // If price changed, sync existing MercadoPago recurring subscriptions to the new amount
+    // so subscribers are charged the new price on their next billing cycle
+    const priceChanged =
+      (monthlyPrice !== undefined && Number(plan.monthlyPrice) !== Number(monthlyPrice)) ||
+      (annualPrice !== undefined && Number(plan.annualPrice) !== Number(annualPrice));
+
+    let syncResult: { updated: number; failed: number; total: number } | null = null;
+    if (priceChanged) {
+      try {
+        syncResult = await updateRecurringSubscriptionsAmountForPlan(
+          updatedPlan.id,
+          Number(updatedPlan.monthlyPrice),
+          Number(updatedPlan.annualPrice)
+        );
+        logger.info(`Plan ${id} price updated, MP sync: ${syncResult.updated}/${syncResult.total} preapprovals updated, ${syncResult.failed} failed`);
+      } catch (syncError) {
+        logger.error('Error syncing MercadoPago preapprovals after price change:', syncError);
+      }
+    }
+
     return res.json({
       success: true,
       data: {
@@ -473,7 +494,10 @@ export const updatePlan = async (req: Request, res: Response) => {
         isActive: updatedPlan.isActive,
         displayOrder: updatedPlan.displayOrder
       },
-      message: 'Plan actualizado correctamente'
+      mercadoPagoSync: syncResult,
+      message: priceChanged && syncResult
+        ? `Plan actualizado. ${syncResult.updated} de ${syncResult.total} suscripciones recurrentes sincronizadas con el nuevo precio.`
+        : 'Plan actualizado correctamente'
     });
   } catch (error) {
     logger.error('Error updating plan:', error);

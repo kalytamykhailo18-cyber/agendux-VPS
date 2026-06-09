@@ -451,15 +451,37 @@ export const createAppointment = async (req: Request, res: Response) => {
           lastName: result.patient.lastName,
           email: decryptedEmail
         },
-        deposit: professional.depositEnabled
-          ? {
+        deposit: await (async () => {
+          if (!professional.depositEnabled || !professional.depositAmount) {
+            return { required: false };
+          }
+          // Generate MercadoPago payment link immediately so the frontend can
+          // auto-redirect the patient. This reduces friction and prevents the
+          // common "patient booked but never paid" scenario.
+          try {
+            const preference = await createDepositPreference({
+              appointmentId: result.appointment.id,
+              professionalId: professional.id,
+              patientEmail: decryptedEmail,
+              patientName: `${result.patient.firstName} ${result.patient.lastName}`,
+              amount: Number(professional.depositAmount),
+              bookingReference: result.appointment.bookingReference
+            });
+            return {
               required: true,
               amount: Number(professional.depositAmount),
-              paymentUrl: null // Will be set when Mercado Pago is integrated
-            }
-          : {
-              required: false
-            }
+              paymentUrl: preference.initPoint,
+              preferenceId: preference.preferenceId
+            };
+          } catch (err) {
+            logger.error('Failed to create deposit preference during booking:', err);
+            return {
+              required: true,
+              amount: Number(professional.depositAmount),
+              paymentUrl: null
+            };
+          }
+        })()
       }
     });
   } catch (error: unknown) {

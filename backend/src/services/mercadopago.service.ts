@@ -921,6 +921,48 @@ async function handlePreapprovalWebhook(data: WebhookData, headers: Record<strin
               professionalId
             });
 
+            // Check if any payment was ever made for this subscription
+            const localSub = await prisma.subscription.findUnique({
+              where: { professionalId },
+              include: {
+                payments: {
+                  where: { status: 'COMPLETED' },
+                  take: 1
+                }
+              }
+            });
+
+            if (localSub && localSub.payments.length === 0) {
+              // No successful payment was ever made — the user started the subscription
+              // flow but never completed authorization in MercadoPago. Don't leave them
+              // with a "cancelled" status; revert to the free plan so they have a clean state.
+              const freePlan = await prisma.subscriptionPlan.findFirst({
+                where: { isActive: true, monthlyPrice: 0 }
+              });
+
+              if (freePlan) {
+                await prisma.subscription.update({
+                  where: { id: localSub.id },
+                  data: {
+                    planId: freePlan.id,
+                    status: 'ACTIVE',
+                    billingPeriod: 'MONTHLY',
+                    startDate: new Date(),
+                    endDate: null,
+                    nextBillingDate: null,
+                    mercadoPagoSubscriptionId: null
+                  }
+                });
+                ServiceLogger.mercadopago('subscription_reverted_to_free', {
+                  preapprovalId,
+                  professionalId,
+                  reason: 'preapproval cancelled without any successful payment'
+                });
+                return { success: true, message: 'Subscription reverted to free plan (no payment was made)' };
+              }
+            }
+
+            // Otherwise, mark as cancelled normally
             await prisma.subscription.update({
               where: { professionalId },
               data: {
@@ -973,35 +1015,80 @@ export async function cancelRecurringSubscription(professionalId: string) {
     throw new Error('No recurring subscription found');
   }
 
+  // Try to cancel preapproval in MercadoPago, but don't fail if it errors
+  // (preapproval may be stale or already cancelled on MP side)
   try {
-    // Cancel preapproval in MercadoPago
     await preapprovalClient.update({
       id: subscription.mercadoPagoSubscriptionId,
       body: {
         status: 'cancelled'
       }
     });
-
-    // Update local database
-    await prisma.subscription.update({
-      where: { id: subscription.id },
-      data: {
-        status: 'CANCELLED',
-        endDate: subscription.nextBillingDate // Active until end of paid period
-      }
-    });
-
-    ServiceLogger.mercadopago('recurring_subscription_cancelled', {
-      subscriptionId: subscription.id,
-      professionalId,
-      preapprovalId: subscription.mercadoPagoSubscriptionId
-    });
-
-    return { success: true, message: 'Recurring subscription cancelled' };
   } catch (error: any) {
-    logger.error('[MercadoPago] Failed to cancel recurring subscription:', error);
-    throw new Error(`Error al cancelar suscripción: ${error.message}`);
+    logger.warn('[MercadoPago] Failed to cancel preapproval (continuing with local cancel):', error.message);
   }
+
+  // Always update local database regardless of MercadoPago result
+  await prisma.subscription.update({
+    where: { id: subscription.id },
+    data: {
+      status: 'CANCELLED',
+      endDate: subscription.nextBillingDate // Active until end of paid period
+    }
+  });
+
+  ServiceLogger.mercadopago('recurring_subscription_cancelled', {
+    subscriptionId: subscription.id,
+    professionalId,
+    preapprovalId: subscription.mercadoPagoSubscriptionId
+  });
+
+  return { success: true, message: 'Recurring subscription cancelled' };
+}
+
+/**
+ * Update the transaction amount of all active recurring subscriptions for a plan.
+ * Called when an admin changes a plan price - updates MercadoPago preapprovals
+ * so existing subscribers are charged the new price on their next billing cycle.
+ */
+export async function updateRecurringSubscriptionsAmountForPlan(planId: string, newMonthlyPrice: number, newAnnualPrice: number) {
+  const subscriptions = await prisma.subscription.findMany({
+    where: {
+      planId,
+      status: 'ACTIVE',
+      mercadoPagoSubscriptionId: { not: null }
+    }
+  });
+
+  let updated = 0;
+  let failed = 0;
+
+  for (const sub of subscriptions) {
+    if (!sub.mercadoPagoSubscriptionId) continue;
+    const newAmount = sub.billingPeriod === 'MONTHLY' ? newMonthlyPrice : newAnnualPrice;
+    try {
+      await preapprovalClient.update({
+        id: sub.mercadoPagoSubscriptionId,
+        body: {
+          auto_recurring: {
+            transaction_amount: newAmount,
+            currency_id: 'ARS'
+          }
+        }
+      });
+      updated++;
+      ServiceLogger.mercadopago('preapproval_amount_updated', {
+        subscriptionId: sub.id,
+        preapprovalId: sub.mercadoPagoSubscriptionId,
+        newAmount
+      });
+    } catch (error: any) {
+      failed++;
+      logger.error(`[MercadoPago] Failed to update preapproval amount for subscription ${sub.id}:`, error.message);
+    }
+  }
+
+  return { updated, failed, total: subscriptions.length };
 }
 
 /**
